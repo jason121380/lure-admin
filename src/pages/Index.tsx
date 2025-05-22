@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -182,10 +183,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         <span className="sr-only">開啟部門選單</span>
       </Button>
       
-      {/* Main content area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Customer list panel */}
-        <div className="w-full md:w-2/5 lg:w-1/3 h-full border-r border-gray-200 bg-white overflow-hidden">
+      {/* Main content area - simplified layout structure */}
+      <div className="flex flex-1 w-full">
+        {/* Customer list panel - ensure visibility */}
+        <div className="flex-shrink-0 w-full md:w-2/5 lg:w-1/3 border-r border-gray-200 bg-white overflow-hidden">
           <CustomerList 
             customers={customers} 
             selectedCustomerId={selectedCustomerId}
@@ -195,7 +196,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         </div>
         
         {/* Customer detail panel */}
-        <div className="w-full md:w-3/5 lg:w-2/3 h-full bg-white overflow-auto">
+        <div className="flex-1 md:w-3/5 lg:w-2/3 bg-white overflow-auto">
           {selectedCustomer ? (
             <CustomerDetail 
               customer={selectedCustomer} 
