@@ -164,7 +164,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Sidebar directly in the layout */}
+      {/* Sidebar */}
       <Sidebar 
         activeDepartment={activeDepartment} 
         setActiveDepartment={setActiveDepartment} 
@@ -183,39 +183,37 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       </Button>
       
       {/* Main content area */}
-      <div className={`flex flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
-        <div className="flex flex-1 flex-col md:flex-row w-full h-full overflow-hidden">
-          {/* Customer list panel */}
-          <div className="w-full md:w-2/5 h-full border-r border-gray-200 bg-white overflow-hidden">
-            <CustomerList 
-              customers={customers} 
-              selectedCustomerId={selectedCustomerId}
-              onSelectCustomer={handleSelectCustomer}
-              onAddCustomer={handleAddCustomer}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Customer list panel */}
+        <div className="w-full md:w-2/5 lg:w-1/3 h-full border-r border-gray-200 bg-white overflow-hidden">
+          <CustomerList 
+            customers={customers} 
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={handleSelectCustomer}
+            onAddCustomer={handleAddCustomer}
+          />
+        </div>
+        
+        {/* Customer detail panel */}
+        <div className="w-full md:w-3/5 lg:w-2/3 h-full bg-white overflow-auto">
+          {selectedCustomer ? (
+            <CustomerDetail 
+              customer={selectedCustomer} 
+              onEditCustomer={handleEditCustomer}
+              onDeleteCustomer={handleDeleteCustomer}
             />
-          </div>
-          
-          {/* Customer detail panel */}
-          <div className="w-full md:w-3/5 h-full bg-white overflow-auto">
-            {selectedCustomer ? (
-              <CustomerDetail 
-                customer={selectedCustomer} 
-                onEditCustomer={handleEditCustomer}
-                onDeleteCustomer={handleDeleteCustomer}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center p-6 max-w-sm">
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">
-                    請選擇客戶
-                  </h3>
-                  <p className="text-gray-500">
-                    從左側清單中選擇一個客戶以查看詳細資訊
-                  </p>
-                </div>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center p-6 max-w-sm">
+                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                  請選擇客戶
+                </h3>
+                <p className="text-gray-500">
+                  從左側清單中選擇一個客戶以查看詳細資訊
+                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
       
