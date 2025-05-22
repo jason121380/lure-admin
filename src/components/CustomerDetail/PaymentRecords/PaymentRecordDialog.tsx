@@ -25,20 +25,11 @@ type PaymentRecordDialogProps = {
   onAddPaymentRecord: (paymentRecord: PaymentRecord) => void;
 };
 
-// 新增帳戶選項列表
+// 新增帳戶選項列表 - 移除了現金、總部返區處、區處返總部
 const accountOptions = [
   { id: 'chenTaiyu', name: '陳泰宇' },
   { id: 'attractionCompany', name: '吸引力公司' },
   { id: 'attractionPersonal', name: '吸引力個人' },
-  { id: 'cash', name: '現金' },
-  { id: 'headquarterToDistrict', name: '總部返區處' },
-  { id: 'districtToHeadquarter', name: '區處返總部' },
-];
-
-// 更新支付方式選項
-const updatedPaymentMethods = [
-  { id: 'transfer', name: '匯款' },
-  { id: 'onlinePayment', name: '線上付款連結' },
 ];
 
 export const PaymentRecordDialog = ({ 
@@ -47,7 +38,7 @@ export const PaymentRecordDialog = ({
   onAddPaymentRecord 
 }: PaymentRecordDialogProps) => {
   const [paymentDate, setPaymentDate] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState(updatedPaymentMethods[0].id);
+  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0].id);
   const [paymentAccount, setPaymentAccount] = useState(accountOptions[0].id);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [taxAmount, setTaxAmount] = useState(''); // 新增稅金欄位
@@ -69,7 +60,7 @@ export const PaymentRecordDialog = ({
       const newPaymentRecord: PaymentRecord = {
         id: `${Date.now()}`,
         date: paymentDate || format(new Date(), 'yyyy-MM-dd'),
-        paymentMethod: updatedPaymentMethods.find(item => item.id === paymentMethod)?.name || '匯款',
+        paymentMethod: paymentMethods.find(item => item.id === paymentMethod)?.name || '匯款',
         account: accountOptions.find(item => item.id === paymentAccount)?.name || '',
         amount: amount,
         invoiceNumber: taxAmount, // 將發票號碼改為稅金
@@ -84,7 +75,7 @@ export const PaymentRecordDialog = ({
 
   const resetForm = () => {
     setPaymentDate('');
-    setPaymentMethod(updatedPaymentMethods[0].id);
+    setPaymentMethod(paymentMethods[0].id);
     setPaymentAccount(accountOptions[0].id);
     setPaymentAmount('');
     setTaxAmount('');
@@ -117,7 +108,7 @@ export const PaymentRecordDialog = ({
                 <SelectValue placeholder="選擇支付方式" />
               </SelectTrigger>
               <SelectContent>
-                {updatedPaymentMethods.map(item => (
+                {paymentMethods.map(item => (
                   <SelectItem key={item.id} value={item.id}>
                     {item.name}
                   </SelectItem>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,9 @@ export type PaymentRecord = {
 export const paymentMethods = [
   { id: 'transfer', name: '匯款' },
   { id: 'onlinePayment', name: '線上付款連結' },
+  { id: 'cash', name: '現金' },
+  { id: 'headquarterToDistrict', name: '總部返區處' },
+  { id: 'districtToHeadquarter', name: '區處返總部' },
 ];
 
 export const PaymentRecordList = () => {
