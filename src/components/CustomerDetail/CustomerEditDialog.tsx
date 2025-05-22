@@ -1,18 +1,46 @@
-import { useState } from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Customer } from "../CustomerList/CustomerListItem";
+
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Customer } from '@/components/CustomerList/CustomerListItem';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+type DepartmentType = {
+  id: string;
+  name: string;
+};
+
+const initialDepartments: DepartmentType[] = [
+  { id: 'all', name: '所有部門' },
+  { id: 'external', name: '發展 對外' },
+  { id: 'internal', name: '發展 對內' },
+  { id: 'digital', name: '數位行銷' },
+  { id: 'alfred', name: 'Alfred' },
+  { id: 'jason', name: 'Jason' },
+  { id: 'uncategorized', name: '未分類' }
+];
 
 type CustomerEditDialogProps = {
   customer?: Customer;
@@ -21,191 +49,227 @@ type CustomerEditDialogProps = {
   onSave: (customer: Partial<Customer>) => void;
 };
 
-export function CustomerEditDialog({ 
-  customer, 
-  open, 
+export function CustomerEditDialog({
+  customer,
+  open,
   onOpenChange,
-  onSave
+  onSave,
 }: CustomerEditDialogProps) {
-  const isEditing = !!customer;
-  
-  const [formData, setFormData] = useState<Partial<Customer>>(
-    customer || {
-      name: "",
-      department: "uncategorized",
-      departmentName: "未分類",
-      status: "active",
-      email: "",
-      phone: "",
-      address: "",
-      contact: "",
-      notes: "",
-      taxId: "",
+  const [name, setName] = useState('');
+  const [department, setDepartment] = useState('');
+  const [departmentName, setDepartmentName] = useState('');
+  const [status, setStatus] = useState('active');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [contact, setContact] = useState('');
+  const [taxId, setTaxId] = useState('');
+  const [notes, setNotes] = useState('');
+  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments.filter(dept => dept.id !== 'all'));
+
+  // Fetch departments from the database or use local state
+  useEffect(() => {
+    if (open) {
+      // Get departments from localStorage if available
+      const storedDepartments = localStorage.getItem('departmentsList');
+      if (storedDepartments) {
+        try {
+          const parsedDepartments = JSON.parse(storedDepartments);
+          // Filter out the "all" department
+          setDepartmentsList(parsedDepartments.filter((dept: DepartmentType) => dept.id !== 'all'));
+        } catch (e) {
+          console.error("Error parsing departments from localStorage", e);
+        }
+      }
+
+      // Reset form or fill with customer data
+      if (customer) {
+        setName(customer.name || '');
+        setDepartment(customer.department || '');
+        setDepartmentName(customer.departmentName || '');
+        setStatus(customer.status || 'active');
+        setEmail(customer.email || '');
+        setPhone(customer.phone || '');
+        setAddress(customer.address || '');
+        setContact(customer.contact || '');
+        setTaxId(customer.taxId || '');
+        setNotes(customer.notes || '');
+      } else {
+        setName('');
+        setDepartment('uncategorized');
+        setDepartmentName('未分類');
+        setStatus('active');
+        setEmail('');
+        setPhone('');
+        setAddress('');
+        setContact('');
+        setTaxId('');
+        setNotes('');
+      }
     }
-  );
-  
-  const handleChange = (field: keyof Customer, value: string) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-      ...(field === 'department' && {
-        departmentName: getDepartmentName(value)
-      })
+  }, [customer, open]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      name,
+      department,
+      departmentName,
+      status,
+      email,
+      phone,
+      address,
+      contact,
+      taxId,
+      notes,
     });
   };
-  
-  const getDepartmentName = (departmentId: string): string => {
-    const departments = {
-      internal: "內部開發",
-      external: "外部開發",
-      digital: "數位行銷",
-      alfred: "Alfred",
-      jason: "Jason",
-      uncategorized: "未分類"
-    };
-    
-    return departments[departmentId as keyof typeof departments] || "未分類";
+
+  const handleDepartmentChange = (value: string) => {
+    setDepartment(value);
+    // Find the department name from the list
+    const selectedDept = departmentsList.find(dept => dept.id === value);
+    if (selectedDept) {
+      setDepartmentName(selectedDept.name);
+    }
   };
-  
-  const handleSubmit = () => {
-    onSave(formData);
-    onOpenChange(false);
-  };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "編輯客戶" : "新增客戶"}</DialogTitle>
-          <DialogDescription>
-            {isEditing 
-              ? "在下方更新您的客戶資訊"
-              : "填寫新客戶的詳細資料"
-            }
-          </DialogDescription>
+          <DialogTitle>{customer ? '編輯客戶' : '新增客戶'}</DialogTitle>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">客戶名稱</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="輸入客戶名稱"
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="department">部門</Label>
-              <Select 
-                value={formData.department} 
-                onValueChange={(value) => handleChange("department", value)}
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm text-gray-700">
+                客戶名稱
+              </label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="department" className="text-sm text-gray-700">
+                部門
+              </label>
+              <Select
+                value={department}
+                onValueChange={handleDepartmentChange}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="選擇部門" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="internal">內部開發</SelectItem>
-                  <SelectItem value="external">外部開發</SelectItem>
-                  <SelectItem value="digital">數位行銷</SelectItem>
-                  <SelectItem value="alfred">Alfred</SelectItem>
-                  <SelectItem value="jason">Jason</SelectItem>
-                  <SelectItem value="uncategorized">未分類</SelectItem>
+                  {departmentsList.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="status">狀態</Label>
-              <Select 
-                value={formData.status} 
-                onValueChange={(value: any) => handleChange("status", value)}
+
+            <div className="space-y-2">
+              <label htmlFor="status" className="text-sm text-gray-700">
+                狀態
+              </label>
+              <Select
+                value={status}
+                onValueChange={setStatus}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="選擇狀態" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">進行中</SelectItem>
+                  <SelectItem value="active">活躍</SelectItem>
                   <SelectItem value="paused">暫停</SelectItem>
-                  <SelectItem value="inactive">不活躍</SelectItem>
+                  <SelectItem value="inactive">非活躍</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="contact">聯絡人</Label>
-            <Input
-              id="contact"
-              value={formData.contact}
-              onChange={(e) => handleChange("contact", e.target.value)}
-              placeholder="聯絡人姓名"
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">電子郵件</Label>
+
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm text-gray-700">
+                Email
+              </label>
               <Input
                 id="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="電子郵件地址"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="phone" className="text-sm text-gray-700">
+                電話
+              </label>
+              <Input
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="contact" className="text-sm text-gray-700">
+                聯絡人
+              </label>
+              <Input
+                id="contact"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="taxId" className="text-sm text-gray-700">
+                統一編號
+              </label>
+              <Input
+                id="taxId"
+                value={taxId}
+                onChange={(e) => setTaxId(e.target.value)}
               />
             </div>
             
-            <div className="grid gap-2">
-              <Label htmlFor="phone">電話</Label>
+            <div className="space-y-2 md:col-span-2">
+              <label htmlFor="address" className="text-sm text-gray-700">
+                地址
+              </label>
               <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
-                placeholder="電話號碼"
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label htmlFor="notes" className="text-sm text-gray-700">
+                備註
+              </label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="min-h-[100px]"
               />
             </div>
           </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="taxId">統一編號</Label>
-            <Input
-              id="taxId"
-              value={formData.taxId}
-              onChange={(e) => handleChange("taxId", e.target.value)}
-              placeholder="請輸入統一編號"
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="address">地址</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) => handleChange("address", e.target.value)}
-              placeholder="公司地址"
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="notes">備註</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange("notes", e.target.value)}
-              placeholder="其他附加資訊"
-              rows={3}
-            />
-          </div>
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-          <Button onClick={handleSubmit}>
-            {isEditing ? "儲存變更" : "新增客戶"}
-          </Button>
-        </DialogFooter>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button type="submit">儲存</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -78,6 +78,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     setLocalIsVisible(isVisible);
   }, [isVisible]);
 
+  // Store departments in localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('departmentsList', JSON.stringify(departmentsList));
+  }, [departmentsList]);
+
   // Get user profile info
   useEffect(() => {
     if (user) {
@@ -269,7 +274,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       "absolute md:relative z-30" // Ensure sidebar is above content on mobile
     )}>
       <div className="p-4 flex justify-between items-center border-b border-slate-200">
-        <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-8 w-auto" />
+        <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-6 w-auto" />
         <Button 
           variant="ghost" 
           size="icon" 
