@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 type CustomerListProps = {
   customers: Customer[];
@@ -80,7 +81,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   };
   
   return (
-    <div className="w-full max-w-md border-r h-screen overflow-hidden flex flex-col bg-white">
+    <div className="border-r h-screen overflow-hidden flex flex-col bg-white">
       <div className="p-5 border-b sticky top-0 bg-white z-10 shadow-sm">
         <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         

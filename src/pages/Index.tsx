@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -10,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tables } from "@/integrations/supabase/types";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const Index = () => {
   const { toast } = useToast();
@@ -245,26 +245,35 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar 
-        activeDepartment={activeDepartment}
-        setActiveDepartment={setActiveDepartment}
-      />
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="min-h-screen"
+    >
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <Sidebar 
+          activeDepartment={activeDepartment}
+          setActiveDepartment={setActiveDepartment}
+        />
+      </ResizablePanel>
       
-      <div className="flex-1 flex">
-        <CustomerList 
-          customers={filteredCustomers}
-          selectedCustomerId={selectedCustomerId}
-          onSelectCustomer={handleSelectCustomer}
-          onAddCustomer={handleAddCustomer}
-        />
-        
-        <CustomerDetail 
-          customer={selectedCustomer}
-          onEditCustomer={handleEditCustomer}
-          onDeleteCustomer={handleDeleteCustomer}
-        />
-      </div>
+      <ResizableHandle withHandle />
+      
+      <ResizablePanel defaultSize={80}>
+        <div className="flex-1 flex">
+          <CustomerList 
+            customers={filteredCustomers}
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={handleSelectCustomer}
+            onAddCustomer={handleAddCustomer}
+          />
+          
+          <CustomerDetail 
+            customer={selectedCustomer}
+            onEditCustomer={handleEditCustomer}
+            onDeleteCustomer={handleDeleteCustomer}
+          />
+        </div>
+      </ResizablePanel>
       
       <CustomerEditDialog 
         customer={customerToEdit}
@@ -279,7 +288,7 @@ const Index = () => {
         onConfirm={handleConfirmDelete}
         customerName={customerToDelete?.name || ""}
       />
-    </div>
+    </ResizablePanelGroup>
   );
 };
 
