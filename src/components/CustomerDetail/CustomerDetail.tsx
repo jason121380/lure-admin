@@ -140,7 +140,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
         </TabsContent>
         
         <TabsContent value="payments">
-          <PaymentRecordList />
+          <PaymentRecordList customerId={customer.id} />
         </TabsContent>
       </Tabs>
     </div>

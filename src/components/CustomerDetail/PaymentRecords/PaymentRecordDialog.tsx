@@ -25,7 +25,7 @@ type PaymentRecordDialogProps = {
   onAddPaymentRecord: (paymentRecord: PaymentRecord) => void;
 };
 
-// 新增帳戶選項列表 - 移除了現金、總部返區處、區處返總部
+// 帳戶選項列表
 const accountOptions = [
   { id: 'chenTaiyu', name: '陳泰宇' },
   { id: 'attractionCompany', name: '吸引力公司' },
@@ -37,14 +37,29 @@ export const PaymentRecordDialog = ({
   onOpenChange, 
   onAddPaymentRecord 
 }: PaymentRecordDialogProps) => {
-  const [paymentDate, setPaymentDate] = useState('');
+  // Get today's date in yyyy-MM-dd format
+  const today = format(new Date(), 'yyyy-MM-dd');
+  
+  const [paymentDate, setPaymentDate] = useState(today); // Default to today
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0].id);
   const [paymentAccount, setPaymentAccount] = useState(accountOptions[0].id);
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [taxAmount, setTaxAmount] = useState(''); // 新增稅金欄位
+  const [taxAmount, setTaxAmount] = useState(''); // 稅金欄位
   const [paymentConfirmed, setPaymentConfirmed] = useState(true);
-  const [totalAmount, setTotalAmount] = useState(0); // 新增總金額計算
+  const [totalAmount, setTotalAmount] = useState(0); // 總金額計算
 
+  // Reset form when dialog is opened
+  useEffect(() => {
+    if (isOpen) {
+      setPaymentDate(today);
+      setPaymentMethod(paymentMethods[0].id);
+      setPaymentAccount(accountOptions[0].id);
+      setPaymentAmount('');
+      setTaxAmount('');
+      setPaymentConfirmed(true);
+    }
+  }, [isOpen, today]);
+  
   // 當金額或稅金變更時計算總金額
   useEffect(() => {
     const amount = Number(paymentAmount) || 0;
@@ -59,12 +74,12 @@ export const PaymentRecordDialog = ({
       
       const newPaymentRecord: PaymentRecord = {
         id: `${Date.now()}`,
-        date: paymentDate || format(new Date(), 'yyyy-MM-dd'),
-        paymentMethod: paymentMethods.find(item => item.id === paymentMethod)?.name || '匯款',
-        account: accountOptions.find(item => item.id === paymentAccount)?.name || '',
+        date: paymentDate || today,
+        paymentMethod: paymentMethod,
+        account: accountOptions.find(item => item.id === paymentAccount)?.name || null,
         amount: amount,
-        invoiceNumber: taxAmount, // 將發票號碼改為稅金
-        total: amount + tax, // 總金額為金額+稅金
+        taxAmount: tax,
+        totalAmount: amount + tax,
         isConfirmed: paymentConfirmed,
       };
       
@@ -74,7 +89,7 @@ export const PaymentRecordDialog = ({
   };
 
   const resetForm = () => {
-    setPaymentDate('');
+    setPaymentDate(today); // Reset to today
     setPaymentMethod(paymentMethods[0].id);
     setPaymentAccount(accountOptions[0].id);
     setPaymentAmount('');
@@ -88,7 +103,7 @@ export const PaymentRecordDialog = ({
         <DialogHeader>
           <DialogTitle>新增付款記錄</DialogTitle>
         </DialogHeader>
-        <div className="py-4 space-y-4">
+        <div className="space-y-4 py-4">
           <div>
             <label className="text-sm text-gray-500 block mb-2">日期</label>
             <Input 

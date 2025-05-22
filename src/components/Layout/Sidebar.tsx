@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -23,6 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 type DepartmentType = {
   id: string;
@@ -46,15 +53,38 @@ type SidebarProps = {
 
 export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps) {
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments);
+  const [userFullName, setUserFullName] = useState<string>('');
   
   // For delete confirmation
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState<DepartmentType | null>(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
+
+  // For user profile
+  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+
+  // Get user profile info
+  useEffect(() => {
+    if (user) {
+      // Get full name from user metadata
+      const fullNameFromMeta = user.user_metadata?.full_name;
+      if (fullNameFromMeta) {
+        setFullName(fullNameFromMeta);
+        setUserFullName(fullNameFromMeta);
+      } else {
+        // Use email as fallback
+        setUserFullName(user.email?.split('@')[0] || '');
+      }
+    }
+  }, [user]);
 
   const handleAddDepartment = () => {
     if (newDepartmentName.trim()) {
@@ -103,8 +133,65 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
     await signOut();
   };
 
+  const handleUpdateProfile = async () => {
+    try {
+      if (!user) return;
+
+      // Update user metadata
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+
+      if (error) throw error;
+
+      setUserFullName(fullName);
+      setIsUserProfileOpen(false);
+      toast({
+        title: "個人資料已更新",
+        description: "您的姓名已成功更新"
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "更新失敗",
+        description: "無法更新您的個人資料，請稍後再試",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      if (!newPassword || !user?.email) return;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) throw error;
+
+      setNewPassword('');
+      setIsPasswordDialogOpen(false);
+      toast({
+        title: "密碼重設郵件已發送",
+        description: "請檢查您的電子郵件以完成密碼重設"
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "重設密碼失敗",
+        description: "無法發送重設密碼郵件，請稍後再試",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Get user initials for avatar
   const getUserInitials = () => {
+    if (userFullName) {
+      return userFullName.substring(0, 2).toUpperCase();
+    }
+    
     if (!user) return '?';
     
     const email = user.email || '';
@@ -188,25 +275,62 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
       {/* User account section */}
       <div className="p-4 mt-auto border-t border-slate-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
-                {getUserInitials()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">{user?.email}</p>
-            </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleLogout} 
-            className="h-8 w-8 text-slate-500 hover:text-slate-900"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="sr-only">登出</span>
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 p-2 rounded-md">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-medium truncate">{userFullName || user?.email}</p>
+                </div>
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-3" align="start">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{userFullName || '未設定姓名'}</p>
+                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-sm"
+                  onClick={() => setIsUserProfileOpen(true)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  個人資料
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-sm"
+                  onClick={() => setIsPasswordDialogOpen(true)}
+                >
+                  <Key className="h-4 w-4 mr-2" />
+                  更改密碼
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  登出
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       
@@ -278,6 +402,82 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* User Profile Dialog */}
+      <Dialog open={isUserProfileOpen} onOpenChange={setIsUserProfileOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>個人資料</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm text-gray-500 block mb-2">
+                <Mail className="h-4 w-4" />
+                電子郵件
+              </label>
+              <Input 
+                value={user?.email || ''}
+                disabled
+                className="bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm text-gray-500 block mb-2">
+                <User className="h-4 w-4" />
+                姓名
+              </label>
+              <Input 
+                placeholder="請輸入您的姓名"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUserProfileOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleUpdateProfile}>
+              儲存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>更改密碼</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600 mb-4">
+              系統將會發送密碼重設連結至您的電子郵件信箱。
+            </p>
+            <div>
+              <label className="flex items-center gap-2 text-sm text-gray-500 block mb-2">
+                <Mail className="h-4 w-4" />
+                您的電子郵件
+              </label>
+              <Input 
+                value={user?.email || ''}
+                disabled
+                className="bg-gray-50"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleChangePassword}>
+              發送重設連結
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

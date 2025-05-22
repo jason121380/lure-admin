@@ -60,6 +60,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          account: string | null
+          amount: number
+          created_at: string
+          customer_id: string
+          date: string
+          id: string
+          is_confirmed: boolean
+          payment_method: string
+          tax_amount: number | null
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account?: string | null
+          amount: number
+          created_at?: string
+          customer_id: string
+          date?: string
+          id?: string
+          is_confirmed?: boolean
+          payment_method: string
+          tax_amount?: number | null
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account?: string | null
+          amount?: number
+          created_at?: string
+          customer_id?: string
+          date?: string
+          id?: string
+          is_confirmed?: boolean
+          payment_method?: string
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
