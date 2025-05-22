@@ -8,6 +8,18 @@ import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDial
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 
 type IndexProps = {
   sidebarVisible: boolean;
@@ -22,6 +34,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -160,49 +173,72 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     }
   };
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-  };
-
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <Sidebar 
-        activeDepartment={activeDepartment} 
-        setActiveDepartment={setActiveDepartment} 
-        isVisible={sidebarVisible}
-        toggleSidebar={toggleSidebar}
-      />
-      
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <div className="w-full md:w-1/3 border-r border-gray-200 bg-white">
-          <CustomerList 
-            customers={customers} 
-            selectedCustomerId={selectedCustomerId}
-            onSelectCustomer={handleSelectCustomer}
-            onAddCustomer={handleAddCustomer}
+      {/* Sidebar as a popup */}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className="fixed top-4 left-4 z-40 p-2 h-10 w-10"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">開啟部門選單</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-72 p-0">
+          <Sidebar 
+            activeDepartment={activeDepartment} 
+            setActiveDepartment={(dept) => {
+              setActiveDepartment(dept);
+              setIsSidebarOpen(false);
+            }} 
+            isVisible={true}
+            toggleSidebar={() => setIsSidebarOpen(false)}
           />
-        </div>
-        
-        <div className="w-full md:w-2/3 overflow-auto">
-          {selectedCustomer ? (
-            <CustomerDetail 
-              customer={selectedCustomer} 
-              onEditCustomer={handleEditCustomer}
-              onDeleteCustomer={handleDeleteCustomer}
+        </SheetContent>
+      </Sheet>
+      
+      {/* Main content with resizable panels */}
+      <div className="flex-1 flex flex-col pt-16 px-4 md:px-6 lg:px-8">
+        <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border overflow-hidden bg-white">
+          <ResizablePanel 
+            defaultSize={40} 
+            minSize={30}
+            className="border-r"
+          >
+            <CustomerList 
+              customers={customers} 
+              selectedCustomerId={selectedCustomerId}
+              onSelectCustomer={handleSelectCustomer}
+              onAddCustomer={handleAddCustomer}
             />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center p-6 max-w-sm">
-                <h3 className="text-xl font-medium text-gray-900 mb-2">
-                  請選擇客戶
-                </h3>
-                <p className="text-gray-500">
-                  從左側清單中選擇一個客戶以查看詳細資訊
-                </p>
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          <ResizablePanel defaultSize={60} minSize={40}>
+            {selectedCustomer ? (
+              <CustomerDetail 
+                customer={selectedCustomer} 
+                onEditCustomer={handleEditCustomer}
+                onDeleteCustomer={handleDeleteCustomer}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center p-6 max-w-sm">
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">
+                    請選擇客戶
+                  </h3>
+                  <p className="text-gray-500">
+                    從左側清單中選擇一個客戶以查看詳細資訊
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
       
       <CustomerEditDialog

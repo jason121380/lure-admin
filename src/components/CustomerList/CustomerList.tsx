@@ -21,9 +21,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 
 type CustomerListProps = {
   customers: Customer[];
@@ -90,7 +88,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   };
   
   return (
-    <div className="border-r h-screen overflow-hidden flex flex-col bg-white">
+    <div className="h-full flex flex-col">
       <div className="p-5 border-b sticky top-0 bg-white z-10 shadow-sm">
         <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         
@@ -137,9 +135,9 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>名稱</TableHead>
-                <TableHead>部門</TableHead>
-                <TableHead>狀態</TableHead>
+                <TableHead className="w-[40%]">名稱</TableHead>
+                <TableHead className="w-[30%]">部門</TableHead>
+                <TableHead className="w-[30%]">狀態</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
