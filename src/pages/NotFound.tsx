@@ -9,7 +9,7 @@ const NotFound = () => {
 
   useEffect(() => {
     console.error(
-      "404 Error: User attempted to access non-existent route:",
+      "404 錯誤：使用者嘗試存取不存在的路徑：",
       location.pathname
     );
   }, [location.pathname]);
@@ -18,9 +18,9 @@ const NotFound = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center max-w-md p-8 bg-white rounded-lg shadow-sm border">
         <h1 className="text-6xl font-bold text-indigo-600 mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-6">This page doesn't exist</p>
+        <p className="text-xl text-gray-600 mb-6">此頁面不存在</p>
         <Button asChild>
-          <Link to="/">Return to Dashboard</Link>
+          <Link to="/">返回儀表板</Link>
         </Button>
       </div>
     </div>

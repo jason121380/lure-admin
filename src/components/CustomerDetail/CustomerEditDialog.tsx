@@ -34,7 +34,7 @@ export function CustomerEditDialog({
     customer || {
       name: "",
       department: "uncategorized",
-      departmentName: "Uncategorized",
+      departmentName: "未分類",
       status: "active",
       email: "",
       phone: "",
@@ -56,15 +56,15 @@ export function CustomerEditDialog({
   
   const getDepartmentName = (departmentId: string): string => {
     const departments = {
-      internal: "Internal Development",
-      external: "External Development",
-      digital: "Digital",
+      internal: "內部開發",
+      external: "外部開發",
+      digital: "數位行銷",
       alfred: "Alfred",
       jason: "Jason",
-      uncategorized: "Uncategorized"
+      uncategorized: "未分類"
     };
     
-    return departments[departmentId as keyof typeof departments] || "Uncategorized";
+    return departments[departmentId as keyof typeof departments] || "未分類";
   };
   
   const handleSubmit = () => {
@@ -76,124 +76,124 @@ export function CustomerEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Customer" : "Add New Customer"}</DialogTitle>
+          <DialogTitle>{isEditing ? "編輯客戶" : "新增客戶"}</DialogTitle>
           <DialogDescription>
             {isEditing 
-              ? "Update your customer's information below"
-              : "Fill in the details for your new customer"
+              ? "在下方更新您的客戶資訊"
+              : "填寫新客戶的詳細資料"
             }
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Customer Name</Label>
+            <Label htmlFor="name">客戶名稱</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Enter customer name"
+              placeholder="輸入客戶名稱"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department">部門</Label>
               <Select 
                 value={formData.department} 
                 onValueChange={(value) => handleChange("department", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue placeholder="選擇部門" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="internal">Internal Development</SelectItem>
-                  <SelectItem value="external">External Development</SelectItem>
-                  <SelectItem value="digital">Digital</SelectItem>
+                  <SelectItem value="internal">內部開發</SelectItem>
+                  <SelectItem value="external">外部開發</SelectItem>
+                  <SelectItem value="digital">數位行銷</SelectItem>
                   <SelectItem value="alfred">Alfred</SelectItem>
                   <SelectItem value="jason">Jason</SelectItem>
-                  <SelectItem value="uncategorized">Uncategorized</SelectItem>
+                  <SelectItem value="uncategorized">未分類</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">狀態</Label>
               <Select 
                 value={formData.status} 
                 onValueChange={(value: any) => handleChange("status", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="選擇狀態" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">In Progress</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="active">進行中</SelectItem>
+                  <SelectItem value="paused">暫停</SelectItem>
+                  <SelectItem value="inactive">不活躍</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="contact">Contact Person</Label>
+            <Label htmlFor="contact">聯絡人</Label>
             <Input
               id="contact"
               value={formData.contact}
               onChange={(e) => handleChange("contact", e.target.value)}
-              placeholder="Contact person name"
+              placeholder="聯絡人姓名"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">電子郵件</Label>
               <Input
                 id="email"
                 value={formData.email}
                 onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="Email address"
+                placeholder="電子郵件地址"
                 type="email"
               />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">電話</Label>
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                placeholder="Phone number"
+                placeholder="電話號碼"
               />
             </div>
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">地址</Label>
             <Input
               id="address"
               value={formData.address}
               onChange={(e) => handleChange("address", e.target.value)}
-              placeholder="Business address"
+              placeholder="公司地址"
             />
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">備註</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
-              placeholder="Additional information"
+              placeholder="其他附加資訊"
               rows={3}
             />
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
           <Button onClick={handleSubmit}>
-            {isEditing ? "Save Changes" : "Add Customer"}
+            {isEditing ? "儲存變更" : "新增客戶"}
           </Button>
         </DialogFooter>
       </DialogContent>

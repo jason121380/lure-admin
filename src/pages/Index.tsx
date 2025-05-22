@@ -12,40 +12,40 @@ import { useToast } from "@/components/ui/use-toast";
 const initialCustomers: Customer[] = [
   {
     id: "1",
-    name: "Beauty Flower Shop",
+    name: "美麗花店",
     department: "alfred",
     departmentName: "Alfred",
     status: "active",
     email: "beauty@floral.com",
     phone: "123-456-7890",
-    address: "123 Flower St, Garden City",
-    contact: "Jane Smith",
+    address: "花園城市花街123號",
+    contact: "張小姐",
     createdAt: "2023-05-15",
-    notes: "Regular monthly service contract"
+    notes: "定期月度服務合約"
   },
   {
     id: "2",
-    name: "Tech Pioneer Co., Ltd.",
+    name: "科技先鋒有限公司",
     department: "internal",
-    departmentName: "Internal Development",
+    departmentName: "內部開發",
     status: "paused",
     email: "info@techpioneer.com",
     phone: "987-654-3210",
-    address: "456 Tech Avenue, Innovation District",
-    contact: "John Doe",
+    address: "創新區科技大道456號",
+    contact: "王先生",
     createdAt: "2023-04-20",
-    notes: "Project on hold - waiting for budget approval"
+    notes: "專案暫停 - 等待預算批准"
   },
   {
     id: "3",
-    name: "Global Marketing Services",
+    name: "全球行銷服務",
     department: "digital",
-    departmentName: "Digital",
+    departmentName: "數位行銷",
     status: "active",
     email: "hello@globalmarketing.com",
     phone: "555-123-4567",
-    address: "789 Marketing Blvd, Media City",
-    contact: "Sarah Johnson",
+    address: "媒體城市行銷大道789號",
+    contact: "李小姐",
     createdAt: "2023-06-10"
   }
 ];
@@ -98,16 +98,16 @@ const Index = () => {
       );
       setCustomers(updatedCustomers);
       toast({
-        title: "Customer updated",
-        description: `${customerData.name} has been updated successfully.`
+        title: "客戶已更新",
+        description: `${customerData.name} 已成功更新。`
       });
     } else {
       // Add new customer
       const newCustomer: Customer = {
         id: `${Date.now()}`,
-        name: customerData.name || "Unnamed Customer",
+        name: customerData.name || "未命名客戶",
         department: customerData.department || "uncategorized",
-        departmentName: customerData.departmentName || "Uncategorized",
+        departmentName: customerData.departmentName || "未分類",
         status: customerData.status || "active",
         email: customerData.email || "",
         phone: customerData.phone || "",
@@ -120,8 +120,8 @@ const Index = () => {
       setCustomers([...customers, newCustomer]);
       setSelectedCustomerId(newCustomer.id);
       toast({
-        title: "Customer added",
-        description: `${newCustomer.name} has been added successfully.`
+        title: "客戶已新增",
+        description: `${newCustomer.name} 已成功新增。`
       });
     }
   };
@@ -136,8 +136,8 @@ const Index = () => {
       }
       
       toast({
-        title: "Customer deleted",
-        description: `${customerToDelete.name} has been deleted.`,
+        title: "客戶已刪除",
+        description: `${customerToDelete.name} 已被刪除。`,
         variant: "destructive"
       });
       

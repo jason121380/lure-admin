@@ -19,9 +19,9 @@ export type Customer = {
 };
 
 const statusConfig = {
-  active: { label: 'In Progress', color: 'bg-status-active' },
-  paused: { label: 'Paused', color: 'bg-status-paused' },
-  inactive: { label: 'Inactive', color: 'bg-status-inactive' }
+  active: { label: '進行中', color: 'bg-status-active' },
+  paused: { label: '暫停', color: 'bg-status-paused' },
+  inactive: { label: '不活躍', color: 'bg-status-inactive' }
 };
 
 type CustomerListItemProps = {

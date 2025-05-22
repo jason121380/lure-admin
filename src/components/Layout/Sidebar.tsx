@@ -10,13 +10,13 @@ type DepartmentType = {
 };
 
 const departments: DepartmentType[] = [
-  { id: 'all', name: 'All Departments' },
-  { id: 'internal', name: 'Internal Development', color: 'bg-blue-500' },
-  { id: 'external', name: 'External Development', color: 'bg-blue-500' },
-  { id: 'digital', name: 'Digital', color: 'bg-blue-500' },
+  { id: 'all', name: '所有部門' },
+  { id: 'internal', name: '內部開發', color: 'bg-blue-500' },
+  { id: 'external', name: '外部開發', color: 'bg-blue-500' },
+  { id: 'digital', name: '數位行銷', color: 'bg-blue-500' },
   { id: 'alfred', name: 'Alfred', color: 'bg-red-500' },
   { id: 'jason', name: 'Jason', color: 'bg-cyan-500' },
-  { id: 'uncategorized', name: 'Uncategorized', color: 'bg-gray-400' }
+  { id: 'uncategorized', name: '未分類', color: 'bg-gray-400' }
 ];
 
 type SidebarProps = {
@@ -34,7 +34,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
       
       <div className="flex-1 flex flex-col gap-6 px-2">
         <div className="space-y-1">
-          <h2 className="text-sm font-medium px-4 py-2">Customer Management</h2>
+          <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
           <Button 
             variant="ghost" 
             className={cn(
@@ -46,12 +46,12 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
             <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
             </svg>
-            All Customers
+            所有客戶
           </Button>
         </div>
         
         <div className="space-y-1">
-          <h2 className="text-sm font-medium px-4 py-2">Departments</h2>
+          <h2 className="text-sm font-medium px-4 py-2">部門</h2>
           {departments.map((dept) => (
             <Button 
               key={dept.id}

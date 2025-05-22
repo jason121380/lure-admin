@@ -26,12 +26,12 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   return (
     <div className="w-full max-w-md border-r">
       <div className="p-4 border-b sticky top-0 bg-white z-10">
-        <h2 className="text-lg font-medium mb-4">Customer List</h2>
+        <h2 className="text-lg font-medium mb-4">客戶列表</h2>
         
         <div className="flex gap-2 mb-4">
           <div className="flex-1">
             <Input 
-              placeholder="Search customers..." 
+              placeholder="搜尋客戶..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
@@ -40,13 +40,13 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">In Progress</SelectItem>
-              <SelectItem value="paused">Paused</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">所有狀態</SelectItem>
+              <SelectItem value="active">進行中</SelectItem>
+              <SelectItem value="paused">暫停</SelectItem>
+              <SelectItem value="inactive">不活躍</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -55,7 +55,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          Add New Customer
+          新增客戶
         </Button>
       </div>
       
@@ -71,7 +71,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">
-            No customers found
+            未找到客戶
           </div>
         )}
       </div>

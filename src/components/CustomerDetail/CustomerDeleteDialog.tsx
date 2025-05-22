@@ -27,19 +27,19 @@ export function CustomerDeleteDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>您確定要刪除嗎？</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete <strong>{customerName}</strong> and all associated data. 
-            This action cannot be undone.
+            這將永久刪除 <strong>{customerName}</strong> 以及所有相關的資料。
+            此操作無法撤銷。
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>取消</AlertDialogCancel>
           <AlertDialogAction 
             onClick={onConfirm}
             className="bg-red-600 hover:bg-red-700"
           >
-            Delete Customer
+            刪除客戶
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
