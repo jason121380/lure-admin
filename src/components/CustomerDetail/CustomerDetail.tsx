@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer } from "../CustomerList/CustomerListItem";
-import { Plus, MoreHorizontal } from "lucide-react";
+import { Plus, MoreHorizontal, Text } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ type CustomerDetailProps = {
 type ServicePlanItem = {
   id: string;
   name: string;
+  description: string;
   price: number;
 };
 
@@ -53,6 +55,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
   const [isServicePlanOpen, setIsServicePlanOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(serviceItems[0].id);
   const [servicePrice, setServicePrice] = useState('');
+  const [serviceDescription, setServiceDescription] = useState('');
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
 
   const handleAddServicePlan = () => {
@@ -63,6 +66,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
         const newServicePlan: ServicePlanItem = {
           id: `${Date.now()}`,
           name: selectedServiceItem.name,
+          description: serviceDescription,
           price: Number(servicePrice)
         };
         
@@ -70,6 +74,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
         setIsServicePlanOpen(false);
         setSelectedService(serviceItems[0].id);
         setServicePrice('');
+        setServiceDescription('');
       }
     }
   };
@@ -214,6 +219,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
                 <TableHeader>
                   <TableRow>
                     <TableHead>服務項目</TableHead>
+                    <TableHead>描述</TableHead>
                     <TableHead className="text-right">價格</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -221,6 +227,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
                   {servicePlans.map((plan) => (
                     <TableRow key={plan.id}>
                       <TableCell>{plan.name}</TableCell>
+                      <TableCell className="max-w-xs truncate">{plan.description}</TableCell>
                       <TableCell className="text-right">{plan.price.toLocaleString()} 元</TableCell>
                     </TableRow>
                   ))}
@@ -273,6 +280,16 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
                   </option>
                 ))}
               </select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">文字描述</label>
+              <Textarea 
+                placeholder="請輸入服務描述"
+                value={serviceDescription}
+                onChange={(e) => setServiceDescription(e.target.value)}
+                className="min-h-24"
+              />
             </div>
             
             <div>
