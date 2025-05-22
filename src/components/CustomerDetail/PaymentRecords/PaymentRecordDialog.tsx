@@ -1,270 +1,215 @@
 
 import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import { PaymentRecord, paymentMethods } from "./PaymentRecordList";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
 
-type PaymentRecordDialogProps = {
+interface PaymentRecordDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddPaymentRecord: (paymentRecord: PaymentRecord) => void;
-};
+  paymentRecord: PaymentRecord | null;
+  onAddPaymentRecord: (record: PaymentRecord) => void;
+  onUpdatePaymentRecord: (record: PaymentRecord) => void;
+}
 
-// 帳戶選項列表
-const accountOptions = [
-  { id: 'chenTaiyu', name: '陳泰宇' },
-  { id: 'attractionCompany', name: '吸引力公司' },
-  { id: 'attractionPersonal', name: '吸引力個人' },
-];
-
-export const PaymentRecordDialog = ({ 
-  isOpen, 
-  onOpenChange, 
-  onAddPaymentRecord 
-}: PaymentRecordDialogProps) => {
-  const [totalAmount, setTotalAmount] = useState(0);
-  const today = format(new Date(), 'yyyy-MM-dd');
+export function PaymentRecordDialog({
+  isOpen,
+  onOpenChange,
+  paymentRecord,
+  onAddPaymentRecord,
+  onUpdatePaymentRecord,
+}: PaymentRecordDialogProps) {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [paymentMethod, setPaymentMethod] = useState("transfer");
+  const [account, setAccount] = useState("");
+  const [amount, setAmount] = useState("");
+  const [taxAmount, setTaxAmount] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [isConfirmed, setIsConfirmed] = useState(true);
   
-  const form = useForm<{
-    date: string;
-    paymentMethod: string;
-    account: string;
-    amount: string;
-    taxAmount: string;
-    isConfirmed: boolean;
-  }>({
-    defaultValues: {
-      date: today,
-      paymentMethod: paymentMethods[0].id,
-      account: accountOptions[0].id,
-      amount: '',
-      taxAmount: '0',
-      isConfirmed: true,
-    }
-  });
-  
-  // Reset form when dialog is opened
+  // Reset form when dialog opens/closes or when paymentRecord changes
   useEffect(() => {
     if (isOpen) {
-      form.reset({
-        date: today,
-        paymentMethod: paymentMethods[0].id,
-        account: accountOptions[0].id,
-        amount: '',
-        taxAmount: '0',
-        isConfirmed: true,
-      });
+      if (paymentRecord) {
+        // Set form values for editing
+        setDate(paymentRecord.date ? new Date(paymentRecord.date) : new Date());
+        setPaymentMethod(paymentRecord.paymentMethod);
+        setAccount(paymentRecord.account || "");
+        setAmount(paymentRecord.amount.toString());
+        setTaxAmount(paymentRecord.taxAmount.toString());
+        setTotalAmount(paymentRecord.totalAmount.toString());
+        setIsConfirmed(paymentRecord.isConfirmed);
+      } else {
+        // Set default values for new record
+        setDate(new Date());
+        setPaymentMethod("transfer");
+        setAccount("");
+        setAmount("");
+        setTaxAmount("0");
+        setTotalAmount("");
+        setIsConfirmed(true);
+      }
     }
-  }, [isOpen, form, today]);
-  
-  // Calculate total amount when amount or tax amount changes
-  useEffect(() => {
-    const amount = Number(form.watch('amount')) || 0;
-    const tax = Number(form.watch('taxAmount')) || 0;
-    setTotalAmount(amount + tax);
-  }, [form.watch('amount'), form.watch('taxAmount')]);
+  }, [isOpen, paymentRecord]);
 
-  const handleSubmit = form.handleSubmit((values) => {
-    const amount = Number(values.amount);
-    const tax = Number(values.taxAmount) || 0;
+  const calculateTotal = () => {
+    const amountValue = parseFloat(amount) || 0;
+    const taxValue = parseFloat(taxAmount) || 0;
+    setTotalAmount((amountValue + taxValue).toString());
+  };
+  
+  useEffect(() => {
+    calculateTotal();
+  }, [amount, taxAmount]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    const newPaymentRecord: PaymentRecord = {
-      id: `temp-${Date.now()}`, // Will be replaced by the server-generated ID
-      date: values.date,
-      paymentMethod: values.paymentMethod,
-      account: accountOptions.find(item => item.id === values.account)?.name || null,
-      amount: amount,
-      taxAmount: tax,
-      totalAmount: amount + tax,
-      isConfirmed: values.isConfirmed,
+    const formattedDate = date ? format(date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
+    const numAmount = parseFloat(amount);
+    const numTaxAmount = parseFloat(taxAmount) || 0;
+    const numTotalAmount = parseFloat(totalAmount);
+    
+    const paymentData: PaymentRecord = {
+      id: paymentRecord?.id || "",
+      date: formattedDate,
+      paymentMethod,
+      account: account || null,
+      amount: numAmount,
+      taxAmount: numTaxAmount,
+      totalAmount: numTotalAmount,
+      isConfirmed,
     };
     
-    onAddPaymentRecord(newPaymentRecord);
-  });
+    if (paymentRecord) {
+      onUpdatePaymentRecord(paymentData);
+    } else {
+      onAddPaymentRecord(paymentData);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>新增付款記錄</DialogTitle>
+          <DialogTitle>{paymentRecord ? "編輯付款記錄" : "新增付款記錄"}</DialogTitle>
         </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>日期</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="date">日期</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="date"
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "yyyy-MM-dd") : <span>選擇日期</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="paymentMethod">支付方式</Label>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger>
+                <SelectValue placeholder="選擇支付方式" />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentMethods.map(method => (
+                  <SelectItem key={method.id} value={method.id}>{method.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="account">帳戶</Label>
+            <Input
+              id="account"
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
+              placeholder="可選"
             />
-            
-            {/* Payment method selection */}
-            <FormField
-              control={form.control}
-              name="paymentMethod"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>支付方式</FormLabel>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇支付方式" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {paymentMethods.map(item => (
-                        <SelectItem key={item.id} value={item.id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="amount">金額</Label>
+            <Input
+              id="amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              required
             />
-            
-            {/* Account selection */}
-            <FormField
-              control={form.control}
-              name="account"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>帳戶</FormLabel>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇帳戶" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {accountOptions.map(item => (
-                        <SelectItem key={item.id} value={item.id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="taxAmount">稅金</Label>
+            <Input
+              id="taxAmount"
+              type="number"
+              value={taxAmount}
+              onChange={(e) => setTaxAmount(e.target.value)}
+              placeholder="0"
             />
-            
-            {/* Amount field */}
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>金額</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="請輸入金額" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="totalAmount">總額</Label>
+            <Input
+              id="totalAmount"
+              type="number"
+              value={totalAmount}
+              onChange={(e) => setTotalAmount(e.target.value)}
+              placeholder="0"
+              required
+              readOnly
             />
-            
-            {/* Tax amount field */}
-            <FormField
-              control={form.control}
-              name="taxAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>稅金</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="請輸入稅金" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isConfirmed"
+              checked={isConfirmed}
+              onCheckedChange={(checked) => setIsConfirmed(checked === true)}
             />
-            
-            {/* Total amount display */}
-            <div>
-              <p className="text-sm text-gray-500 mb-2">總金額</p>
-              <div className="border border-gray-300 rounded-md p-2 bg-gray-50">
-                {totalAmount.toLocaleString()} 元
-              </div>
-            </div>
-            
-            {/* Confirmation checkbox */}
-            <FormField
-              control={form.control}
-              name="isConfirmed"
-              render={({ field }) => (
-                <FormItem className="flex items-center space-x-2">
-                  <FormControl>
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel className="text-sm text-gray-700">確認收款</FormLabel>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Action buttons */}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                取消
-              </Button>
-              <Button type="submit">
-                新增
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            <label
+              htmlFor="isConfirmed"
+              className="text-sm font-medium leading-none cursor-pointer"
+            >
+              確認收款
+            </label>
+          </div>
+          
+          <div className="flex justify-end pt-2">
+            <Button type="submit">{paymentRecord ? "更新" : "新增"}</Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

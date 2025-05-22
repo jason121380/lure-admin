@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -45,6 +45,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
   const [isPaymentRecordOpen, setIsPaymentRecordOpen] = useState(false);
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingPaymentRecord, setEditingPaymentRecord] = useState<PaymentRecord | null>(null);
 
   // 獲取付款記錄
   useEffect(() => {
@@ -144,10 +145,55 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     }
   };
 
+  const handleUpdatePaymentRecord = async (updatedPaymentRecord: PaymentRecord) => {
+    try {
+      const { error } = await supabase
+        .from('payment_records')
+        .update({
+          date: updatedPaymentRecord.date,
+          payment_method: updatedPaymentRecord.paymentMethod,
+          account: updatedPaymentRecord.account,
+          amount: updatedPaymentRecord.amount,
+          tax_amount: updatedPaymentRecord.taxAmount,
+          total_amount: updatedPaymentRecord.totalAmount,
+          is_confirmed: updatedPaymentRecord.isConfirmed,
+        })
+        .eq('id', updatedPaymentRecord.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPaymentRecords(paymentRecords.map(record => 
+        record.id === updatedPaymentRecord.id ? updatedPaymentRecord : record
+      ));
+      
+      setEditingPaymentRecord(null);
+      setIsPaymentRecordOpen(false);
+      
+      toast({
+        title: "付款記錄已更新",
+        description: `更新了 ${updatedPaymentRecord.amount.toLocaleString()} 元的付款記錄`
+      });
+      
+    } catch (error) {
+      console.error('Error updating payment record:', error);
+      toast({
+        title: "更新付款記錄失敗",
+        description: "請稍後再試",
+        variant: "destructive"
+      });
+    }
+  };
+
   // 獲取支付方式名稱
   const getPaymentMethodName = (methodId: string) => {
     const method = paymentMethods.find(m => m.id === methodId);
     return method ? method.name : methodId;
+  };
+
+  const handleEditClick = (record: PaymentRecord) => {
+    setEditingPaymentRecord(record);
+    setIsPaymentRecordOpen(true);
   };
 
   if (isLoading) {
@@ -165,7 +211,10 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
         variant="ghost" 
         size="icon"
         className="absolute right-3 top-3 z-10"
-        onClick={() => setIsPaymentRecordOpen(true)}
+        onClick={() => {
+          setEditingPaymentRecord(null);
+          setIsPaymentRecordOpen(true);
+        }}
       >
         <Plus className="h-4 w-4" />
         <span className="sr-only">新增付款記錄</span>
@@ -183,6 +232,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                 <TableHead className="text-right">稅金</TableHead>
                 <TableHead className="text-right">總額</TableHead>
                 <TableHead className="text-center">確認收款</TableHead>
+                <TableHead className="text-center">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -205,6 +255,17 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell className="text-center">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleEditClick(record)}
+                      className="h-8 w-8"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">編輯</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -219,8 +280,11 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
       <PaymentRecordDialog 
         isOpen={isPaymentRecordOpen} 
         onOpenChange={setIsPaymentRecordOpen}
+        paymentRecord={editingPaymentRecord}
         onAddPaymentRecord={handleAddPaymentRecord}
+        onUpdatePaymentRecord={handleUpdatePaymentRecord}
       />
     </div>
   );
 };
+
