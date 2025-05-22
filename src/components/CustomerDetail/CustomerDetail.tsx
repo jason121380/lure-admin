@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +28,15 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       </div>
     );
   }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return '進行中';
+      case 'paused': return '暫停'; 
+      case 'inactive': return '不活躍';
+      default: return status;
+    }
+  };
 
   return (
     <div className="flex-1 p-6">
@@ -94,8 +104,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
                 <div className="flex items-center gap-2">
                   <span className={`inline-block w-2 h-2 rounded-full bg-status-${customer.status}`}></span>
                   <span>
-                    {customer.status === 'active' ? '進行中' : 
-                     customer.status === 'paused' ? '暫停' : '不活躍'}
+                    {getStatusText(customer.status)}
                   </span>
                 </div>
               </div>

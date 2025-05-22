@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,7 +58,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
           name: item.name,
           department: item.department,
           departmentName: item.department_name,
-          status: item.status,
+          status: item.status, // Now matches string type in Customer
           email: item.email || undefined,
           phone: item.phone || undefined,
           address: item.address || undefined,

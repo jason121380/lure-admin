@@ -8,7 +8,7 @@ export type Customer = {
   name: string;
   department: string;
   departmentName: string;
-  status: "active" | "paused" | "inactive";
+  status: string; // Changed from "active" | "paused" | "inactive" to string
   email?: string;
   phone?: string;
   address?: string;

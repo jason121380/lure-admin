@@ -51,7 +51,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         name: item.name,
         department: item.department,
         departmentName: item.department_name,
-        status: item.status,
+        status: item.status, // Now matches string type in Customer
         email: item.email || undefined,
         phone: item.phone || undefined,
         address: item.address || undefined,
