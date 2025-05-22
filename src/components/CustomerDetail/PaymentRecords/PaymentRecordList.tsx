@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,11 +22,10 @@ export type PaymentRecord = {
   isConfirmed: boolean;
 };
 
+// 更新支付方式列表
 export const paymentMethods = [
-  { id: 'bank', name: '銀行轉帳' },
-  { id: 'cash', name: '現金' },
-  { id: 'credit', name: '信用卡' },
-  { id: 'line', name: 'Line Pay' },
+  { id: 'transfer', name: '匯款' },
+  { id: 'onlinePayment', name: '線上付款連結' },
 ];
 
 export const PaymentRecordList = () => {
@@ -60,7 +58,7 @@ export const PaymentRecordList = () => {
                 <TableHead>支付方式</TableHead>
                 <TableHead>帳戶</TableHead>
                 <TableHead className="text-right">金額</TableHead>
-                <TableHead>發票號碼</TableHead>
+                <TableHead>稅金</TableHead>
                 <TableHead className="text-right">總額</TableHead>
                 <TableHead className="text-center">確認收款</TableHead>
               </TableRow>
