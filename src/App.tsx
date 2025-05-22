@@ -9,7 +9,6 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { SidebarToggle } from "@/components/Layout/Sidebar";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -34,15 +33,8 @@ const AppRoutes = () => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-  };
-  
   return (
-    <div className="flex relative">
-      {/* Hamburger menu toggle for sidebar */}
-      <SidebarToggle isVisible={sidebarVisible} onClick={toggleSidebar} />
-      
+    <div className="flex relative">      
       <Routes>
         <Route 
           path="/" 

@@ -11,11 +11,6 @@ import { toast } from "sonner";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
@@ -175,33 +170,26 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Sidebar as a popup */}
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetTrigger asChild>
-          <Button 
-            variant="ghost" 
-            className="fixed top-4 left-4 z-40 p-2 h-10 w-10"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">開啟部門選單</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0">
-          <Sidebar 
-            activeDepartment={activeDepartment} 
-            setActiveDepartment={(dept) => {
-              setActiveDepartment(dept);
-              setIsSidebarOpen(false);
-            }} 
-            isVisible={true}
-            toggleSidebar={() => setIsSidebarOpen(false)}
-          />
-        </SheetContent>
-      </Sheet>
+      {/* Sidebar directly in the layout */}
+      <Sidebar 
+        activeDepartment={activeDepartment} 
+        setActiveDepartment={setActiveDepartment} 
+        isVisible={isSidebarOpen}
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+      
+      {/* Toggle button */}
+      <Button 
+        variant="ghost" 
+        className="fixed top-4 left-4 z-40 p-2 h-10 w-10"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">開啟部門選單</span>
+      </Button>
       
       {/* Main content with resizable panels */}
-      <div className="flex-1 flex flex-col pt-16 px-4 md:px-6 lg:px-8">
+      <div className={`flex-1 flex flex-col pt-16 px-4 md:px-6 lg:px-8 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
         <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border overflow-hidden bg-white">
           <ResizablePanel 
             defaultSize={40} 
