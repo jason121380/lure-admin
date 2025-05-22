@@ -39,27 +39,6 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
     }
   };
 
-  // Function to get department color - 直接使用部門的顏色值
-  const getDepartmentColor = (department: string) => {
-    // 將 bg-{color}-500 格式轉換為對應的 bg 和 text 顏色
-    switch (department) {
-      case "alfred":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "jason":
-        return "bg-cyan-100 text-cyan-800 border-cyan-200";
-      case "internal":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "external":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "digital":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "uncategorized":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   // Function to get status text in Chinese
   const getStatusText = (status: string) => {
     switch (status) {
@@ -98,7 +77,7 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
         
         <Badge 
           variant="outline" 
-          className={`text-xs ${getDepartmentColor(customer.department)} px-2 py-0.5 border`}
+          className="text-xs px-2 py-0.5 border"
         >
           {customer.departmentName}
         </Badge>
