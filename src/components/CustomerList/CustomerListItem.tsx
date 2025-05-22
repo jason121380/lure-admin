@@ -39,19 +39,22 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
     }
   };
 
-  // Function to get department color
+  // Function to get department color - 直接使用部門的顏色值
   const getDepartmentColor = (department: string) => {
+    // 將 bg-{color}-500 格式轉換為對應的 bg 和 text 顏色
     switch (department) {
       case "alfred":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-red-100 text-red-800 border-red-200";
       case "jason":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-cyan-100 text-cyan-800 border-cyan-200";
       case "internal":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+        return "bg-green-100 text-green-800 border-green-200";
       case "external":
-        return "bg-teal-100 text-teal-800 border-teal-200";
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "digital":
-        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "uncategorized":
+        return "bg-gray-100 text-gray-800 border-gray-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -75,12 +78,12 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
     <Button
       variant="ghost"
       className={cn(
-        "w-full justify-start px-4 py-3 gap-3 font-normal rounded-none border-b hover:bg-slate-100",
+        "w-full justify-start px-4 py-4 gap-3 font-normal rounded-none border-b hover:bg-slate-100",
         isSelected ? 'bg-slate-100' : ''
       )}
       onClick={onClick}
     >
-      <div className="flex flex-col items-start w-full space-y-2">
+      <div className="flex flex-col items-start w-full space-y-3">
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center gap-2">
             <span className="font-medium">{customer.name}</span>

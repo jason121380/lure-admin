@@ -27,10 +27,10 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   
   return (
     <div className="w-full max-w-md border-r h-screen overflow-hidden flex flex-col">
-      <div className="p-4 border-b sticky top-0 bg-white z-10 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
+      <div className="p-5 border-b sticky top-0 bg-white z-10 shadow-sm">
+        <h2 className="text-xl font-semibold mb-5">客戶列表</h2>
         
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-5">
           <div className="flex-1">
             <Input 
               placeholder="搜尋客戶名稱或統編..." 
@@ -72,7 +72,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-10 text-gray-500">
             未找到客戶
           </div>
         )}
