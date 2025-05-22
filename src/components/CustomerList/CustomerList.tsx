@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CustomerListItem, Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 type CustomerListProps = {
   customers: Customer[];
@@ -18,20 +19,21 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   
   const filteredCustomers = customers.filter(customer => {
     const matchesStatus = statusFilter === "all" || customer.status === statusFilter;
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         (customer.taxId && customer.taxId.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return matchesStatus && matchesSearch;
   });
   
   return (
-    <div className="w-full max-w-md border-r">
-      <div className="p-4 border-b sticky top-0 bg-white z-10">
-        <h2 className="text-lg font-medium mb-4">客戶列表</h2>
+    <div className="w-full max-w-md border-r h-screen overflow-hidden flex flex-col">
+      <div className="p-4 border-b sticky top-0 bg-white z-10 shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         
         <div className="flex gap-2 mb-4">
           <div className="flex-1">
             <Input 
-              placeholder="搜尋客戶..." 
+              placeholder="搜尋客戶名稱或統編..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
@@ -39,7 +41,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-32 shrink-0">
               <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
@@ -52,23 +54,23 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
         </div>
         
         <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={onAddCustomer}>
-          <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <PlusCircle className="w-4 h-4 mr-2" />
           新增客戶
         </Button>
       </div>
       
-      <div className="p-4">
+      <div className="flex-1 overflow-y-auto">
         {filteredCustomers.length > 0 ? (
-          filteredCustomers.map((customer) => (
-            <CustomerListItem
-              key={customer.id}
-              customer={customer}
-              isSelected={customer.id === selectedCustomerId}
-              onClick={() => onSelectCustomer(customer)}
-            />
-          ))
+          <div className="divide-y divide-gray-100">
+            {filteredCustomers.map((customer) => (
+              <CustomerListItem
+                key={customer.id}
+                customer={customer}
+                isSelected={customer.id === selectedCustomerId}
+                onClick={() => onSelectCustomer(customer)}
+              />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
             未找到客戶
