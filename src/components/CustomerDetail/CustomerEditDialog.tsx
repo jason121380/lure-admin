@@ -41,6 +41,7 @@ export function CustomerEditDialog({
       address: "",
       contact: "",
       notes: "",
+      taxId: "",
     }
   );
   
@@ -166,6 +167,16 @@ export function CustomerEditDialog({
                 placeholder="電話號碼"
               />
             </div>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="taxId">統一編號</Label>
+            <Input
+              id="taxId"
+              value={formData.taxId}
+              onChange={(e) => handleChange("taxId", e.target.value)}
+              placeholder="請輸入統一編號"
+            />
           </div>
           
           <div className="grid gap-2">

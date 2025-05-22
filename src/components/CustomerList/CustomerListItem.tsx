@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export type Customer = {
   id: string;
@@ -43,12 +44,17 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
       className={`w-full justify-start px-4 py-2 gap-3 font-normal rounded-none border-b hover:bg-slate-100 ${isSelected ? 'bg-slate-100' : ''}`}
       onClick={onClick}
     >
-      <div className="flex justify-between items-center w-full">
-        <span className="font-medium">{customer.name}</span>
-        <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-          {customer.status === "active" ? "進行中" : 
-           customer.status === "paused" ? "暫停" : "不活躍"}
-        </span>
+      <div className="flex flex-col items-start w-full">
+        <div className="flex justify-between items-center w-full">
+          <span className="font-medium">{customer.name}</span>
+          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+            {customer.status === "active" ? "進行中" : 
+             customer.status === "paused" ? "暫停" : "不活躍"}
+          </span>
+        </div>
+        <div className="mt-1">
+          <Badge variant="secondary" className="text-xs">{customer.departmentName}</Badge>
+        </div>
       </div>
     </Button>
   );

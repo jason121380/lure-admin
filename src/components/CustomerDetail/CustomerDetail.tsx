@@ -110,20 +110,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="mb-4 grid grid-cols-5 w-full">
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
-          <div className="relative flex items-center">
-            <TabsTrigger value="services" className="w-full">
-              服務方案
-            </TabsTrigger>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-1 h-5 w-5"
-              onClick={() => setIsServicePlanOpen(true)}
-            >
-              <Plus className="h-3 w-3" />
-              <span className="sr-only">新增服務方案</span>
-            </Button>
-          </div>
+          <TabsTrigger value="services">服務方案</TabsTrigger>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
           <TabsTrigger value="advertising">廣告成本</TabsTrigger>
           <TabsTrigger value="profit">利潤計算</TabsTrigger>
@@ -195,7 +182,16 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           </div>
         </TabsContent>
         
-        <TabsContent value="services">
+        <TabsContent value="services" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="absolute right-3 top-3 z-10"
+            onClick={() => setIsServicePlanOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">新增服務方案</span>
+          </Button>
           <div className="p-12 text-center text-gray-500 border rounded-md">
             服務方案資訊將顯示於此
           </div>
