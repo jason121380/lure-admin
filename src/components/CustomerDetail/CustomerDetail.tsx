@@ -3,6 +3,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer } from "../CustomerList/CustomerListItem";
+import { Plus, MoreHorizontal } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 type CustomerDetailProps = {
   customer: Customer | null;
@@ -10,7 +25,40 @@ type CustomerDetailProps = {
   onDeleteCustomer: (customerId: string) => void;
 };
 
+type ServicePlanItem = {
+  id: string;
+  name: string;
+  price: number;
+};
+
+const serviceItems = [
+  { id: 'website', name: '網站設計' },
+  { id: 'seo', name: 'SEO 優化' },
+  { id: 'social', name: '社群媒體管理' },
+  { id: 'advertising', name: '數位廣告投放' },
+  { id: 'content', name: '內容行銷' },
+  { id: 'email', name: '電子郵件行銷' },
+];
+
 export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
+  const [isServicePlanOpen, setIsServicePlanOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(serviceItems[0].id);
+  const [servicePrice, setServicePrice] = useState('');
+
+  const handleAddServicePlan = () => {
+    if (selectedService && servicePrice) {
+      // In a real application, you would add this to the customer's service plans
+      console.log('Adding service plan:', {
+        service: selectedService,
+        price: servicePrice
+      });
+      
+      setIsServicePlanOpen(false);
+      setSelectedService(serviceItems[0].id);
+      setServicePrice('');
+    }
+  };
+
   if (!customer) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -38,23 +86,44 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
             編輯資訊
           </Button>
           
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-            onClick={() => onDeleteCustomer(customer.id)}
-          >
-            <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-            </svg>
-            刪除客戶
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                className="text-red-600 cursor-pointer"
+                onClick={() => onDeleteCustomer(customer.id)}
+              >
+                <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+                刪除客戶
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="mb-4 grid grid-cols-5 w-full">
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
-          <TabsTrigger value="services">服務與任務</TabsTrigger>
+          <div className="relative flex items-center">
+            <TabsTrigger value="services" className="w-full">
+              服務方案
+            </TabsTrigger>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-1 h-5 w-5"
+              onClick={() => setIsServicePlanOpen(true)}
+            >
+              <Plus className="h-3 w-3" />
+              <span className="sr-only">新增服務方案</span>
+            </Button>
+          </div>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
           <TabsTrigger value="advertising">廣告成本</TabsTrigger>
           <TabsTrigger value="profit">利潤計算</TabsTrigger>
@@ -64,8 +133,8 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm text-gray-500 block">部門</label>
-                <div>{customer.departmentName}</div>
+                <label className="text-sm text-gray-500 block">客戶名稱</label>
+                <div>{customer.name}</div>
               </div>
               
               <div>
@@ -76,6 +145,11 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
               <div>
                 <label className="text-sm text-gray-500 block">電子郵件</label>
                 <div>{customer.email || "-"}</div>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500 block">地址</label>
+                <div>{customer.address || "-"}</div>
               </div>
               
               <div>
@@ -102,8 +176,13 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
               </div>
               
               <div>
-                <label className="text-sm text-gray-500 block">地址</label>
-                <div>{customer.address || "-"}</div>
+                <label className="text-sm text-gray-500 block">部門</label>
+                <div>{customer.departmentName}</div>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500 block">統一編號</label>
+                <div>{customer.taxId || "-"}</div>
               </div>
             </div>
           </div>
@@ -118,7 +197,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
         
         <TabsContent value="services">
           <div className="p-12 text-center text-gray-500 border rounded-md">
-            服務與任務資訊將顯示於此
+            服務方案資訊將顯示於此
           </div>
         </TabsContent>
         
@@ -140,6 +219,49 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Add Service Plan Dialog */}
+      <Dialog open={isServicePlanOpen} onOpenChange={setIsServicePlanOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>新增服務方案</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">服務項目</label>
+              <select 
+                className="w-full border border-gray-300 rounded-md p-2"
+                value={selectedService}
+                onChange={(e) => setSelectedService(e.target.value)}
+              >
+                {serviceItems.map(item => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">價格</label>
+              <Input 
+                placeholder="請輸入價格"
+                type="number"
+                value={servicePrice}
+                onChange={(e) => setServicePrice(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsServicePlanOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleAddServicePlan}>
+              新增
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,16 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type DepartmentType = {
   id: string;
@@ -18,14 +28,25 @@ type DepartmentType = {
   color?: string;
 };
 
-const departments: DepartmentType[] = [
+const initialDepartments: DepartmentType[] = [
   { id: 'all', name: '所有部門' },
-  { id: 'internal', name: '內部開發', color: 'bg-blue-500' },
-  { id: 'external', name: '外部開發', color: 'bg-blue-500' },
-  { id: 'digital', name: '數位行銷', color: 'bg-blue-500' },
+  { id: 'external', name: '發展 對外', color: 'bg-blue-500' },
+  { id: 'internal', name: '發展 對內', color: 'bg-green-500' },
+  { id: 'digital', name: '數位行銷', color: 'bg-purple-500' },
   { id: 'alfred', name: 'Alfred', color: 'bg-red-500' },
   { id: 'jason', name: 'Jason', color: 'bg-cyan-500' },
   { id: 'uncategorized', name: '未分類', color: 'bg-gray-400' }
+];
+
+const colorOptions = [
+  { name: '藍色', value: 'bg-blue-500' },
+  { name: '綠色', value: 'bg-green-500' },
+  { name: '紅色', value: 'bg-red-500' },
+  { name: '紫色', value: 'bg-purple-500' },
+  { name: '青色', value: 'bg-cyan-500' },
+  { name: '橙色', value: 'bg-orange-500' },
+  { name: '粉色', value: 'bg-pink-500' },
+  { name: '灰色', value: 'bg-gray-500' },
 ];
 
 type SidebarProps = {
@@ -36,19 +57,57 @@ type SidebarProps = {
 export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps) {
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
-  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(departments);
+  const [newDepartmentColor, setNewDepartmentColor] = useState('bg-blue-500');
+  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments);
+  
+  // For delete confirmation
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [departmentToDelete, setDepartmentToDelete] = useState<DepartmentType | null>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
 
   const handleAddDepartment = () => {
     if (newDepartmentName.trim()) {
       const newDepartment: DepartmentType = {
         id: newDepartmentName.toLowerCase().replace(/\s+/g, '-'),
         name: newDepartmentName,
-        color: 'bg-blue-500'
+        color: newDepartmentColor
       };
       
       setDepartmentsList([...departmentsList, newDepartment]);
       setNewDepartmentName('');
       setIsAddDepartmentOpen(false);
+      setNewDepartmentColor('bg-blue-500');
+    }
+  };
+  
+  const handleDeleteClick = (e: React.MouseEvent, dept: DepartmentType) => {
+    e.stopPropagation(); // Prevent triggering department selection
+    if (dept.id === 'all' || dept.id === 'uncategorized') {
+      return; // Don't allow deleting default departments
+    }
+    setDepartmentToDelete(dept);
+    setIsDeleteDialogOpen(true);
+    setDeletePassword('');
+    setPasswordError(false);
+  };
+  
+  const handleConfirmDelete = () => {
+    if (deletePassword === '1234') {
+      if (departmentToDelete) {
+        const updatedDepartments = departmentsList.filter(dept => dept.id !== departmentToDelete.id);
+        setDepartmentsList(updatedDepartments);
+        
+        // If deleted department was active, reset to "all"
+        if (activeDepartment === departmentToDelete.id) {
+          setActiveDepartment('all');
+        }
+      }
+      setIsDeleteDialogOpen(false);
+      setDeletePassword('');
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
     }
   };
 
@@ -92,40 +151,76 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
           </div>
           
           {departmentsList.map((dept) => (
-            <Button 
-              key={dept.id}
-              variant="ghost" 
-              className={cn(
-                "w-full justify-start px-4 gap-3 font-normal",
-                activeDepartment === dept.id && "bg-slate-100"
+            <div key={dept.id} className="relative group">
+              <Button 
+                variant="ghost" 
+                className={cn(
+                  "w-full justify-start px-4 gap-3 font-normal",
+                  activeDepartment === dept.id && "bg-slate-100"
+                )}
+                onClick={() => setActiveDepartment(dept.id)}
+              >
+                {dept.color ? (
+                  <span className={`inline-block w-2 h-2 rounded-full ${dept.color}`}></span>
+                ) : (
+                  <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                  </svg>
+                )}
+                {dept.name}
+              </Button>
+              
+              {/* Delete button - only show for non-default departments */}
+              {dept.id !== 'all' && dept.id !== 'uncategorized' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleDeleteClick(e, dept)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               )}
-              onClick={() => setActiveDepartment(dept.id)}
-            >
-              {dept.color ? (
-                <span className={`inline-block w-2 h-2 rounded-full ${dept.color}`}></span>
-              ) : (
-                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                </svg>
-              )}
-              {dept.name}
-            </Button>
+            </div>
           ))}
         </div>
       </div>
       
+      {/* Add Department Dialog */}
       <Dialog open={isAddDepartmentOpen} onOpenChange={setIsAddDepartmentOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>新增部門</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <Input 
-              placeholder="部門名稱"
-              value={newDepartmentName}
-              onChange={(e) => setNewDepartmentName(e.target.value)}
-            />
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">部門名稱</label>
+              <Input 
+                placeholder="部門名稱"
+                value={newDepartmentName}
+                onChange={(e) => setNewDepartmentName(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">選擇顏色</label>
+              <div className="grid grid-cols-4 gap-2">
+                {colorOptions.map((color) => (
+                  <button
+                    key={color.value}
+                    className={cn(
+                      "h-8 rounded-md border transition-all",
+                      newDepartmentColor === color.value ? "ring-2 ring-offset-1 ring-primary" : ""
+                    )}
+                    onClick={() => setNewDepartmentColor(color.value)}
+                  >
+                    <span className={`block h-full w-full rounded-[4px] ${color.value}`} title={color.name}></span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDepartmentOpen(false)}>
               取消
@@ -136,6 +231,47 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Delete Department Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認刪除部門</AlertDialogTitle>
+            <AlertDialogDescription>
+              您確定要刪除「{departmentToDelete?.name}」部門嗎？
+              <div className="mt-4">
+                <label className="text-sm text-gray-500 block mb-2">
+                  請輸入密碼「1234」進行確認
+                </label>
+                <Input
+                  type="password"
+                  placeholder="請輸入密碼"
+                  value={deletePassword}
+                  onChange={(e) => {
+                    setDeletePassword(e.target.value);
+                    setPasswordError(false);
+                  }}
+                  className={cn(passwordError && "border-red-500")}
+                />
+                {passwordError && (
+                  <p className="text-sm text-red-500 mt-1">密碼錯誤</p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeletePassword('');
+              setPasswordError(false);
+            }}>
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              刪除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
