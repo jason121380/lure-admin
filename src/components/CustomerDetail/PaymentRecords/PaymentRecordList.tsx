@@ -185,6 +185,36 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     }
   };
 
+  const handleDeletePaymentRecord = async (recordId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_records')
+        .delete()
+        .eq('id', recordId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPaymentRecords(paymentRecords.filter(record => record.id !== recordId));
+      
+      setEditingPaymentRecord(null);
+      setIsPaymentRecordOpen(false);
+      
+      toast({
+        title: "付款記錄已刪除",
+        description: "付款記錄已成功刪除"
+      });
+      
+    } catch (error) {
+      console.error('Error deleting payment record:', error);
+      toast({
+        title: "刪除付款記錄失敗",
+        description: "請稍後再試",
+        variant: "destructive"
+      });
+    }
+  };
+
   // 獲取支付方式名稱
   const getPaymentMethodName = (methodId: string) => {
     const method = paymentMethods.find(m => m.id === methodId);
@@ -283,8 +313,8 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
         paymentRecord={editingPaymentRecord}
         onAddPaymentRecord={handleAddPaymentRecord}
         onUpdatePaymentRecord={handleUpdatePaymentRecord}
+        onDeletePaymentRecord={handleDeletePaymentRecord}
       />
     </div>
   );
 };
-
