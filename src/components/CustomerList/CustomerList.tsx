@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Customer } from './CustomerListItem';
@@ -21,7 +21,9 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 type CustomerListProps = {
   customers: Customer[];
@@ -30,11 +32,54 @@ type CustomerListProps = {
   onAddCustomer: () => void;
 };
 
-export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, onAddCustomer }: CustomerListProps) {
+export function CustomerList({ customers: initialCustomers, selectedCustomerId, onSelectCustomer, onAddCustomer }: CustomerListProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  
+  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('customers')
+          .select('*');
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Transform Supabase data to match our Customer type
+        const transformedData: Customer[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          department: item.department,
+          departmentName: item.department_name,
+          status: item.status,
+          email: item.email || undefined,
+          phone: item.phone || undefined,
+          address: item.address || undefined,
+          contact: item.contact || undefined,
+          createdAt: item.created_at,
+          notes: item.notes || undefined,
+          taxId: item.tax_id || undefined,
+        }));
+        
+        setCustomers(transformedData);
+      } catch (error) {
+        toast.error("無法載入客戶資料");
+        console.error("Error fetching customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchCustomers();
+  }, []);
   
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {
@@ -115,7 +160,15 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
       </div>
       
       <div className="flex-1 overflow-y-auto">
-        {filteredCustomers.length > 0 ? (
+        {loading ? (
+          <div className="p-4 space-y-4">
+            {Array(5).fill(0).map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : filteredCustomers.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>

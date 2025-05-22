@@ -1,9 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
 import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
+import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type IndexProps = {
   sidebarVisible: boolean;
@@ -11,51 +15,148 @@ type IndexProps = {
 };
 
 const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
+  const { user } = useAuth();
   const [activeDepartment, setActiveDepartment] = useState("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   
-  // Mock customers data for demonstration
-  const mockCustomers: Customer[] = [
-    {
-      id: "1",
-      name: "台北科技股份有限公司",
-      department: "tech",
-      departmentName: "科技部門",
-      status: "active",
-      email: "info@taipeitech.com",
-      phone: "02-1234-5678",
-      address: "台北市信義區松高路123號",
-      contact: "張先生",
-      createdAt: new Date().toISOString(),
-      notes: "重要客戶，優先處理",
-      taxId: "12345678"
-    },
-    {
-      id: "2",
-      name: "高雄物流有限公司",
-      department: "logistics",
-      departmentName: "物流部門",
-      status: "paused",
-      createdAt: new Date().toISOString()
+  // Fetch customers on initial load
+  useEffect(() => {
+    if (user) {
+      fetchCustomers();
     }
-  ];
+  }, [user, activeDepartment]);
+  
+  const fetchCustomers = async () => {
+    try {
+      let query = supabase.from('customers').select('*');
+      
+      // Filter by department if not showing all
+      if (activeDepartment !== 'all') {
+        query = query.eq('department', activeDepartment);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Transform Supabase data to match our Customer type
+      const transformedData: Customer[] = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        department: item.department,
+        departmentName: item.department_name,
+        status: item.status,
+        email: item.email || undefined,
+        phone: item.phone || undefined,
+        address: item.address || undefined,
+        contact: item.contact || undefined,
+        createdAt: item.created_at,
+        notes: item.notes || undefined,
+        taxId: item.tax_id || undefined,
+      }));
+      
+      setCustomers(transformedData);
+      
+      // Reset selection if the customer no longer exists in the list
+      if (selectedCustomerId && !transformedData.some(c => c.id === selectedCustomerId)) {
+        setSelectedCustomerId(null);
+        setSelectedCustomer(null);
+      }
+    } catch (error) {
+      toast.error("無法載入客戶資料");
+      console.error("Error fetching customers:", error);
+    }
+  };
   
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomerId(customer.id);
     setSelectedCustomer(customer);
   };
   
-  const handleDeleteCustomer = (customerId: string) => {
-    // Mock implementation for demonstration
-    console.log(`Delete customer with ID: ${customerId}`);
-    setSelectedCustomerId(null);
-    setSelectedCustomer(null);
+  const handleAddCustomer = () => {
+    setEditingCustomer(undefined);
+    setIsAddEditDialogOpen(true);
   };
   
   const handleEditCustomer = (customer: Customer) => {
-    // Mock implementation for demonstration
-    console.log(`Edit customer:`, customer);
+    setEditingCustomer(customer);
+    setIsAddEditDialogOpen(true);
+  };
+  
+  const handleDeleteCustomer = async (customerId: string) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', customerId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("已成功刪除客戶");
+      setSelectedCustomerId(null);
+      setSelectedCustomer(null);
+      fetchCustomers();
+    } catch (error) {
+      toast.error("刪除客戶時發生錯誤");
+      console.error("Error deleting customer:", error);
+    }
+  };
+  
+  const handleSaveCustomer = async (customerData: Partial<Customer>) => {
+    try {
+      // Transform data for Supabase
+      const supabaseCustomerData = {
+        name: customerData.name,
+        department: customerData.department,
+        department_name: customerData.departmentName,
+        status: customerData.status,
+        email: customerData.email || null,
+        phone: customerData.phone || null,
+        address: customerData.address || null,
+        contact: customerData.contact || null,
+        notes: customerData.notes || null,
+        tax_id: customerData.taxId || null,
+        user_id: user?.id,
+      };
+      
+      if (editingCustomer) {
+        // Update existing customer
+        const { error } = await supabase
+          .from('customers')
+          .update(supabaseCustomerData)
+          .eq('id', editingCustomer.id);
+        
+        if (error) throw error;
+        toast.success("客戶資料已更新");
+      } else {
+        // Create new customer
+        const { data, error } = await supabase
+          .from('customers')
+          .insert(supabaseCustomerData)
+          .select();
+        
+        if (error) throw error;
+        toast.success("已新增客戶");
+        
+        if (data && data.length > 0) {
+          setSelectedCustomerId(data[0].id);
+          fetchCustomers();
+        }
+      }
+      
+      fetchCustomers();
+    } catch (error) {
+      toast.error(editingCustomer ? "更新客戶資料失敗" : "新增客戶失敗");
+      console.error("Error saving customer:", error);
+    }
   };
 
   return (
@@ -69,10 +170,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         <div className="w-full md:w-1/3 border-r border-gray-200 bg-white">
           <CustomerList 
-            customers={mockCustomers} 
+            customers={customers} 
             selectedCustomerId={selectedCustomerId}
             onSelectCustomer={handleSelectCustomer}
-            onAddCustomer={() => console.log("Add customer clicked")}
+            onAddCustomer={handleAddCustomer}
           />
         </div>
         
@@ -97,6 +198,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           )}
         </div>
       </div>
+      
+      <CustomerEditDialog
+        customer={editingCustomer}
+        open={isAddEditDialogOpen}
+        onOpenChange={setIsAddEditDialogOpen}
+        onSave={handleSaveCustomer}
+      />
     </div>
   );
 };
