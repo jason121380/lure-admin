@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,44 +42,9 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    async function fetchCustomers() {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('customers')
-          .select('*');
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Transform Supabase data to match our Customer type
-        const transformedData: Customer[] = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          department: item.department,
-          departmentName: item.department_name,
-          status: item.status, // Now matches string type in Customer
-          email: item.email || undefined,
-          phone: item.phone || undefined,
-          address: item.address || undefined,
-          contact: item.contact || undefined,
-          createdAt: item.created_at,
-          notes: item.notes || undefined,
-          taxId: item.tax_id || undefined,
-        }));
-        
-        setCustomers(transformedData);
-      } catch (error) {
-        toast.error("無法載入客戶資料");
-        console.error("Error fetching customers:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    fetchCustomers();
-  }, []);
+    setCustomers(initialCustomers);
+    setLoading(false);
+  }, [initialCustomers]);
   
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {

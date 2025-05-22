@@ -51,7 +51,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         name: item.name,
         department: item.department,
         departmentName: item.department_name,
-        status: item.status, // Now matches string type in Customer
+        status: item.status,
         email: item.email || undefined,
         phone: item.phone || undefined,
         address: item.address || undefined,
@@ -153,6 +153,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       }
       
       fetchCustomers();
+      setIsAddEditDialogOpen(false);
     } catch (error) {
       toast.error(editingCustomer ? "更新客戶資料失敗" : "新增客戶失敗");
       console.error("Error saving customer:", error);

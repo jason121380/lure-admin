@@ -93,16 +93,35 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   }, [user]);
 
-  const handleAddDepartment = () => {
+  const handleAddDepartment = async () => {
     if (newDepartmentName.trim()) {
+      const newDepartmentId = newDepartmentName.toLowerCase().replace(/\s+/g, '-');
+      
+      // First check if this department already exists
+      const existingDept = departmentsList.find(dept => dept.id === newDepartmentId);
+      if (existingDept) {
+        toast({
+          title: "部門已存在",
+          description: `${newDepartmentName} 部門已存在`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const newDepartment: DepartmentType = {
-        id: newDepartmentName.toLowerCase().replace(/\s+/g, '-'),
+        id: newDepartmentId,
         name: newDepartmentName,
       };
       
+      // Add the new department to the local state
       setDepartmentsList([...departmentsList, newDepartment]);
       setNewDepartmentName('');
       setIsAddDepartmentOpen(false);
+      
+      toast({
+        title: "部門已新增",
+        description: `${newDepartmentName} 部門已成功新增`,
+      });
     }
   };
   
@@ -117,15 +136,42 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     setPasswordError(false);
   };
   
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletePassword === '1234') {
       if (departmentToDelete) {
-        const updatedDepartments = departmentsList.filter(dept => dept.id !== departmentToDelete.id);
-        setDepartmentsList(updatedDepartments);
-        
-        // If deleted department was active, reset to "all"
-        if (activeDepartment === departmentToDelete.id) {
-          setActiveDepartment('all');
+        // First move all customers from this department to "uncategorized"
+        try {
+          // Update customers in Supabase
+          const { error } = await supabase
+            .from('customers')
+            .update({ 
+              department: 'uncategorized',
+              department_name: '未分類'
+            })
+            .eq('department', departmentToDelete.id);
+            
+          if (error) throw error;
+          
+          // Remove the department from local state
+          const updatedDepartments = departmentsList.filter(dept => dept.id !== departmentToDelete.id);
+          setDepartmentsList(updatedDepartments);
+          
+          // If deleted department was active, reset to "all"
+          if (activeDepartment === departmentToDelete.id) {
+            setActiveDepartment('all');
+          }
+          
+          toast({
+            title: "部門已刪除",
+            description: `${departmentToDelete.name} 部門已成功刪除`
+          });
+        } catch (error) {
+          console.error("Error deleting department:", error);
+          toast({
+            title: "刪除部門失敗",
+            description: "無法刪除部門，請稍後再試",
+            variant: "destructive"
+          });
         }
       }
       setIsDeleteDialogOpen(false);
@@ -242,9 +288,9 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             variant="ghost" 
             className={cn(
               "w-full justify-start px-4 gap-3 font-normal",
-              activeDepartment === 'all-customers' && "bg-slate-100"
+              activeDepartment === 'all' && "bg-slate-100"
             )}
-            onClick={() => setActiveDepartment('all-customers')}
+            onClick={() => setActiveDepartment('all')}
           >
             <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
@@ -267,7 +313,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             </Button>
           </div>
           
-          {departmentsList.map((dept) => (
+          {departmentsList.filter(dept => dept.id !== 'all').map((dept) => (
             <div key={dept.id} className="relative group">
               <Button 
                 variant="ghost" 
