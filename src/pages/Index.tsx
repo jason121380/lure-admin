@@ -21,20 +21,22 @@ const initialCustomers: Customer[] = [
     address: "花園城市花街123號",
     contact: "張小姐",
     createdAt: "2023-05-15",
-    notes: "定期月度服務合約"
+    notes: "定期月度服務合約",
+    taxId: "12345678"
   },
   {
     id: "2",
     name: "科技先鋒有限公司",
     department: "internal",
-    departmentName: "內部開發",
+    departmentName: "發展 對內",
     status: "paused",
     email: "info@techpioneer.com",
     phone: "987-654-3210",
     address: "創新區科技大道456號",
     contact: "王先生",
     createdAt: "2023-04-20",
-    notes: "專案暫停 - 等待預算批准"
+    notes: "專案暫停 - 等待預算批准",
+    taxId: "87654321"
   },
   {
     id: "3",
@@ -46,7 +48,8 @@ const initialCustomers: Customer[] = [
     phone: "555-123-4567",
     address: "媒體城市行銷大道789號",
     contact: "李小姐",
-    createdAt: "2023-06-10"
+    createdAt: "2023-06-10",
+    taxId: "23456789"
   }
 ];
 

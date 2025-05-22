@@ -18,6 +18,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 type CustomerDetailProps = {
   customer: Customer | null;
@@ -32,30 +40,37 @@ type ServicePlanItem = {
 };
 
 const serviceItems = [
-  { id: 'website', name: '網站設計' },
-  { id: 'seo', name: 'SEO 優化' },
-  { id: 'social', name: '社群媒體管理' },
-  { id: 'advertising', name: '數位廣告投放' },
-  { id: 'content', name: '內容行銷' },
-  { id: 'email', name: '電子郵件行銷' },
+  { id: '1v1', name: '1v1 輔導' },
+  { id: 'social', name: '社群代操' },
+  { id: 'advert', name: '廣告監測及回報' },
+  { id: 'custom', name: '客製化店家方案' },
+  { id: 'special', name: '特別專案' },
+  { id: 'video', name: '影音拍攝' },
+  { id: 'bos', name: 'BOS系統' },
 ];
 
 export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
   const [isServicePlanOpen, setIsServicePlanOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(serviceItems[0].id);
   const [servicePrice, setServicePrice] = useState('');
+  const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
 
   const handleAddServicePlan = () => {
     if (selectedService && servicePrice) {
-      // In a real application, you would add this to the customer's service plans
-      console.log('Adding service plan:', {
-        service: selectedService,
-        price: servicePrice
-      });
+      const selectedServiceItem = serviceItems.find(item => item.id === selectedService);
       
-      setIsServicePlanOpen(false);
-      setSelectedService(serviceItems[0].id);
-      setServicePrice('');
+      if (selectedServiceItem) {
+        const newServicePlan: ServicePlanItem = {
+          id: `${Date.now()}`,
+          name: selectedServiceItem.name,
+          price: Number(servicePrice)
+        };
+        
+        setServicePlans([...servicePlans, newServicePlan]);
+        setIsServicePlanOpen(false);
+        setSelectedService(serviceItems[0].id);
+        setServicePrice('');
+      }
     }
   };
 
@@ -192,9 +207,31 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
             <Plus className="h-4 w-4" />
             <span className="sr-only">新增服務方案</span>
           </Button>
-          <div className="p-12 text-center text-gray-500 border rounded-md">
-            服務方案資訊將顯示於此
-          </div>
+          
+          {servicePlans.length > 0 ? (
+            <div className="p-4 border rounded-md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>服務項目</TableHead>
+                    <TableHead className="text-right">價格</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {servicePlans.map((plan) => (
+                    <TableRow key={plan.id}>
+                      <TableCell>{plan.name}</TableCell>
+                      <TableCell className="text-right">{plan.price.toLocaleString()} 元</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-12 text-center text-gray-500 border rounded-md">
+              服務方案資訊將顯示於此
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="payments">
