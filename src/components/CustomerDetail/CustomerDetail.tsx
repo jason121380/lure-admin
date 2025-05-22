@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer } from "../CustomerList/CustomerListItem";
-import { Plus, MoreHorizontal, Text } from "lucide-react";
+import { Plus, MoreHorizontal, Text, Calendar, Receipt, CreditCard, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +26,22 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { format } from "date-fns";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 type CustomerDetailProps = {
   customer: Customer | null;
@@ -41,6 +56,18 @@ type ServicePlanItem = {
   price: number;
 };
 
+// Define the Payment Record type
+type PaymentRecord = {
+  id: string;
+  date: string;
+  paymentMethod: string;
+  account: string;
+  amount: number;
+  invoiceNumber: string;
+  total: number;
+  isConfirmed: boolean;
+};
+
 const serviceItems = [
   { id: '1v1', name: '1v1 輔導' },
   { id: 'social', name: '社群代操' },
@@ -51,12 +78,29 @@ const serviceItems = [
   { id: 'bos', name: 'BOS系統' },
 ];
 
+const paymentMethods = [
+  { id: 'bank', name: '銀行轉帳' },
+  { id: 'cash', name: '現金' },
+  { id: 'credit', name: '信用卡' },
+  { id: 'line', name: 'Line Pay' },
+];
+
 export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
   const [isServicePlanOpen, setIsServicePlanOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(serviceItems[0].id);
   const [servicePrice, setServicePrice] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
+  
+  // Payment records state and dialog state
+  const [isPaymentRecordOpen, setIsPaymentRecordOpen] = useState(false);
+  const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
+  const [paymentDate, setPaymentDate] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0].id);
+  const [paymentAccount, setPaymentAccount] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [paymentConfirmed, setPaymentConfirmed] = useState(true);
 
   const handleAddServicePlan = () => {
     if (selectedService && servicePrice) {
@@ -77,6 +121,38 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
         setServiceDescription('');
       }
     }
+  };
+  
+  // Handle adding a new payment record
+  const handleAddPaymentRecord = () => {
+    if (paymentAmount) {
+      const amount = Number(paymentAmount);
+      
+      const newPaymentRecord: PaymentRecord = {
+        id: `${Date.now()}`,
+        date: paymentDate || format(new Date(), 'yyyy-MM-dd'),
+        paymentMethod: paymentMethods.find(item => item.id === paymentMethod)?.name || '銀行轉帳',
+        account: paymentAccount,
+        amount: amount,
+        invoiceNumber: invoiceNumber,
+        total: amount, // For simplicity, total equals amount
+        isConfirmed: paymentConfirmed,
+      };
+      
+      setPaymentRecords([...paymentRecords, newPaymentRecord]);
+      setIsPaymentRecordOpen(false);
+      resetPaymentForm();
+    }
+  };
+  
+  // Reset payment form fields
+  const resetPaymentForm = () => {
+    setPaymentDate('');
+    setPaymentMethod(paymentMethods[0].id);
+    setPaymentAccount('');
+    setPaymentAmount('');
+    setInvoiceNumber('');
+    setPaymentConfirmed(true);
   };
 
   if (!customer) {
@@ -241,10 +317,61 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           )}
         </TabsContent>
         
-        <TabsContent value="payments">
-          <div className="p-12 text-center text-gray-500 border rounded-md">
-            付款記錄將顯示於此
-          </div>
+        <TabsContent value="payments" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="absolute right-3 top-3 z-10"
+            onClick={() => setIsPaymentRecordOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">新增付款記錄</span>
+          </Button>
+          
+          {paymentRecords.length > 0 ? (
+            <div className="p-4 border rounded-md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>日期</TableHead>
+                    <TableHead>支付方式</TableHead>
+                    <TableHead>帳戶</TableHead>
+                    <TableHead className="text-right">金額</TableHead>
+                    <TableHead>發票號碼</TableHead>
+                    <TableHead className="text-right">總額</TableHead>
+                    <TableHead className="text-center">確認收款</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paymentRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>{record.date}</TableCell>
+                      <TableCell>{record.paymentMethod}</TableCell>
+                      <TableCell>{record.account || "-"}</TableCell>
+                      <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
+                      <TableCell>{record.invoiceNumber || "-"}</TableCell>
+                      <TableCell className="text-right">{record.total.toLocaleString()} 元</TableCell>
+                      <TableCell className="text-center">
+                        {record.isConfirmed ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <Check className="h-3 w-3 mr-1" />已確認
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            未確認
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-12 text-center text-gray-500 border rounded-md">
+              付款記錄將顯示於此
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="advertising">
@@ -307,6 +434,87 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
               取消
             </Button>
             <Button onClick={handleAddServicePlan}>
+              新增
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Payment Record Dialog */}
+      <Dialog open={isPaymentRecordOpen} onOpenChange={setIsPaymentRecordOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>新增付款記錄</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">日期</label>
+              <Input 
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">支付方式</label>
+              <select 
+                className="w-full border border-gray-300 rounded-md p-2"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                {paymentMethods.map(item => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">帳戶</label>
+              <Input 
+                placeholder="請輸入帳戶資訊"
+                value={paymentAccount}
+                onChange={(e) => setPaymentAccount(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">金額</label>
+              <Input 
+                placeholder="請輸入金額"
+                type="number"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">發票號碼</label>
+              <Input 
+                placeholder="請輸入發票號碼"
+                value={invoiceNumber}
+                onChange={(e) => setInvoiceNumber(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="payment-confirmed"
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                checked={paymentConfirmed}
+                onChange={(e) => setPaymentConfirmed(e.target.checked)}
+              />
+              <label htmlFor="payment-confirmed" className="text-sm text-gray-700">確認收款</label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPaymentRecordOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleAddPaymentRecord}>
               新增
             </Button>
           </DialogFooter>
