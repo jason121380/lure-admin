@@ -159,12 +159,17 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
     <div className="flex h-screen w-full bg-gray-50">
       <Sidebar 
         activeDepartment={activeDepartment} 
         setActiveDepartment={setActiveDepartment} 
-        isVisible={sidebarVisible} 
+        isVisible={sidebarVisible}
+        toggleSidebar={toggleSidebar}
       />
       
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">

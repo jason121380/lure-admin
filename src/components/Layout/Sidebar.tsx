@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -50,15 +49,17 @@ type SidebarProps = {
   activeDepartment: string;
   setActiveDepartment: (id: string) => void;
   isVisible: boolean;
+  toggleSidebar?: () => void;
 };
 
-export function Sidebar({ activeDepartment, setActiveDepartment, isVisible }: SidebarProps) {
+export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments);
   const [userFullName, setUserFullName] = useState<string>('');
+  const [localIsVisible, setLocalIsVisible] = useState(isVisible);
   
   // For delete confirmation
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -71,6 +72,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible }: Si
   const [fullName, setFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+
+  // Sync local visibility state with prop
+  useEffect(() => {
+    setLocalIsVisible(isVisible);
+  }, [isVisible]);
 
   // Get user profile info
   useEffect(() => {
@@ -202,14 +208,31 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible }: Si
     return '?';
   };
 
+  const handleToggleSidebar = () => {
+    if (toggleSidebar) {
+      toggleSidebar();
+    } else {
+      setLocalIsVisible(!localIsVisible);
+    }
+  };
+
   return (
     <div className={cn(
       "w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
-      isVisible ? "translate-x-0" : "-translate-x-full",
+      localIsVisible ? "translate-x-0" : "-translate-x-full",
       "absolute md:relative z-30" // Ensure sidebar is above content on mobile
     )}>
-      <div className="p-6">
-        <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-12 w-auto" />
+      <div className="p-4 flex justify-between items-center border-b border-slate-200">
+        <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-8 w-auto" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:flex"
+          onClick={handleToggleSidebar}
+        >
+          <ChevronLeft className="h-5 w-5" />
+          <span className="sr-only">收起選單</span>
+        </Button>
       </div>
       
       <div className="flex-1 flex flex-col gap-6 px-2">
@@ -483,5 +506,20 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible }: Si
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// Add a SidebarToggle component for use outside of the sidebar
+export function SidebarToggle({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) {
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      className="fixed top-4 left-4 z-40 md:hidden"
+      onClick={onClick}
+    >
+      {isVisible ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      <span className="sr-only">{isVisible ? '收起選單' : '展開選單'}</span>
+    </Button>
   );
 }
