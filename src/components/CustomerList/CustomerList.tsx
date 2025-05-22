@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CustomerListItem, Customer } from './CustomerListItem';
+import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, SearchIcon, Table, List } from 'lucide-react';
+import { PlusCircle, SearchIcon } from 'lucide-react';
 import {
   Pagination,
   PaginationContent,
@@ -14,7 +14,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  Table as UITable,
+  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -33,7 +33,6 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<"list" | "table">("list");
   const itemsPerPage = 10;
   
   // Filter customers based on search and status
@@ -109,27 +108,6 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           </Select>
         </div>
         
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-2">
-            <Button 
-              variant={viewMode === "list" ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setViewMode("list")}
-            >
-              <List className="h-4 w-4" />
-              <span className="ml-1">列表</span>
-            </Button>
-            <Button 
-              variant={viewMode === "table" ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setViewMode("table")}
-            >
-              <Table className="h-4 w-4" />
-              <span className="ml-1">表格</span>
-            </Button>
-          </div>
-        </div>
-        
         <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={onAddCustomer}>
           <PlusCircle className="w-4 h-4 mr-2" />
           新增客戶
@@ -138,47 +116,34 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
       
       <div className="flex-1 overflow-y-auto">
         {filteredCustomers.length > 0 ? (
-          viewMode === "list" ? (
-            <div className="divide-y divide-gray-100">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>名稱</TableHead>
+                <TableHead>部門</TableHead>
+                <TableHead>狀態</TableHead>
+                <TableHead>統編</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {paginatedCustomers.map((customer) => (
-                <CustomerListItem
-                  key={customer.id}
-                  customer={customer}
-                  isSelected={customer.id === selectedCustomerId}
+                <TableRow 
+                  key={customer.id} 
+                  className={`cursor-pointer ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
                   onClick={() => onSelectCustomer(customer)}
-                />
-              ))}
-            </div>
-          ) : (
-            <UITable>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>名稱</TableHead>
-                  <TableHead>部門</TableHead>
-                  <TableHead>狀態</TableHead>
-                  <TableHead>統編</TableHead>
+                >
+                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell>{customer.departmentName}</TableCell>
+                  <TableCell>
+                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                      {getStatusText(customer.status)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-gray-500">{customer.taxId || '—'}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedCustomers.map((customer) => (
-                  <TableRow 
-                    key={customer.id} 
-                    className={`cursor-pointer ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
-                    onClick={() => onSelectCustomer(customer)}
-                  >
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>{customer.departmentName}</TableCell>
-                    <TableCell>
-                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                        {getStatusText(customer.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-xs text-gray-500">{customer.taxId || '—'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </UITable>
-          )
+              ))}
+            </TableBody>
+          </Table>
         ) : (
           <div className="text-center py-10 text-gray-500">
             未找到客戶
