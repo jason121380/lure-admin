@@ -2,6 +2,15 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 type DepartmentType = {
   id: string;
@@ -25,6 +34,24 @@ type SidebarProps = {
 };
 
 export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps) {
+  const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
+  const [newDepartmentName, setNewDepartmentName] = useState('');
+  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(departments);
+
+  const handleAddDepartment = () => {
+    if (newDepartmentName.trim()) {
+      const newDepartment: DepartmentType = {
+        id: newDepartmentName.toLowerCase().replace(/\s+/g, '-'),
+        name: newDepartmentName,
+        color: 'bg-blue-500'
+      };
+      
+      setDepartmentsList([...departmentsList, newDepartment]);
+      setNewDepartmentName('');
+      setIsAddDepartmentOpen(false);
+    }
+  };
+
   return (
     <div className="w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col">
       <div className="p-6">
@@ -51,8 +78,20 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
         </div>
         
         <div className="space-y-1">
-          <h2 className="text-sm font-medium px-4 py-2">部門</h2>
-          {departments.map((dept) => (
+          <div className="flex items-center justify-between px-4 py-2">
+            <h2 className="text-sm font-medium">部門</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-5 w-5"
+              onClick={() => setIsAddDepartmentOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="sr-only">新增部門</span>
+            </Button>
+          </div>
+          
+          {departmentsList.map((dept) => (
             <Button 
               key={dept.id}
               variant="ghost" 
@@ -74,6 +113,29 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
           ))}
         </div>
       </div>
+      
+      <Dialog open={isAddDepartmentOpen} onOpenChange={setIsAddDepartmentOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>新增部門</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input 
+              placeholder="部門名稱"
+              value={newDepartmentName}
+              onChange={(e) => setNewDepartmentName(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDepartmentOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleAddDepartment}>
+              新增
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
