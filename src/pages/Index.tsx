@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -165,15 +164,17 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar 
-        activeDepartment={activeDepartment} 
-        setActiveDepartment={setActiveDepartment} 
-        isVisible={isSidebarOpen}
-        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
+      {/* Department Sidebar */}
+      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+        <Sidebar 
+          activeDepartment={activeDepartment} 
+          setActiveDepartment={setActiveDepartment} 
+          isVisible={isSidebarOpen}
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </div>
       
-      {/* Toggle button */}
+      {/* Mobile menu button */}
       <Button 
         variant="ghost" 
         className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
@@ -183,10 +184,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         <span className="sr-only">開啟部門選單</span>
       </Button>
       
-      {/* Main content area - fixed layout to ensure both columns are visible */}
-      <div className="flex flex-1 h-full w-full overflow-hidden">
-        {/* Customer list panel - fixed width with scroll */}
-        <div className="w-full md:w-[40%] lg:w-[35%] h-full border-r border-gray-200 bg-white overflow-auto">
+      {/* Main content container */}
+      <div className="flex flex-1 h-full w-full">
+        {/* Customer List Panel */}
+        <div className="w-1/3 min-w-[300px] h-full border-r border-gray-200 bg-white overflow-y-auto">
           <CustomerList 
             customers={customers} 
             selectedCustomerId={selectedCustomerId}
@@ -195,8 +196,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           />
         </div>
         
-        {/* Customer detail panel */}
-        <div className="w-full md:w-[60%] lg:w-[65%] h-full bg-white overflow-auto">
+        {/* Customer Detail Panel */}
+        <div className="w-2/3 h-full bg-white overflow-y-auto">
           {selectedCustomer ? (
             <CustomerDetail 
               customer={selectedCustomer} 
