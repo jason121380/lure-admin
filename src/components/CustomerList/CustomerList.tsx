@@ -39,8 +39,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {
     const matchesStatus = statusFilter === "all" || customer.status === statusFilter;
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (customer.taxId && customer.taxId.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesStatus && matchesSearch;
   });
@@ -89,7 +88,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
           <div className="flex-1 relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
-              placeholder="搜尋客戶名稱或統編..." 
+              placeholder="搜尋客戶名稱..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9"
@@ -123,7 +122,6 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
                 <TableHead>名稱</TableHead>
                 <TableHead>部門</TableHead>
                 <TableHead>狀態</TableHead>
-                <TableHead>統編</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,7 +138,6 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer, 
                       {getStatusText(customer.status)}
                     </span>
                   </TableCell>
-                  <TableCell className="text-xs text-gray-500">{customer.taxId || '—'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
