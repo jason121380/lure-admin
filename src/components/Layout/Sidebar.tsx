@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -49,9 +49,10 @@ const initialDepartments: DepartmentType[] = [
 type SidebarProps = {
   activeDepartment: string;
   setActiveDepartment: (id: string) => void;
+  isVisible: boolean;
 };
 
-export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps) {
+export function Sidebar({ activeDepartment, setActiveDepartment, isVisible }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
@@ -202,10 +203,13 @@ export function Sidebar({ activeDepartment, setActiveDepartment }: SidebarProps)
   };
 
   return (
-    <div className="w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col">
+    <div className={cn(
+      "w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
+      isVisible ? "translate-x-0" : "-translate-x-full",
+      "absolute md:relative z-30" // Ensure sidebar is above content on mobile
+    )}>
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-indigo-600 tracking-tight">LURE</h1>
-        <div className="w-12 h-1 bg-indigo-600 mt-2"></div>
+        <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-12 w-auto" />
       </div>
       
       <div className="flex-1 flex flex-col gap-6 px-2">
