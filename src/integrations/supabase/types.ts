@@ -60,6 +60,30 @@ export type Database = {
         }
         Relationships: []
       }
+      departments: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_records: {
         Row: {
           account: string | null

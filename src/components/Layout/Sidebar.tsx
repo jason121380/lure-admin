@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,18 +33,9 @@ import { useToast } from "@/components/ui/use-toast";
 
 type DepartmentType = {
   id: string;
+  code: string;
   name: string;
 };
-
-const initialDepartments: DepartmentType[] = [
-  { id: 'all', name: '所有部門' },
-  { id: 'external', name: '發展 對外' },
-  { id: 'internal', name: '發展 對內' },
-  { id: 'digital', name: '數位行銷' },
-  { id: 'alfred', name: 'Alfred' },
-  { id: 'jason', name: 'Jason' },
-  { id: 'uncategorized', name: '未分類' }
-];
 
 type SidebarProps = {
   activeDepartment: string;
@@ -57,7 +49,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
-  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments);
+  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [userFullName, setUserFullName] = useState<string>('');
   const [localIsVisible, setLocalIsVisible] = useState(isVisible);
   
@@ -78,10 +71,12 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     setLocalIsVisible(isVisible);
   }, [isVisible]);
 
-  // Store departments in localStorage whenever they change
+  // Fetch departments from Supabase
   useEffect(() => {
-    localStorage.setItem('departmentsList', JSON.stringify(departmentsList));
-  }, [departmentsList]);
+    if (user) {
+      fetchDepartments();
+    }
+  }, [user]);
 
   // Get user profile info
   useEffect(() => {
@@ -98,12 +93,77 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   }, [user]);
 
+  const fetchDepartments = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Map database fields to our component structure
+        const departments: DepartmentType[] = data.map(dept => ({
+          id: dept.id,
+          code: dept.code,
+          name: dept.name
+        }));
+        
+        // Make sure 'all' is at the top
+        const allDept = departments.find(dept => dept.code === 'all');
+        const otherDepts = departments.filter(dept => dept.code !== 'all');
+        
+        setDepartmentsList(allDept ? [allDept, ...otherDepts] : departments);
+      } else {
+        // If no departments found, create default ones
+        await createDefaultDepartments();
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      toast({
+        title: "載入失敗",
+        description: "無法載入部門資料",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createDefaultDepartments = async () => {
+    try {
+      const defaultDepartments = [
+        { code: 'all', name: '所有部門' },
+        { code: 'external', name: '發展 對外' },
+        { code: 'internal', name: '發展 對內' },
+        { code: 'digital', name: '數位行銷' },
+        { code: 'alfred', name: 'Alfred' },
+        { code: 'jason', name: 'Jason' },
+        { code: 'uncategorized', name: '未分類' }
+      ];
+      
+      for (const dept of defaultDepartments) {
+        await supabase.from('departments').insert({
+          code: dept.code,
+          name: dept.name,
+          user_id: user!.id
+        });
+      }
+      
+      await fetchDepartments();
+    } catch (error) {
+      console.error("Error creating default departments:", error);
+    }
+  };
+
   const handleAddDepartment = async () => {
     if (newDepartmentName.trim()) {
-      const newDepartmentId = newDepartmentName.toLowerCase().replace(/\s+/g, '-');
+      const newDepartmentCode = newDepartmentName.toLowerCase().replace(/\s+/g, '-');
       
       // First check if this department already exists
-      const existingDept = departmentsList.find(dept => dept.id === newDepartmentId);
+      const existingDept = departmentsList.find(dept => dept.code === newDepartmentCode);
       if (existingDept) {
         toast({
           title: "部門已存在",
@@ -113,26 +173,48 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         return;
       }
       
-      const newDepartment: DepartmentType = {
-        id: newDepartmentId,
-        name: newDepartmentName,
-      };
-      
-      // Add the new department to the local state
-      setDepartmentsList([...departmentsList, newDepartment]);
-      setNewDepartmentName('');
-      setIsAddDepartmentOpen(false);
-      
-      toast({
-        title: "部門已新增",
-        description: `${newDepartmentName} 部門已成功新增`,
-      });
+      try {
+        const { data, error } = await supabase
+          .from('departments')
+          .insert({
+            code: newDepartmentCode,
+            name: newDepartmentName,
+            user_id: user!.id
+          })
+          .select('*')
+          .single();
+          
+        if (error) throw error;
+        
+        // Add the new department to the local state
+        if (data) {
+          setDepartmentsList([
+            ...departmentsList, 
+            { id: data.id, code: data.code, name: data.name }
+          ]);
+        }
+        
+        setNewDepartmentName('');
+        setIsAddDepartmentOpen(false);
+        
+        toast({
+          title: "部門已新增",
+          description: `${newDepartmentName} 部門已成功新增`,
+        });
+      } catch (error) {
+        console.error("Error adding department:", error);
+        toast({
+          title: "新增部門失敗",
+          description: "無法新增部門，請稍後再試",
+          variant: "destructive"
+        });
+      }
     }
   };
   
   const handleDeleteClick = (e: React.MouseEvent, dept: DepartmentType) => {
     e.stopPropagation(); // Prevent triggering department selection
-    if (dept.id === 'all' || dept.id === 'uncategorized') {
+    if (dept.code === 'all' || dept.code === 'uncategorized') {
       return; // Don't allow deleting default departments
     }
     setDepartmentToDelete(dept);
@@ -144,16 +226,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const handleConfirmDelete = async () => {
     if (deletePassword === '1234') {
       if (departmentToDelete) {
-        // First move all customers from this department to "uncategorized"
         try {
           // Update customers in Supabase
-          const { error } = await supabase
+          await supabase
             .from('customers')
             .update({ 
               department: 'uncategorized',
               department_name: '未分類'
             })
-            .eq('department', departmentToDelete.id);
+            .eq('department', departmentToDelete.code);
+            
+          // Delete the department
+          const { error } = await supabase
+            .from('departments')
+            .delete()
+            .eq('id', departmentToDelete.id);
             
           if (error) throw error;
           
@@ -162,7 +249,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           setDepartmentsList(updatedDepartments);
           
           // If deleted department was active, reset to "all"
-          if (activeDepartment === departmentToDelete.id) {
+          if (activeDepartment === departmentToDelete.code) {
             setActiveDepartment('all');
           }
           
@@ -289,19 +376,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       <div className="flex-1 flex flex-col gap-6 px-2">
         <div className="space-y-1">
           <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
-          <Button 
-            variant="ghost" 
-            className={cn(
-              "w-full justify-start px-4 gap-3 font-normal",
-              activeDepartment === 'all' && "bg-slate-100"
-            )}
-            onClick={() => setActiveDepartment('all')}
-          >
-            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-            </svg>
-            所有客戶
-          </Button>
+          {departmentsList.some(dept => dept.code === 'all') && (
+            <Button 
+              variant="ghost" 
+              className={cn(
+                "w-full justify-start px-4 gap-3 font-normal",
+                activeDepartment === 'all' && "bg-slate-100"
+              )}
+              onClick={() => setActiveDepartment('all')}
+            >
+              <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+              </svg>
+              所有客戶
+            </Button>
+          )}
         </div>
         
         <div className="space-y-1">
@@ -318,35 +407,45 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             </Button>
           </div>
           
-          {departmentsList.filter(dept => dept.id !== 'all').map((dept) => (
-            <div key={dept.id} className="relative group">
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "w-full justify-start px-4 gap-3 font-normal",
-                  activeDepartment === dept.id && "bg-slate-100"
-                )}
-                onClick={() => setActiveDepartment(dept.id)}
-              >
-                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                </svg>
-                {dept.name}
-              </Button>
-              
-              {/* Delete button - only show for non-default departments */}
-              {dept.id !== 'all' && dept.id !== 'uncategorized' && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => handleDeleteClick(e, dept)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
+          {isLoading ? (
+            <div className="p-4 flex flex-col gap-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-8 bg-gray-200 animate-pulse rounded-md" />
+              ))}
             </div>
-          ))}
+          ) : (
+            departmentsList
+              .filter(dept => dept.code !== 'all')
+              .map((dept) => (
+                <div key={dept.id} className="relative group">
+                  <Button 
+                    variant="ghost" 
+                    className={cn(
+                      "w-full justify-start px-4 gap-3 font-normal",
+                      activeDepartment === dept.code && "bg-slate-100"
+                    )}
+                    onClick={() => setActiveDepartment(dept.code)}
+                  >
+                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                    </svg>
+                    {dept.name}
+                  </Button>
+                  
+                  {/* Delete button - only show for non-default departments */}
+                  {dept.code !== 'all' && dept.code !== 'uncategorized' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => handleDeleteClick(e, dept)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              ))
+          )}
         </div>
       </div>
       

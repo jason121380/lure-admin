@@ -29,18 +29,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 type DepartmentType = {
   id: string;
+  code: string;
   name: string;
 };
-
-const initialDepartments: DepartmentType[] = [
-  { id: 'all', name: '所有部門' },
-  { id: 'external', name: '發展 對外' },
-  { id: 'internal', name: '發展 對內' },
-  { id: 'digital', name: '數位行銷' },
-  { id: 'alfred', name: 'Alfred' },
-  { id: 'jason', name: 'Jason' },
-  { id: 'uncategorized', name: '未分類' }
-];
 
 type CustomerEditDialogProps = {
   customer?: Customer;
@@ -65,22 +56,13 @@ export function CustomerEditDialog({
   const [contact, setContact] = useState('');
   const [taxId, setTaxId] = useState('');
   const [notes, setNotes] = useState('');
-  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>(initialDepartments.filter(dept => dept.id !== 'all'));
+  const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch departments from the database or use local state
+  // Fetch departments from the database
   useEffect(() => {
     if (open) {
-      // Get departments from localStorage if available
-      const storedDepartments = localStorage.getItem('departmentsList');
-      if (storedDepartments) {
-        try {
-          const parsedDepartments = JSON.parse(storedDepartments);
-          // Filter out the "all" department
-          setDepartmentsList(parsedDepartments.filter((dept: DepartmentType) => dept.id !== 'all'));
-        } catch (e) {
-          console.error("Error parsing departments from localStorage", e);
-        }
-      }
+      fetchDepartments();
 
       // Reset form or fill with customer data
       if (customer) {
@@ -109,6 +91,35 @@ export function CustomerEditDialog({
     }
   }, [customer, open]);
 
+  const fetchDepartments = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Filter out the "all" department as it's not a valid selection for a customer
+        const filteredDepts = data.filter(dept => dept.code !== 'all');
+        // Map database fields to our component structure
+        const departments: DepartmentType[] = filteredDepts.map(dept => ({
+          id: dept.id,
+          code: dept.code,
+          name: dept.name
+        }));
+        
+        setDepartmentsList(departments);
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
@@ -128,7 +139,7 @@ export function CustomerEditDialog({
   const handleDepartmentChange = (value: string) => {
     setDepartment(value);
     // Find the department name from the list
-    const selectedDept = departmentsList.find(dept => dept.id === value);
+    const selectedDept = departmentsList.find(dept => dept.code === value);
     if (selectedDept) {
       setDepartmentName(selectedDept.name);
     }
@@ -161,13 +172,14 @@ export function CustomerEditDialog({
               <Select
                 value={department}
                 onValueChange={handleDepartmentChange}
+                disabled={isLoading}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="選擇部門" />
                 </SelectTrigger>
                 <SelectContent>
                   {departmentsList.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
+                    <SelectItem key={dept.id} value={dept.code}>
                       {dept.name}
                     </SelectItem>
                   ))}
