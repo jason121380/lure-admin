@@ -77,11 +77,11 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-status-active/20 text-status-active font-medium";
+        return "bg-green-100 text-green-700 font-medium";
       case "paused":
-        return "bg-status-paused/20 text-status-paused font-medium";
+        return "bg-amber-100 text-amber-700 font-medium";
       case "inactive":
-        return "bg-status-inactive/20 text-status-inactive font-medium";
+        return "bg-red-100 text-red-700 font-medium";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -89,7 +89,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   
   return (
     <div className="h-full flex flex-col">
-      <div className="p-5 border-b sticky top-0 bg-white z-10 shadow-sm">
+      <div className="p-5 border-b sticky top-0 bg-white z-10">
         <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         
         <div className="flex gap-2 mb-4">
@@ -122,7 +122,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
         </Button>
       </div>
       
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-auto">
         {loading ? (
           <div className="p-4 space-y-4">
             {Array(5).fill(0).map((_, i) => (
@@ -144,7 +144,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
               {paginatedCustomers.map((customer) => (
                 <TableRow 
                   key={customer.id} 
-                  className={`cursor-pointer ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
+                  className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
                   onClick={() => onSelectCustomer(customer)}
                 >
                   <TableCell className="font-medium">{customer.name}</TableCell>

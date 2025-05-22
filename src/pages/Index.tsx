@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -10,11 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 
 type IndexProps = {
   sidebarVisible: boolean;
@@ -169,7 +163,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-gray-50">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       {/* Sidebar directly in the layout */}
       <Sidebar 
         activeDepartment={activeDepartment} 
@@ -181,32 +175,28 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       {/* Toggle button */}
       <Button 
         variant="ghost" 
-        className="fixed top-4 left-4 z-40 p-2 h-10 w-10"
+        className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
         <Menu className="h-5 w-5" />
         <span className="sr-only">開啟部門選單</span>
       </Button>
       
-      {/* Main content with resizable panels */}
-      <div className={`flex-1 flex flex-col pt-16 px-4 md:px-6 lg:px-8 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
-        <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border overflow-hidden bg-white">
-          <ResizablePanel 
-            defaultSize={40} 
-            minSize={30}
-            className="border-r"
-          >
+      {/* Main content area */}
+      <div className={`flex flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
+        <div className="flex flex-1 flex-col md:flex-row w-full h-full overflow-hidden">
+          {/* Customer list panel */}
+          <div className="w-full md:w-2/5 h-full border-r border-gray-200 bg-white overflow-hidden">
             <CustomerList 
               customers={customers} 
               selectedCustomerId={selectedCustomerId}
               onSelectCustomer={handleSelectCustomer}
               onAddCustomer={handleAddCustomer}
             />
-          </ResizablePanel>
+          </div>
           
-          <ResizableHandle withHandle />
-          
-          <ResizablePanel defaultSize={60} minSize={40}>
+          {/* Customer detail panel */}
+          <div className="w-full md:w-3/5 h-full bg-white overflow-auto">
             {selectedCustomer ? (
               <CustomerDetail 
                 customer={selectedCustomer} 
@@ -225,8 +215,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
                 </div>
               </div>
             )}
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+        </div>
       </div>
       
       <CustomerEditDialog
