@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { ServicePlanList } from "./ServicePlans/ServicePlanList";
 import { PaymentRecordList } from "./PaymentRecords/PaymentRecordList";
 
 type CustomerDetailProps = {
@@ -56,12 +55,9 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="mb-4 grid grid-cols-5 w-full">
+        <TabsList className="mb-4 grid grid-cols-2 w-full">
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
-          <TabsTrigger value="services">服務方案</TabsTrigger>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
-          <TabsTrigger value="advertising">廣告成本</TabsTrigger>
-          <TabsTrigger value="profit">利潤計算</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basic" className="p-4 bg-white border rounded-md">
@@ -143,24 +139,8 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           </div>
         </TabsContent>
         
-        <TabsContent value="services">
-          <ServicePlanList />
-        </TabsContent>
-        
         <TabsContent value="payments">
           <PaymentRecordList />
-        </TabsContent>
-        
-        <TabsContent value="advertising">
-          <div className="p-12 text-center text-gray-500 border rounded-md">
-            廣告成本將顯示於此
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="profit">
-          <div className="p-12 text-center text-gray-500 border rounded-md">
-            利潤計算將顯示於此
-          </div>
         </TabsContent>
       </Tabs>
     </div>
