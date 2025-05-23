@@ -18,9 +18,10 @@ type CustomerDetailProps = {
   customer: Customer | null;
   onEditCustomer: (customer: Customer) => void;
   onDeleteCustomer: (customerId: string) => void;
+  onUpdateCustomer: (customer: Customer) => void;
 };
 
-export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
+export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onUpdateCustomer }: CustomerDetailProps) {
   const isMobile = useIsMobile();
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   
@@ -59,9 +60,8 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
   const handleUpdateNotes = (notes: string) => {
     if (customer) {
       const updatedCustomer = { ...customer, notes };
-      onEditCustomer(updatedCustomer);
+      onUpdateCustomer(updatedCustomer);
     }
-    setIsNotesDialogOpen(false);
   };
 
   return (
@@ -190,6 +190,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       <NotesEditDialog 
         open={isNotesDialogOpen}
         onOpenChange={setIsNotesDialogOpen}
+        customerId={customer.id}
         notes={customer.notes || ""}
         onSave={handleUpdateNotes}
       />

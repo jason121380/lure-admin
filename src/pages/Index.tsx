@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -105,6 +104,14 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const handleEditCustomer = (customer: Customer) => {
     setEditingCustomer(customer);
     setIsAddEditDialogOpen(true);
+  };
+  
+  const handleUpdateCustomer = (updatedCustomer: Customer) => {
+    setSelectedCustomer(updatedCustomer);
+    // Update the customers list
+    setCustomers(prevCustomers => 
+      prevCustomers.map(c => c.id === updatedCustomer.id ? updatedCustomer : c)
+    );
   };
   
   const handleDeleteCustomer = async (customerId: string) => {
@@ -260,6 +267,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
               customer={selectedCustomer} 
               onEditCustomer={handleEditCustomer}
               onDeleteCustomer={handleDeleteCustomer}
+              onUpdateCustomer={handleUpdateCustomer}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
