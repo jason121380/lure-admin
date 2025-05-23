@@ -242,11 +242,42 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   }, [user, departmentsList]);
 
+  // Real-time updates for customer counts
+  useEffect(() => {
+    if (!user) return;
+
+    console.log("Setting up real-time customer count updates");
+    
+    const channel = supabase
+      .channel('customer-count-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'customers',
+          filter: `user_id=eq.${user.id}` // Only listen to current user's customers
+        },
+        (payload) => {
+          console.log('Customer change detected:', payload);
+          // Refetch customer counts when any customer is added, updated, or deleted
+          fetchCustomerCounts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log("Cleaning up real-time subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [user, departmentsList]);
+
   const fetchCustomerCounts = async () => {
     try {
       const { data, error } = await supabase
         .from('customers')
-        .select('department');
+        .select('department')
+        .eq('user_id', user!.id); // Only fetch current user's customers
 
       if (error) throw error;
 
@@ -270,6 +301,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         }
       });
 
+      console.log("Updated customer counts:", counts);
       setCustomerCounts(counts);
     } catch (error) {
       console.error("Error fetching customer counts:", error);
