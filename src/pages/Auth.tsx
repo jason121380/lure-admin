@@ -83,21 +83,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <div className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-md px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">LURE CRM</h1>
+          <h1 className="text-4xl font-bold">LURE CRM</h1>
           <p className="text-muted-foreground mt-2">客戶管理系統</p>
         </div>
         
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
-            <Card>
+            <Card className="border-2">
               <CardHeader>
                 <CardTitle>Login</CardTitle>
                 <CardDescription>
@@ -140,7 +140,7 @@ export default function Auth() {
           </TabsContent>
           
           <TabsContent value="signup">
-            <Card>
+            <Card className="border-2">
               <CardHeader>
                 <CardTitle>Create an account</CardTitle>
                 <CardDescription>
