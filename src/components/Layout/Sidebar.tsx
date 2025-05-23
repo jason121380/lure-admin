@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, Wallet } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -46,7 +46,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useNavigate } from 'react-router-dom';
 
 type DepartmentType = {
   id: string;
@@ -142,7 +141,6 @@ const SortableDepartment = ({
 };
 
 export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
-  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
@@ -572,8 +570,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-6 w-auto" />
       </div>
       
-      <div className="flex-1 flex flex-col gap-6 px-2 overflow-y-auto">
-        {/* Customer Management Section */}
+      <div className="flex-1 flex flex-col gap-6 px-2">
         <div className="space-y-1">
           <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
           {departmentsList.some(dept => dept.code === 'all') && (
@@ -593,7 +590,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           )}
         </div>
         
-        {/* Department Section */}
         <div className="space-y-1">
           <div className="flex items-center justify-between px-4 py-2">
             <h2 className="text-sm font-medium">部門</h2>
@@ -638,19 +634,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               </SortableContext>
             </DndContext>
           )}
-        </div>
-
-        {/* Financial Center Section - NEW */}
-        <div className="space-y-1">
-          <h2 className="text-sm font-medium px-4 py-2">財務中心</h2>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start px-4 gap-3 font-normal"
-            onClick={() => navigate('/finance')}
-          >
-            <Wallet className="w-5 h-5" />
-            收入報表
-          </Button>
         </div>
       </div>
       
