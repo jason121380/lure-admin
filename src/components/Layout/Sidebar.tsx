@@ -608,6 +608,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       <div className="flex-1 flex flex-col gap-6 px-2">
         <div className="space-y-1">
           <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
+          
+          {/* Show "所有客戶" button separately */}
           {departmentsList.some(dept => dept.code === 'all') && (
             <Button 
               variant="ghost" 
