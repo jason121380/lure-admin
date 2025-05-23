@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -151,19 +150,19 @@ export const ServicePlanList = () => {
   
   // Render advertising details based on payment method
   const renderAdvertisingDetails = (plan: AdvertisingPlanItem) => {
-    switch (true) {
-      case plan.paymentMethod === "次月算上月" && plan.details.serviceFeePercentage:
-        return `服務費: ${plan.details.serviceFeePercentage}%`;
-      
-      case plan.paymentMethod === "預收內扣" && plan.details.prepaidAmount && plan.details.placementLimit:
-        return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 上限: ${parseFloat(plan.details.placementLimit).toLocaleString()}`;
-      
-      case plan.paymentMethod === "預收外+%" && plan.details.prepaidAmount && plan.details.serviceFeePercentage:
-        return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 服務費: ${plan.details.serviceFeePercentage}%`;
-      
-      default:
-        return "";
+    if (plan.paymentMethod === "次月算上月" && plan.details.serviceFeePercentage) {
+      return `服務費: ${plan.details.serviceFeePercentage}%`;
     }
+    
+    if (plan.paymentMethod === "預收內扣" && plan.details.prepaidAmount && plan.details.placementLimit) {
+      return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 上限: ${parseFloat(plan.details.placementLimit).toLocaleString()}`;
+    }
+    
+    if (plan.paymentMethod === "預收外+%" && plan.details.prepaidAmount && plan.details.serviceFeePercentage) {
+      return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 服務費: ${plan.details.serviceFeePercentage}%`;
+    }
+    
+    return "";
   };
 
   return (
