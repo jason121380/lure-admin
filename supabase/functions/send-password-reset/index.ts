@@ -25,9 +25,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Password reset request received for:", email);
     console.log("Reset token provided:", token ? "Yes" : "No");
 
-    // Create reset link - note we don't need the actual token as Supabase handles this
-    // with resetPasswordForEmail
-    const baseUrl = req.headers.get("origin") || "http://localhost:3000";
+    // Use the correct domain for the reset link
+    const baseUrl = "https://lure.lovable.app";
     
     // We'll use the email in the URL to help with identification
     // The actual token hash will be in the link that Supabase generates
