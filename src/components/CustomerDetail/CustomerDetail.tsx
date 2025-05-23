@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { PaymentRecordList } from "./PaymentRecords/PaymentRecordList";
+import { ServicePlanList } from "./ServicePlans/ServicePlanList";
 import { useState } from "react";
 import { NotesEditDialog } from "./NotesEditDialog";
 
@@ -102,8 +103,9 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onU
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className={`mb-4 grid w-full grid-cols-2 ${isMobile ? 'text-sm' : ''}`}>
+        <TabsList className={`mb-4 grid w-full grid-cols-3 ${isMobile ? 'text-sm' : ''}`}>
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
+          <TabsTrigger value="services">服務項目</TabsTrigger>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
         </TabsList>
         
@@ -180,6 +182,10 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onU
               {customer.notes || "無備註資訊"}
             </div>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="services">
+          <ServicePlanList />
         </TabsContent>
         
         <TabsContent value="payments">
