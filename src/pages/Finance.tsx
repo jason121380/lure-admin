@@ -17,7 +17,7 @@ const Finance = ({ sidebarVisible, setSidebarVisible }: FinanceProps) => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       {/* Sidebar */}
-      <div className={`${sidebarVisible ? 'block' : 'hidden'} md:block`}>
+      <div className={`${sidebarVisible ? 'block' : 'hidden'} md:block relative z-20`}>
         <Sidebar 
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
@@ -26,20 +26,20 @@ const Finance = ({ sidebarVisible, setSidebarVisible }: FinanceProps) => {
         />
       </div>
       
-      {/* Mobile menu button */}
-      {isMobile && (
-        <Button 
-          variant="ghost" 
-          className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
-          onClick={() => setSidebarVisible(!sidebarVisible)}
-        >
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">開啟部門選單</span>
-        </Button>
-      )}
-      
       {/* Main content container */}
-      <div className="flex flex-1 h-full w-full">
+      <div className="flex flex-1 h-full w-full relative">
+        {/* Mobile menu button */}
+        {isMobile && (
+          <Button 
+            variant="ghost" 
+            className="fixed top-4 left-4 z-50 p-2 h-10 w-10 md:hidden"
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">開啟部門選單</span>
+          </Button>
+        )}
+        
         <div className="w-full h-full bg-white overflow-y-auto p-6">
           <h1 className="text-2xl font-bold mb-6">財務中心</h1>
           
