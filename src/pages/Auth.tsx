@@ -87,30 +87,30 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl font-bold">L</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">LURE CRM</h1>
-          <p className="text-blue-100">客戶關係管理系統</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">LURE CRM</h1>
+          <p className="text-gray-600">客戶關係管理系統</p>
         </div>
 
-        <Card className="w-full border-0 shadow-2xl bg-gray-900/80 backdrop-blur-sm">
+        <Card className="w-full border shadow-sm bg-white">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-800/50">
+            <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-100">
               <TabsTrigger 
                 value="login" 
-                className="h-10 text-sm font-medium text-gray-300 data-[state=active]:bg-gray-700/80 data-[state=active]:text-white data-[state=active]:shadow-sm"
+                className="h-10 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 登入
               </TabsTrigger>
               <TabsTrigger 
                 value="signup"
-                className="h-10 text-sm font-medium text-gray-300 data-[state=active]:bg-gray-700/80 data-[state=active]:text-white data-[state=active]:shadow-sm"
+                className="h-10 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 註冊
@@ -119,8 +119,8 @@ export default function Auth() {
 
             <TabsContent value="login" className="mt-0">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-white">歡迎回來</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-xl text-gray-900">歡迎回來</CardTitle>
+                <CardDescription className="text-gray-600">
                   輸入您的登入資訊以存取您的帳戶
                 </CardDescription>
               </CardHeader>
@@ -128,7 +128,7 @@ export default function Auth() {
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-sm font-medium text-gray-200">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-gray-700">
                       電子郵件
                     </Label>
                     <Input 
@@ -137,13 +137,13 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-medium text-gray-200">
+                    <Label htmlFor="login-password" className="text-sm font-medium text-gray-700">
                       密碼
                     </Label>
                     <div className="relative">
@@ -152,14 +152,14 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="h-11 pr-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+                        className="h-11 pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-11 w-10 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-11 w-10 hover:bg-gray-100"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -175,7 +175,7 @@ export default function Auth() {
                     <Button
                       type="button"
                       variant="link"
-                      className="px-0 h-auto text-sm text-blue-400 hover:text-blue-300"
+                      className="px-0 h-auto text-sm text-blue-600 hover:text-blue-700"
                       onClick={() => setForgotPasswordOpen(true)}
                     >
                       忘記密碼？
@@ -186,7 +186,7 @@ export default function Auth() {
                 <CardFooter>
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white"
                     disabled={isLoading}
                   >
                     {isLoading ? "登入中..." : "登入"}
@@ -197,8 +197,8 @@ export default function Auth() {
 
             <TabsContent value="signup" className="mt-0">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-white">建立新帳戶</CardTitle>
-                <CardDescription className="text-gray-300">
+                <CardTitle className="text-xl text-gray-900">建立新帳戶</CardTitle>
+                <CardDescription className="text-gray-600">
                   填寫以下資訊以建立您的帳戶
                 </CardDescription>
               </CardHeader>
@@ -206,7 +206,7 @@ export default function Auth() {
               <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-fullname" className="text-sm font-medium text-gray-200">
+                    <Label htmlFor="signup-fullname" className="text-sm font-medium text-gray-700">
                       全名
                     </Label>
                     <Input
@@ -214,13 +214,13 @@ export default function Auth() {
                       placeholder="張小明"
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
-                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-200">
+                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">
                       電子郵件
                     </Label>
                     <Input 
@@ -229,13 +229,13 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-200">
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">
                       密碼
                     </Label>
                     <div className="relative">
@@ -244,14 +244,14 @@ export default function Auth() {
                         type={showSignupPassword ? "text" : "password"}
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="h-11 pr-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
+                        className="h-11 pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-11 w-10 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-11 w-10 hover:bg-gray-100"
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
                       >
                         {showSignupPassword ? (
@@ -267,7 +267,7 @@ export default function Auth() {
                 <CardFooter>
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
                     disabled={isLoading}
                   >
                     {isLoading ? "建立帳戶中..." : "建立帳戶"}
@@ -279,7 +279,7 @@ export default function Auth() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-blue-100">
+        <div className="text-center mt-8 text-sm text-gray-500">
           <p>© 2024 LURE CRM. 版權所有.</p>
         </div>
       </div>
