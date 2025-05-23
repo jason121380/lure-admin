@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -18,11 +18,14 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     // Check if we have the necessary tokens
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    
+    console.log("Tokens from URL:", { accessToken, refreshToken });
     
     if (!accessToken || !refreshToken) {
       toast({
@@ -35,10 +38,38 @@ export default function ResetPassword() {
     }
 
     // Set the session with the tokens
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    const setSessionAsync = async () => {
+      try {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        console.log("Session set result:", { data, error });
+        
+        if (error) {
+          toast({
+            title: "設定會話失敗",
+            description: error.message,
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
+        
+        setInitialized(true);
+      } catch (err) {
+        console.error("Error setting session:", err);
+        toast({
+          title: "設定會話失敗",
+          description: "請重新申請密碼重設。",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      }
+    };
+    
+    setSessionAsync();
   }, [searchParams, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,9 +96,12 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      console.log("Updating password...");
+      const { data, error } = await supabase.auth.updateUser({
         password: password
       });
+      
+      console.log("Password update result:", { data, error });
 
       if (error) {
         toast({
@@ -80,9 +114,14 @@ export default function ResetPassword() {
           title: "密碼重設成功",
           description: "您的密碼已成功更新。",
         });
-        navigate("/");
+        
+        // Wait a bit before navigating to allow the user to see the success message
+        setTimeout(() => {
+          navigate("/auth");
+        }, 2000);
       }
     } catch (error: any) {
+      console.error("Error resetting password:", error);
       toast({
         title: "錯誤",
         description: error.message || "重設密碼時發生錯誤",
@@ -93,18 +132,37 @@ export default function ResetPassword() {
     }
   };
 
+  // If not initialized yet, show a loading state
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <div className="w-16 h-16 border-4 border-t-blue-600 border-b-blue-600 border-l-gray-200 border-r-gray-200 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-gray-600">驗證中...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-            <Lock className="text-white text-2xl" />
+          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
+              <img 
+                src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png"
+                alt="Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">重設密碼</h1>
-          <p className="text-gray-600">輸入您的新密碼</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">重設密碼</h1>
         </div>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="border shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl">設定新密碼</CardTitle>
             <CardDescription>
@@ -174,7 +232,7 @@ export default function ResetPassword() {
             <CardContent className="pt-0">
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "更新中..." : "更新密碼"}
