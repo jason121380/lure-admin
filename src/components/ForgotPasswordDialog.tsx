@@ -30,17 +30,38 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // Generate reset link using Supabase auth
+      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) {
+      if (resetError) {
+        console.error("Supabase reset error:", resetError);
         toast({
           title: "發送失敗",
-          description: error.message,
+          description: resetError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Call our custom edge function to send the email
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
+          resetLink: `${window.location.origin}/reset-password`
+        }
+      });
+
+      if (emailError) {
+        console.error("Email sending error:", emailError);
+        toast({
+          title: "發送失敗",
+          description: "無法發送重設郵件，請稍後再試。",
           variant: "destructive",
         });
       } else {
+        console.log("Email sent successfully:", emailData);
         toast({
           title: "郵件已發送",
           description: "請檢查您的電子郵件以重設密碼。",
@@ -49,6 +70,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
         setEmail("");
       }
     } catch (error: any) {
+      console.error("General error:", error);
       toast({
         title: "錯誤",
         description: error.message || "發送重設郵件時發生錯誤",
