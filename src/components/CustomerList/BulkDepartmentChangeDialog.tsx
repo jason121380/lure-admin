@@ -48,11 +48,17 @@ export function BulkDepartmentChangeDialog({
 
       if (error) throw error;
 
-      // Add uncategorized option
-      const departmentOptions: Department[] = [
-        { code: 'uncategorized', name: '未分類' },
-        ...(data || [])
-      ];
+      // Add uncategorized option only if it doesn't exist in the data
+      const hasUncategorized = data?.some(dept => dept.code === 'uncategorized');
+      
+      const departmentOptions: Department[] = [];
+      
+      if (!hasUncategorized) {
+        departmentOptions.push({ code: 'uncategorized', name: '未分類' });
+      }
+      
+      // Add all other departments
+      departmentOptions.push(...(data || []));
       
       setDepartments(departmentOptions);
     } catch (error) {
