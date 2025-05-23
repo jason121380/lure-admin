@@ -14,17 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 
-export type PaymentRecord = {
-  id: string;
-  date: string;
-  paymentMethod: string;
-  account: string | null;
-  amount: number;
-  taxAmount: number;
-  totalAmount: number;
-  isConfirmed: boolean;
-};
-
 // 支付方式列表
 export const paymentMethods = [
   { id: 'transfer', name: '匯款' },
@@ -249,19 +238,21 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
   }
 
   return (
-    <div className="relative">
-      <Button 
-        variant="ghost" 
-        size="icon"
-        className="absolute right-3 top-3 z-10"
-        onClick={() => {
-          setEditingPaymentRecord(null);
-          setIsPaymentRecordOpen(true);
-        }}
-      >
-        <Plus className="h-4 w-4" />
-        <span className="sr-only">新增付款記錄</span>
-      </Button>
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium">付款記錄</h3>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => {
+            setEditingPaymentRecord(null);
+            setIsPaymentRecordOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          <span className="sr-only">新增付款記錄</span>
+        </Button>
+      </div>
       
       {paymentRecords.length > 0 ? (
         <div className="p-4 border rounded-md">
