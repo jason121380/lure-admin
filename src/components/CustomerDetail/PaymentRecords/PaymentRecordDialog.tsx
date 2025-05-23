@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,11 +31,11 @@ interface PaymentRecordDialogProps {
   onDeletePaymentRecord?: (recordId: string) => void;
 }
 
-// Define the account options
+// Define the account options with Chinese names
 const accountOptions = [
-  { id: "attraction-personal", name: "吸引力個人" },
-  { id: "attraction-company", name: "吸引力公司" },
-  { id: "development", name: "發展處" }
+  { id: "attraction-personal", name: "吸引力個人帳戶" },
+  { id: "attraction-company", name: "吸引力公司帳戶" },
+  { id: "development", name: "發展處帳戶" }
 ];
 
 export function PaymentRecordDialog({
