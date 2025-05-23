@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -9,7 +8,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Customer } from '@/components/CustomerList/CustomerListItem';
 import {
   Select,
@@ -55,7 +53,6 @@ export function CustomerEditDialog({
   const [address, setAddress] = useState('');
   const [contact, setContact] = useState('');
   const [taxId, setTaxId] = useState('');
-  const [notes, setNotes] = useState('');
   const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -75,7 +72,6 @@ export function CustomerEditDialog({
         setAddress(customer.address || '');
         setContact(customer.contact || '');
         setTaxId(customer.taxId || '');
-        setNotes(customer.notes || '');
       } else {
         // For new customers, set default values with uncategorized
         setName('');
@@ -87,7 +83,6 @@ export function CustomerEditDialog({
         setAddress('');
         setContact('');
         setTaxId('');
-        setNotes('');
       }
     }
   }, [customer, open]);
@@ -161,7 +156,6 @@ export function CustomerEditDialog({
       address,
       contact,
       taxId,
-      notes,
     });
   };
 
@@ -288,18 +282,6 @@ export function CustomerEditDialog({
                 id="address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label htmlFor="notes" className="text-sm text-gray-700">
-                備註
-              </label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="min-h-[100px]"
               />
             </div>
           </div>
