@@ -204,9 +204,9 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const fetchDepartments = async () => {
     try {
       setIsLoading(true);
-      console.log("Fetching all departments...");
+      console.log("Fetching departments for user:", user?.id);
       
-      // 獲取所有部門，不進行任何用戶過濾
+      // 只獲取當前用戶的部門（由於RLS，這會自動過濾）
       const { data, error } = await supabase
         .from('departments')
         .select('*')
@@ -217,7 +217,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       if (error) throw error;
 
-      if (data) {
+      if (data && data.length > 0) {
         // Map database fields to our component structure
         const departments: DepartmentType[] = data.map(dept => ({
           id: dept.id,
@@ -227,12 +227,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         }));
         
         console.log("Mapped departments:", departments);
-        
-        // 設置所有部門，不進行任何過濾
         setDepartmentsList(departments);
       } else {
-        console.log("No departments found, creating defaults...");
-        // 只有在完全沒有部門時才創建預設部門
+        console.log("No departments found for user, creating defaults...");
+        // 如果用戶沒有任何部門，創建預設部門
         await createDefaultDepartments();
       }
     } catch (error) {
@@ -249,7 +247,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
   const createDefaultDepartments = async () => {
     try {
-      console.log("Creating default departments...");
+      console.log("Creating default departments for user:", user?.id);
       const defaultDepartments = [
         { code: 'all', name: '所有部門', sort_order: 0 },
         { code: 'external', name: '發展 對外', sort_order: 1 },
@@ -260,22 +258,33 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         { code: 'uncategorized', name: '未分類', sort_order: 6 }
       ];
       
+      // 為當前用戶創建每個預設部門
       for (const dept of defaultDepartments) {
         const { error } = await supabase.from('departments').insert({
           code: dept.code,
           name: dept.name,
-          user_id: user!.id, // 使用當前用戶創建預設部門
+          user_id: user!.id, // 確保每個部門都綁定到當前用戶
           sort_order: dept.sort_order
         });
         
-        if (error && !error.message.includes('duplicate key')) {
+        if (error) {
           console.error("Error creating department:", dept.name, error);
+          // 如果是重複鍵錯誤，忽略它（部門可能已存在）
+          if (!error.message.includes('duplicate key')) {
+            throw error;
+          }
         }
       }
       
+      // 重新獲取部門列表
       await fetchDepartments();
     } catch (error) {
       console.error("Error creating default departments:", error);
+      toast({
+        title: "創建預設部門失敗",
+        description: "無法創建預設部門，請稍後再試",
+        variant: "destructive"
+      });
     }
   };
 
