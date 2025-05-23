@@ -217,7 +217,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           id: dept.id,
           code: dept.code,
           name: dept.name,
-          sort_order: dept.sort_order || 0 // Add default of 0 if sort_order is missing
+          sort_order: (dept as any).sort_order || 0 // Use type assertion to handle missing property
         }));
         
         // Make sure 'all' is at the top
@@ -308,7 +308,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               id: data.id, 
               code: data.code, 
               name: data.name,
-              sort_order: data.sort_order || 0
+              sort_order: (data as any).sort_order || 0 // Use type assertion
             }
           ]);
         }
