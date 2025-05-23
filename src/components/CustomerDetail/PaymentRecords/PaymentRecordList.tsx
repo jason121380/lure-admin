@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ const accountOptions = [
   { id: "development", name: "發展處帳戶" }
 ];
 
-type PaymentRecord = {
+export type PaymentRecord = {
   id: string;
   date: string;
   paymentMethod: string;
