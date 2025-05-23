@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,13 @@ export const paymentMethods = [
   { id: 'cash', name: '現金' },
   { id: 'headquarterToDistrict', name: '總部返區處' },
   { id: 'districtToHeadquarter', name: '區處返總部' },
+];
+
+// 帳戶選項
+const accountOptions = [
+  { id: "attraction-personal", name: "吸引力個人帳戶" },
+  { id: "attraction-company", name: "吸引力公司帳戶" },
+  { id: "development", name: "發展處帳戶" }
 ];
 
 type PaymentRecordListProps = {
@@ -221,6 +227,13 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     return method ? method.name : methodId;
   };
 
+  // 獲取帳戶名稱
+  const getAccountName = (accountId: string | null) => {
+    if (!accountId) return "-";
+    const account = accountOptions.find(a => a.id === accountId);
+    return account ? account.name : accountId;
+  };
+
   const handleEditClick = (record: PaymentRecord) => {
     setEditingPaymentRecord(record);
     setIsPaymentRecordOpen(true);
@@ -270,7 +283,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                 <TableRow key={record.id}>
                   <TableCell>{record.date}</TableCell>
                   <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
-                  <TableCell>{record.account || "-"}</TableCell>
+                  <TableCell>{getAccountName(record.account)}</TableCell>
                   <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
                   <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
                   <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
