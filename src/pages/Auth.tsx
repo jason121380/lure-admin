@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,111 +82,110 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="w-full max-w-md px-4 py-8">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
           <h1 className="text-4xl font-bold">LURE CRM</h1>
-          <p className="text-muted-foreground mt-2">客戶管理系統</p>
+          <p className="text-muted-foreground">客戶管理系統</p>
         </div>
         
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login">登入</TabsTrigger>
-            <TabsTrigger value="signup">註冊</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 rounded-md">
+            <TabsTrigger value="login" className="rounded-md data-[state=active]:bg-white">登入</TabsTrigger>
+            <TabsTrigger value="signup" className="rounded-md data-[state=active]:bg-white">註冊</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle>登入</CardTitle>
-                <CardDescription>
-                  輸入您的憑證以訪問您的帳戶
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleSignIn}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">電子郵件</Label>
-                    <Input 
-                      id="login-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">密碼</Label>
-                    </div>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "登入中..." : "登入"}
-                  </Button>
-                </CardFooter>
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold">登入</h2>
+                <p className="text-sm text-gray-500">輸入您的憑證以訪問您的帳戶</p>
+              </div>
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">電子郵件</Label>
+                  <Input 
+                    id="login-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">密碼</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-[#0f172a] text-white hover:bg-[#1e293b]"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "登入中..." : "登入"}
+                </Button>
               </form>
-            </Card>
+            </div>
           </TabsContent>
           
           <TabsContent value="signup">
-            <Card className="border-2">
-              <CardHeader>
-                <CardTitle>創建帳戶</CardTitle>
-                <CardDescription>
-                  輸入您的資料以創建新帳戶
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-fullname">全名</Label>
-                    <Input
-                      id="signup-fullname"
-                      placeholder="張三"
-                      value={signupFullName}
-                      onChange={(e) => setSignupFullName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">電子郵件</Label>
-                    <Input 
-                      id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">密碼</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "創建帳戶中..." : "創建帳戶"}
-                  </Button>
-                </CardFooter>
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold">創建帳戶</h2>
+                <p className="text-sm text-gray-500">輸入您的資料以創建新帳戶</p>
+              </div>
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-fullname">全名</Label>
+                  <Input
+                    id="signup-fullname"
+                    placeholder="張三"
+                    value={signupFullName}
+                    onChange={(e) => setSignupFullName(e.target.value)}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">電子郵件</Label>
+                  <Input 
+                    id="signup-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">密碼</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-[#0f172a] text-white hover:bg-[#1e293b]"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "創建帳戶中..." : "創建帳戶"}
+                </Button>
               </form>
-            </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
