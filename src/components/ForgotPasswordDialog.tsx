@@ -33,9 +33,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     try {
       // Generate reset token with Supabase
       console.log("Calling Supabase resetPasswordForEmail...");
-      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email);
 
       console.log("Supabase resetPasswordForEmail result:", { data, error: resetError });
 
@@ -49,13 +47,43 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
         return;
       }
 
+      // Get access token for custom email
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || '';
+
+      // Send custom email with our edge function
+      try {
+        const response = await fetch(`https://wpvvixiptlfehhkhoqgk.supabase.co/functions/v1/send-password-reset`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            email: email,
+            token: data?.code || '',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Edge function error:", errorText);
+          throw new Error(`發送自訂郵件失敗: ${errorText}`);
+        }
+
+        console.log("Custom email sent successfully");
+      } catch (emailError: any) {
+        console.error("Error sending custom email:", emailError);
+        // Continue with default email if custom email fails
+        console.log("Using default Supabase email as fallback");
+      }
+
       toast({
         title: "郵件已發送",
         description: "請檢查您的電子郵件以重設密碼。如果沒收到郵件，請檢查垃圾郵件資料夾。",
       });
       onOpenChange(false);
       setEmail("");
-
     } catch (error: any) {
       console.error("General error in password reset:", error);
       toast({

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -19,45 +20,30 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
 
   useEffect(() => {
-    // Check for error parameters first
-    const error = searchParams.get('error');
-    const errorDescription = searchParams.get('error_description');
+    // Extract the token from the URL
+    const token = searchParams.get('token');
     
-    if (error) {
-      console.log("Error in URL:", error, errorDescription);
-      toast({
-        title: "重設連結無效",
-        description: "密碼重設連結已過期或無效，請重新申請。",
-        variant: "destructive",
-      });
-      navigate("/auth");
+    console.log("Reset password page loaded. Token from URL:", token);
+    
+    if (!token) {
+      console.error("No token found in URL");
+      setError("無效的重設連結，請重新申請密碼重設。");
+      setShowErrorDialog(true);
       return;
     }
 
-    // Check for valid reset tokens
-    const tokenHash = searchParams.get('token_hash');
-    const type = searchParams.get('type');
-    
-    console.log("Reset password params:", { tokenHash, type });
-    
-    if (!tokenHash || type !== 'recovery') {
-      toast({
-        title: "無效的重設連結",
-        description: "請重新申請密碼重設。",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    // Verify and exchange the token for a session
+    // Verify the token
     const verifyTokenAsync = async () => {
       try {
-        console.log("Verifying token hash:", tokenHash);
+        console.log("Verifying token:", token);
+        
+        // Exchange the token for a session
         const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
+          token: token,
           type: 'recovery'
         });
         
@@ -65,12 +51,8 @@ export default function ResetPassword() {
         
         if (error) {
           console.error("Token verification failed:", error);
-          toast({
-            title: "驗證失敗",
-            description: "重設連結無效或已過期，請重新申請。",
-            variant: "destructive",
-          });
-          navigate("/auth");
+          setError(error.message || "重設連結無效或已過期，請重新申請。");
+          setShowErrorDialog(true);
           return;
         }
         
@@ -81,14 +63,10 @@ export default function ResetPassword() {
           throw new Error("No session established after token verification");
         }
         
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error verifying token:", err);
-        toast({
-          title: "驗證失敗",
-          description: "請重新申請密碼重設。",
-          variant: "destructive",
-        });
-        navigate("/auth");
+        setError(err.message || "請重新申請密碼重設。");
+        setShowErrorDialog(true);
       }
     };
     
@@ -155,6 +133,33 @@ export default function ResetPassword() {
       setIsLoading(false);
     }
   };
+
+  // Error dialog handler
+  const handleCloseErrorDialog = () => {
+    setShowErrorDialog(false);
+    navigate("/auth");
+  };
+
+  // If there's an error, show an error dialog
+  if (showErrorDialog) {
+    return (
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>重設連結無效</AlertDialogTitle>
+            <AlertDialogDescription>
+              {error || "密碼重設連結已過期或無效，請重新申請。"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleCloseErrorDialog}>
+              返回登入頁面
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
 
   // If not initialized yet, show a loading state
   if (!initialized) {

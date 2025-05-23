@@ -12,8 +12,6 @@ const corsHeaders = {
 
 interface PasswordResetRequest {
   email: string;
-  resetLink: string;
-  token_hash: string;
   token: string;
 }
 
@@ -23,13 +21,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, resetLink, token_hash, token }: PasswordResetRequest = await req.json();
+    const { email, token }: PasswordResetRequest = await req.json();
     console.log("Password reset request received for:", email);
-    console.log("Reset link:", resetLink);
-    console.log("Token hash:", token_hash);
+    console.log("Reset token:", token);
 
     // Create the actual reset link with the token
-    const actualResetLink = `${resetLink}?token_hash=${token_hash}&type=recovery`;
+    const baseUrl = req.headers.get("origin") || "http://localhost:3000";
+    const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
     const emailResponse = await resend.emails.send({
       from: "密碼重設 <onboarding@resend.dev>",
@@ -46,14 +44,14 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
             <div style="background: white; padding: 40px; text-align: center; border-radius: 16px 16px 0 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-              <img src="${resetLink.split('/reset-password')[0]}/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" style="width: 64px; height: 64px; margin: 0 auto 20px;">
+              <img src="${baseUrl}/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" style="width: 64px; height: 64px; margin: 0 auto 20px;">
               <h1 style="color: #1f2937; margin: 0 0 20px; font-size: 24px; font-weight: 600;">重設您的密碼</h1>
               
               <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
                 您收到這封郵件是因為您要求重設帳戶的密碼。請點擊下方按鈕以重設密碼。
               </p>
               
-              <a href="${actualResetLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0;">
+              <a href="${resetLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0;">
                 重設密碼
               </a>
             </div>
@@ -65,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p style="color: #9ca3af; font-size: 12px; margin: 20px 0 0; text-align: center;">
                 如果按鈕無法點擊，請複製以下連結到瀏覽器：<br>
-                <span style="word-break: break-all;">${actualResetLink}</span>
+                <span style="word-break: break-all;">${resetLink}</span>
               </p>
             </div>
             
