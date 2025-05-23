@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, SearchIcon, Edit2 } from 'lucide-react';
+import { Plus, SearchIcon, Edit2 } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BulkDepartmentChangeDialog } from './BulkDepartmentChangeDialog';
@@ -160,7 +160,16 @@ export function CustomerList({
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 md:p-5 border-b sticky top-0 bg-white z-10">
-        <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">客戶列表</h2>
+          <Button 
+            size="sm" 
+            className="bg-indigo-600 hover:bg-indigo-700"
+            onClick={onAddCustomer}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
         
         <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-3'} mb-4`}>
           <div className="flex-1 relative">
@@ -203,11 +212,6 @@ export function CustomerList({
             </Button>
           </div>
         )}
-        
-        <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={onAddCustomer}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          新增客戶
-        </Button>
       </div>
       
       <div className="flex-1 overflow-auto">
