@@ -24,58 +24,63 @@ export default function ResetPassword() {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
 
   useEffect(() => {
-    // Extract the token from the URL
-    const token = searchParams.get('token');
-    
-    console.log("Reset password page loaded. Token from URL:", token);
-    
-    if (!token) {
-      console.error("No token found in URL");
-      setError("無效的重設連結，請重新申請密碼重設。");
-      setShowErrorDialog(true);
-      return;
-    }
-
-    // Verify the token
-    const verifyTokenAsync = async () => {
+    const initializeResetPassword = async () => {
       try {
-        console.log("Verifying token:", token);
+        console.log("Initializing reset password page...");
+        console.log("URL search params:", window.location.search);
         
-        // Fix: The verifyOtp function requires the correct parameters based on the type
-        // For a recovery token, we need to use the VerifyOtpParams with email parameter
-        const email = searchParams.get('email'); // Extract email from URL if available
+        // Check if we have hash params (common in Supabase auth flows)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const urlParams = searchParams;
         
-        // If we don't have the email, use verifyOTP with token hash method
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'recovery',
-        });
+        // Look for access_token and type in either hash or query params
+        const accessToken = hashParams.get('access_token') || urlParams.get('access_token');
+        const type = hashParams.get('type') || urlParams.get('type');
         
-        console.log("Token verification result:", { data, error });
+        console.log("Access token found:", !!accessToken);
+        console.log("Type:", type);
         
-        if (error) {
-          console.error("Token verification failed:", error);
-          setError(error.message || "重設連結無效或已過期，請重新申請。");
-          setShowErrorDialog(true);
-          return;
-        }
-        
-        if (data?.user && data?.session) {
-          console.log("Token verified successfully, user session established");
-          setInitialized(true);
+        if (accessToken && type === 'recovery') {
+          console.log("Found recovery token, setting session...");
+          
+          // Set the session using the access token
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: hashParams.get('refresh_token') || urlParams.get('refresh_token') || '',
+          });
+          
+          if (error) {
+            console.error("Error setting session:", error);
+            throw error;
+          }
+          
+          if (data.session) {
+            console.log("Session set successfully");
+            setInitialized(true);
+          } else {
+            throw new Error("無法建立重設密碼工作階段");
+          }
         } else {
-          throw new Error("No session established after token verification");
+          // Check if user is already authenticated (direct navigation)
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log("User already authenticated");
+            setInitialized(true);
+          } else {
+            throw new Error("無效的重設連結，請重新申請密碼重設。");
+          }
         }
         
       } catch (err: any) {
-        console.error("Error verifying token:", err);
-        setError(err.message || "請重新申請密碼重設。");
+        console.error("Error initializing reset password:", err);
+        setError(err.message || "重設連結無效或已過期，請重新申請。");
         setShowErrorDialog(true);
       }
     };
     
-    verifyTokenAsync();
-  }, [searchParams, navigate, toast]);
+    initializeResetPassword();
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,10 +122,10 @@ export default function ResetPassword() {
       } else {
         toast({
           title: "密碼重設成功",
-          description: "您的密碼已成功更新。",
+          description: "您的密碼已成功更新，正在導向登入頁面...",
         });
         
-        // Sign out and redirect to login
+        // Sign out and redirect to auth page
         await supabase.auth.signOut();
         setTimeout(() => {
           navigate("/auth");
@@ -173,7 +178,7 @@ export default function ResetPassword() {
           <div className="w-16 h-16 mx-auto mb-4">
             <div className="w-16 h-16 border-4 border-t-blue-600 border-b-blue-600 border-l-gray-200 border-r-gray-200 rounded-full animate-spin"></div>
           </div>
-          <p className="text-gray-600">驗證中...</p>
+          <p className="text-gray-600">驗證重設連結中...</p>
         </div>
       </div>
     );
@@ -193,13 +198,14 @@ export default function ResetPassword() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">重設密碼</h1>
+          <p className="text-gray-600">請輸入您的新密碼</p>
         </div>
 
         <Card className="border shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl">設定新密碼</CardTitle>
             <CardDescription>
-              請輸入您的新密碼
+              密碼必須至少 6 個字符
             </CardDescription>
           </CardHeader>
           
@@ -214,6 +220,7 @@ export default function ResetPassword() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pr-10"
+                    placeholder="請輸入新密碼"
                     required
                     minLength={6}
                   />
@@ -242,6 +249,7 @@ export default function ResetPassword() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pr-10"
+                    placeholder="請再次輸入新密碼"
                     required
                     minLength={6}
                   />
@@ -270,6 +278,17 @@ export default function ResetPassword() {
               >
                 {isLoading ? "更新中..." : "更新密碼"}
               </Button>
+              
+              <div className="mt-4 text-center">
+                <Button 
+                  type="button"
+                  variant="ghost"
+                  onClick={() => navigate("/auth")}
+                  className="text-sm text-gray-600 hover:text-gray-800"
+                >
+                  返回登入頁面
+                </Button>
+              </div>
             </CardContent>
           </form>
         </Card>
