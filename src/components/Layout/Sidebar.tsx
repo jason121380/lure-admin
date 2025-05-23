@@ -704,15 +704,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start text-sm"
-                  onClick={() => setIsPasswordDialogOpen(true)}
-                >
-                  <Key className="h-4 w-4 mr-2" />
-                  更改密碼
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
                   className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
                   onClick={handleLogout}
                 >
@@ -831,40 +822,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             </Button>
             <Button onClick={handleUpdateProfile}>
               儲存
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Change Password Dialog */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>更改密碼</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-gray-600 mb-4">
-              系統將會發送密碼重設連結至您的電子郵件信箱。
-            </p>
-            <div>
-              <label className="flex items-center gap-2 text-sm text-gray-500 block mb-2">
-                <Mail className="h-4 w-4" />
-                您的電子郵件
-              </label>
-              <Input 
-                value={user?.email || ''}
-                disabled
-                className="bg-gray-50"
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
-              取消
-            </Button>
-            <Button onClick={handleChangePassword}>
-              發送重設連結
             </Button>
           </DialogFooter>
         </DialogContent>
