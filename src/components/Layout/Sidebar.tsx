@@ -211,22 +211,19 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data) {
         // Map database fields to our component structure
         const departments: DepartmentType[] = data.map(dept => ({
           id: dept.id,
           code: dept.code,
           name: dept.name,
-          sort_order: (dept as any).sort_order || 0 // Use type assertion to handle missing property
+          sort_order: (dept as any).sort_order || 0
         }));
         
-        // Make sure 'all' is at the top
-        const allDept = departments.find(dept => dept.code === 'all');
-        const otherDepts = departments.filter(dept => dept.code !== 'all');
-        
-        setDepartmentsList(allDept ? [allDept, ...otherDepts] : departments);
+        // Set departments without any filtering or default creation
+        setDepartmentsList(departments);
       } else {
-        // If no departments found, create default ones
+        // Only create defaults if NO departments exist at all
         await createDefaultDepartments();
       }
     } catch (error) {
