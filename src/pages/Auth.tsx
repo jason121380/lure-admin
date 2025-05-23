@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Auth() {
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -88,9 +91,9 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
         {/* Logo and Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
               <img 
@@ -104,33 +107,33 @@ export default function Auth() {
 
         <Card className="w-full border shadow-sm bg-white">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-100">
+            <TabsList className={`grid w-full grid-cols-2 h-12 p-1 bg-gray-100 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               <TabsTrigger 
                 value="login" 
-                className="h-10 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                className="h-10 font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className={`${isMobile ? 'w-3 h-3 mr-1' : 'w-4 h-4 mr-2'}`} />
                 登入
               </TabsTrigger>
               <TabsTrigger 
                 value="signup"
-                className="h-10 text-sm font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                className="h-10 font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
               >
-                <UserPlus className="w-4 h-4 mr-2" />
+                <UserPlus className={`${isMobile ? 'w-3 h-3 mr-1' : 'w-4 h-4 mr-2'}`} />
                 註冊
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="mt-0">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-gray-900">歡迎回來</CardTitle>
+              <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
+                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>歡迎回來</CardTitle>
                 <CardDescription className="text-gray-600">
                   輸入您的登入資訊以存取您的帳戶
                 </CardDescription>
               </CardHeader>
               
               <form onSubmit={handleSignIn}>
-                <CardContent className="space-y-4">
+                <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
                   <div className="space-y-2">
                     <Label htmlFor="login-email" className="text-sm font-medium text-gray-700">
                       電子郵件
@@ -141,7 +144,7 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                       required
                     />
                   </div>
@@ -156,14 +159,14 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="h-11 pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-11 w-10 hover:bg-gray-100"
+                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -187,10 +190,10 @@ export default function Auth() {
                   </div>
                 </CardContent>
                 
-                <CardFooter>
+                <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white"
+                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-blue-600 hover:bg-blue-700 text-white`}
                     disabled={isLoading}
                   >
                     {isLoading ? "登入中..." : "登入"}
@@ -200,15 +203,15 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="signup" className="mt-0">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-gray-900">建立新帳戶</CardTitle>
+              <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
+                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>建立新帳戶</CardTitle>
                 <CardDescription className="text-gray-600">
                   填寫以下資訊以建立您的帳戶
                 </CardDescription>
               </CardHeader>
               
               <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4">
+                <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
                   <div className="space-y-2">
                     <Label htmlFor="signup-fullname" className="text-sm font-medium text-gray-700">
                       全名
@@ -218,7 +221,7 @@ export default function Auth() {
                       placeholder="張小明"
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
-                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                       required
                     />
                   </div>
@@ -233,7 +236,7 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="h-11 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                       required
                     />
                   </div>
@@ -248,14 +251,14 @@ export default function Auth() {
                         type={showSignupPassword ? "text" : "password"}
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="h-11 pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-11 w-10 hover:bg-gray-100"
+                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
                       >
                         {showSignupPassword ? (
@@ -268,10 +271,10 @@ export default function Auth() {
                   </div>
                 </CardContent>
                 
-                <CardFooter>
+                <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-emerald-600 hover:bg-emerald-700 text-white`}
                     disabled={isLoading}
                   >
                     {isLoading ? "建立帳戶中..." : "建立帳戶"}
@@ -283,7 +286,7 @@ export default function Auth() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
+        <div className="text-center mt-6 text-sm text-gray-500">
           <p>© 2024. 版權所有.</p>
         </div>
       </div>

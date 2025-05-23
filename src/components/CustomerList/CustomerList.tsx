@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, SearchIcon } from 'lucide-react';
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ type CustomerListProps = {
 };
 
 export function CustomerList({ customers: initialCustomers, selectedCustomerId, onSelectCustomer, onAddCustomer }: CustomerListProps) {
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [displayedCount, setDisplayedCount] = useState(20); // Start with 20 items
@@ -109,10 +111,10 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   
   return (
     <div className="h-full flex flex-col">
-      <div className="p-5 border-b sticky top-0 bg-white z-10">
+      <div className="p-4 md:p-5 border-b sticky top-0 bg-white z-10">
         <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         
-        <div className="flex gap-2 mb-4">
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-2'} mb-4`}>
           <div className="flex-1 relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
@@ -124,7 +126,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32 shrink-0">
+            <SelectTrigger className={`${isMobile ? 'w-full' : 'w-32'} shrink-0`}>
               <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
@@ -154,7 +156,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
         ) : filteredCustomers.length > 0 ? (
           <>
             <Table>
-              <TableHeader>
+              <TableHeader className={isMobile ? 'hidden' : ''}>
                 <TableRow>
                   <TableHead className="w-[40%]">名稱</TableHead>
                   <TableHead className="w-[30%]">部門</TableHead>
@@ -165,16 +167,32 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
                 {displayedCustomers.map((customer) => (
                   <TableRow 
                     key={customer.id} 
-                    className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
+                    className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''} ${isMobile ? 'flex flex-col p-3 border-b' : ''}`}
                     onClick={() => onSelectCustomer(customer)}
                   >
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>{customer.departmentName}</TableCell>
-                    <TableCell>
-                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                        {getStatusText(customer.status)}
-                      </span>
-                    </TableCell>
+                    {isMobile ? (
+                      // Mobile layout
+                      <>
+                        <div className="font-medium text-base mb-1">{customer.name}</div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-500">{customer.departmentName}</span>
+                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                            {getStatusText(customer.status)}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      // Desktop layout
+                      <>
+                        <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell>{customer.departmentName}</TableCell>
+                        <TableCell>
+                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                            {getStatusText(customer.status)}
+                          </span>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

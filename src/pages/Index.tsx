@@ -8,8 +8,9 @@ import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDial
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Menu } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type IndexProps = {
   sidebarVisible: boolean;
@@ -18,13 +19,15 @@ type IndexProps = {
 
 const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [activeDepartment, setActiveDepartment] = useState("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Changed default to true
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showCustomerDetail, setShowCustomerDetail] = useState(false);
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -32,6 +35,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       fetchCustomers();
     }
   }, [user, activeDepartment]);
+
+  // Show customer detail panel on mobile when a customer is selected
+  useEffect(() => {
+    if (isMobile && selectedCustomer) {
+      setShowCustomerDetail(true);
+    }
+  }, [selectedCustomer, isMobile]);
   
   const fetchCustomers = async () => {
     try {
@@ -163,6 +173,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     }
   };
 
+  const handleBackToList = () => {
+    setShowCustomerDetail(false);
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       {/* Department Sidebar - Always visible on initial load */}
@@ -170,7 +184,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         <Sidebar 
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
-          isVisible={true} // Always visible by default
+          isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
       </div>
@@ -188,7 +202,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       {/* Main content container */}
       <div className="flex flex-1 h-full w-full">
         {/* Customer List Panel */}
-        <div className="w-1/3 min-w-[300px] h-full border-r border-gray-200 bg-white overflow-y-auto">
+        <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-1/3 min-w-0 md:min-w-[300px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
           <CustomerList 
             customers={customers} 
             selectedCustomerId={selectedCustomerId}
@@ -198,7 +212,18 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         </div>
         
         {/* Customer Detail Panel */}
-        <div className="w-2/3 h-full bg-white overflow-y-auto">
+        <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/3 h-full bg-white overflow-y-auto`}>
+          {isMobile && (
+            <Button
+              variant="ghost"
+              className="ml-4 mt-4 mb-2 p-2 flex items-center text-sm"
+              onClick={handleBackToList}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              返回客戶列表
+            </Button>
+          )}
+          
           {selectedCustomer ? (
             <CustomerDetail 
               customer={selectedCustomer} 

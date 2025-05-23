@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer } from "../CustomerList/CustomerListItem";
 import { MoreHorizontal, PencilLine } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,8 @@ type CustomerDetailProps = {
 };
 
 export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
+  const isMobile = useIsMobile();
+  
   if (!customer) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -51,24 +54,24 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
   };
 
   return (
-    <div className="flex-1 p-6 h-full overflow-auto">
+    <div className="flex-1 p-4 md:p-6 h-full overflow-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">{customer.name}</h2>
+        <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-semibold`}>{customer.name}</h2>
         
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex items-center gap-2"
+            className={`flex items-center gap-1 ${isMobile ? 'px-2 py-1 h-8' : ''}`}
             onClick={() => onEditCustomer(customer)}
           >
             <PencilLine className="w-4 h-4" />
-            編輯
+            {!isMobile && "編輯"}
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className={isMobile ? "h-8 w-8" : ""}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -88,13 +91,13 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="mb-4 grid w-full grid-cols-2">
+        <TabsList className={`mb-4 grid w-full grid-cols-2 ${isMobile ? 'text-sm' : ''}`}>
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="basic" className="p-4 bg-white border rounded-md">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="basic" className="p-3 md:p-4 bg-white border rounded-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-gray-500 block">客戶名稱</label>
@@ -113,7 +116,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
               
               <div>
                 <label className="text-sm text-gray-500 block">地址</label>
-                <div>{customer.address || "-"}</div>
+                <div className="break-words">{customer.address || "-"}</div>
               </div>
               
               <div>
@@ -151,7 +154,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           
           <div className="mt-6">
             <label className="text-sm text-gray-500 block">備註</label>
-            <div className="p-4 border rounded-md bg-gray-50 min-h-24">
+            <div className="p-3 md:p-4 border rounded-md bg-gray-50 min-h-16 md:min-h-24">
               {customer.notes || "無備註資訊"}
             </div>
           </div>
