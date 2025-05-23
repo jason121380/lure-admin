@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -29,11 +29,29 @@ import {
 } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type DepartmentType = {
   id: string;
   code: string;
   name: string;
+  sort_order?: number;
 };
 
 type SidebarProps = {
@@ -41,6 +59,85 @@ type SidebarProps = {
   setActiveDepartment: (id: string) => void;
   isVisible: boolean;
   toggleSidebar?: () => void;
+};
+
+// Sortable department item component
+const SortableDepartment = ({ 
+  department, 
+  activeDepartment,
+  onSelectDepartment,
+  onDeleteClick
+}: { 
+  department: DepartmentType;
+  activeDepartment: string;
+  onSelectDepartment: (code: string) => void;
+  onDeleteClick: (e: React.MouseEvent, dept: DepartmentType) => void;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ 
+    id: department.id,
+    data: department
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className="relative group flex items-center"
+    >
+      {department.code !== 'all' && department.code !== 'uncategorized' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5 absolute left-1 cursor-grab"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-3.5 w-3.5 text-gray-400" />
+        </Button>
+      )}
+      
+      <Button 
+        variant="ghost" 
+        className={cn(
+          "w-full justify-start px-4 gap-3 font-normal",
+          activeDepartment === department.code && "bg-slate-100",
+          department.code !== 'all' && department.code !== 'uncategorized' && "pl-7"
+        )}
+        onClick={() => onSelectDepartment(department.code)}
+      >
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+        </svg>
+        {department.name}
+      </Button>
+      
+      {/* Delete button */}
+      {department.code !== 'all' && department.code !== 'uncategorized' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => onDeleteClick(e, department)}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
 };
 
 export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
@@ -64,6 +161,18 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const [fullName, setFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+
+  // DND sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Sync local visibility state with prop
   useEffect(() => {
@@ -98,7 +207,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       const { data, error } = await supabase
         .from('departments')
         .select('*')
-        .order('name', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
 
@@ -107,7 +216,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         const departments: DepartmentType[] = data.map(dept => ({
           id: dept.id,
           code: dept.code,
-          name: dept.name
+          name: dept.name,
+          sort_order: dept.sort_order
         }));
         
         // Make sure 'all' is at the top
@@ -134,20 +244,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const createDefaultDepartments = async () => {
     try {
       const defaultDepartments = [
-        { code: 'all', name: '所有部門' },
-        { code: 'external', name: '發展 對外' },
-        { code: 'internal', name: '發展 對內' },
-        { code: 'digital', name: '數位行銷' },
-        { code: 'alfred', name: 'Alfred' },
-        { code: 'jason', name: 'Jason' },
-        { code: 'uncategorized', name: '未分類' }
+        { code: 'all', name: '所有部門', sort_order: 0 },
+        { code: 'external', name: '發展 對外', sort_order: 1 },
+        { code: 'internal', name: '發展 對內', sort_order: 2 },
+        { code: 'digital', name: '數位行銷', sort_order: 3 },
+        { code: 'alfred', name: 'Alfred', sort_order: 4 },
+        { code: 'jason', name: 'Jason', sort_order: 5 },
+        { code: 'uncategorized', name: '未分類', sort_order: 6 }
       ];
       
       for (const dept of defaultDepartments) {
         await supabase.from('departments').insert({
           code: dept.code,
           name: dept.name,
-          user_id: user!.id
+          user_id: user!.id,
+          sort_order: dept.sort_order
         });
       }
       
@@ -172,13 +283,17 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         return;
       }
       
+      // Get the highest sort_order from current departments
+      const highestOrder = Math.max(...departmentsList.map(dept => dept.sort_order || 0));
+      
       try {
         const { data, error } = await supabase
           .from('departments')
           .insert({
             code: newDepartmentCode,
             name: newDepartmentName,
-            user_id: user!.id
+            user_id: user!.id,
+            sort_order: highestOrder + 1
           })
           .select('*')
           .single();
@@ -189,7 +304,12 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         if (data) {
           setDepartmentsList([
             ...departmentsList, 
-            { id: data.id, code: data.code, name: data.name }
+            { 
+              id: data.id, 
+              code: data.code, 
+              name: data.name,
+              sort_order: data.sort_order
+            }
           ]);
         }
         
@@ -353,6 +473,79 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   };
 
+  // Handle drag end event
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      return;
+    }
+    
+    // Skip dragging for "all" and "uncategorized" departments
+    const dept = departmentsList.find(d => d.id === active.id);
+    if (dept?.code === 'all' || dept?.code === 'uncategorized') {
+      return;
+    }
+    
+    // Find indices
+    const activeIndex = departmentsList.findIndex((dept) => dept.id === active.id);
+    const overIndex = departmentsList.findIndex((dept) => dept.id === over.id);
+    
+    // Skip dragging if trying to place department before "all"
+    if (departmentsList[overIndex].code === 'all' && overIndex === 0) {
+      return;
+    }
+    
+    // Update local state with new order
+    const newOrder = arrayMove(departmentsList, activeIndex, overIndex);
+    setDepartmentsList(newOrder);
+    
+    // Generate new sort_order values (keeping "all" at top)
+    const firstItem = newOrder[0];
+    const otherItems = [...newOrder.slice(1)];
+    
+    // Ensure "all" is first
+    if (firstItem.code !== 'all') {
+      const allDept = otherItems.find(d => d.code === 'all');
+      if (allDept) {
+        // Move "all" to the top
+        otherItems.splice(otherItems.indexOf(allDept), 1);
+        const reordered = [allDept, firstItem, ...otherItems];
+        setDepartmentsList(reordered);
+      }
+    }
+    
+    // Update database with new order
+    try {
+      // Skip update for "all" and "uncategorized" departments
+      const updatedDepts = newOrder
+        .filter(dept => dept.code !== 'all' && dept.code !== 'uncategorized')
+        .map((dept, index) => ({
+          id: dept.id,
+          sort_order: index + 1 // Start from 1 (all is 0)
+        }));
+      
+      if (updatedDepts.length > 0) {
+        const { error } = await supabase
+          .from('departments')
+          .upsert(updatedDepts, { onConflict: 'id' });
+          
+        if (error) {
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error("Error updating department order:", error);
+      toast({
+        title: "更新失敗",
+        description: "無法更新部門順序，請稍後再試",
+        variant: "destructive"
+      });
+      // Revert to original order by refetching
+      await fetchDepartments();
+    }
+  };
+
   return (
     <div className={cn(
       "w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
@@ -404,37 +597,28 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               ))}
             </div>
           ) : (
-            departmentsList
-              .filter(dept => dept.code !== 'all')
-              .map((dept) => (
-                <div key={dept.id} className="relative group">
-                  <Button 
-                    variant="ghost" 
-                    className={cn(
-                      "w-full justify-start px-4 gap-3 font-normal",
-                      activeDepartment === dept.code && "bg-slate-100"
-                    )}
-                    onClick={() => setActiveDepartment(dept.code)}
-                  >
-                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                    </svg>
-                    {dept.name}
-                  </Button>
-                  
-                  {/* Delete button - only show for non-default departments */}
-                  {dept.code !== 'all' && dept.code !== 'uncategorized' && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => handleDeleteClick(e, dept)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              ))
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext 
+                items={departmentsList.filter(dept => dept.code !== 'all').map(dept => dept.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {departmentsList
+                  .filter(dept => dept.code !== 'all')
+                  .map((dept) => (
+                    <SortableDepartment 
+                      key={dept.id} 
+                      department={dept} 
+                      activeDepartment={activeDepartment}
+                      onSelectDepartment={setActiveDepartment}
+                      onDeleteClick={handleDeleteClick}
+                    />
+                  ))}
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </div>
