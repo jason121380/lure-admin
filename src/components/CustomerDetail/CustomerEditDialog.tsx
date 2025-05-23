@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -76,6 +77,7 @@ export function CustomerEditDialog({
         setTaxId(customer.taxId || '');
         setNotes(customer.notes || '');
       } else {
+        // For new customers, set default values with uncategorized
         setName('');
         setDepartment('uncategorized');
         setDepartmentName('未分類');
@@ -110,10 +112,33 @@ export function CustomerEditDialog({
           name: dept.name
         }));
         
+        // Ensure uncategorized department exists in the list
+        const hasUncategorized = departments.some(dept => dept.code === 'uncategorized');
+        if (!hasUncategorized) {
+          departments.unshift({
+            id: 'temp-uncategorized',
+            code: 'uncategorized',
+            name: '未分類'
+          });
+        }
+        
         setDepartmentsList(departments);
+      } else {
+        // If no departments exist, create a default uncategorized option
+        setDepartmentsList([{
+          id: 'temp-uncategorized',
+          code: 'uncategorized',
+          name: '未分類'
+        }]);
       }
     } catch (error) {
       console.error("Error fetching departments:", error);
+      // Fallback to uncategorized if fetch fails
+      setDepartmentsList([{
+        id: 'temp-uncategorized',
+        code: 'uncategorized',
+        name: '未分類'
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -121,10 +146,15 @@ export function CustomerEditDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Ensure we have valid department data for new customers
+    const finalDepartment = department || 'uncategorized';
+    const finalDepartmentName = departmentName || '未分類';
+    
     onSave({
       name,
-      department,
-      departmentName,
+      department: finalDepartment,
+      departmentName: finalDepartmentName,
       status,
       email,
       phone,
