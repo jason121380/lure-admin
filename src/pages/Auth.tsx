@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -93,17 +92,14 @@ export default function Auth() {
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            {/* Replace the L character with the LURE logo */}
             <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
               <img 
                 src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png"
-                alt="LURE CRM Logo"
+                alt="Logo"
                 className="w-full h-full object-contain"
               />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">LURE CRM</h1>
-          <p className="text-gray-600">客戶關係管理系統</p>
         </div>
 
         <Card className="w-full border shadow-sm bg-white">
@@ -288,7 +284,7 @@ export default function Auth() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-500">
-          <p>© 2024 LURE CRM. 版權所有.</p>
+          <p>© 2024. 版權所有.</p>
         </div>
       </div>
 
