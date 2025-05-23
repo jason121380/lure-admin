@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -199,9 +198,9 @@ export function CustomerEditDialog({
                   <SelectValue placeholder="選擇狀態" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">活躍</SelectItem>
+                  <SelectItem value="active">進行中</SelectItem>
                   <SelectItem value="paused">暫停</SelectItem>
-                  <SelectItem value="inactive">非活躍</SelectItem>
+                  <SelectItem value="inactive">終止</SelectItem>
                 </SelectContent>
               </Select>
             </div>

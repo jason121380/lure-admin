@@ -32,7 +32,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
     switch (status) {
       case 'active': return '進行中';
       case 'paused': return '暫停'; 
-      case 'inactive': return '不活躍';
+      case 'inactive': return '終止';
       default: return status;
     }
   };

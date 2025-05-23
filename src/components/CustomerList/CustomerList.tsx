@@ -67,7 +67,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
       case "paused":
         return "暫停";
       case "inactive":
-        return "不活躍";
+        return "終止";
       default:
         return status;
     }
@@ -111,7 +111,7 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
               <SelectItem value="all">所有狀態</SelectItem>
               <SelectItem value="active">進行中</SelectItem>
               <SelectItem value="paused">暫停</SelectItem>
-              <SelectItem value="inactive">不活躍</SelectItem>
+              <SelectItem value="inactive">終止</SelectItem>
             </SelectContent>
           </Select>
         </div>

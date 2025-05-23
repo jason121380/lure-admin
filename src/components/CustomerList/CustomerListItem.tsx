@@ -47,7 +47,7 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
       case "paused":
         return "暫停";
       case "inactive":
-        return "不活躍";
+        return "終止";
       default:
         return status;
     }
