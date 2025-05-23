@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,30 +58,12 @@ export const paymentMethods = [
 export const ServicePlanList = () => {
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
-  const [selectedService, setSelectedService] = useState<string>("");
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
   const [editingAmountId, setEditingAmountId] = useState<string | null>(null);
   const [editingAmount, setEditingAmount] = useState<string>("");
-
-  const handleAddService = () => {
-    if (!selectedService) return;
-    
-    const serviceItem = serviceItems.find(item => item.id === selectedService);
-    if (!serviceItem) return;
-
-    const newServicePlan: ServicePlanItem = {
-      id: `service-${Date.now()}`,
-      name: serviceItem.name,
-      description: "",
-      price: 0
-    };
-    
-    setServicePlans([...servicePlans, newServicePlan]);
-    setSelectedService("");
-  };
 
   const handleServiceFromDialog = (serviceId: string) => {
     const serviceItem = serviceItems.find(item => item.id === serviceId);
@@ -174,33 +157,6 @@ export const ServicePlanList = () => {
           <h3 className="text-lg font-semibold text-gray-900">服務項目</h3>
           <ServiceSelectionDialog onSelectService={handleServiceFromDialog} />
         </div>
-        
-        {/* 上方菜單選擇 */}
-        <div className="flex items-center gap-4 p-4 border rounded-md bg-gray-50">
-          <div className="flex-1">
-            <label className="text-sm text-gray-600 block mb-2">選擇服務項目</label>
-            <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="請選擇服務項目" />
-              </SelectTrigger>
-              <SelectContent>
-                {serviceItems.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button 
-            onClick={handleAddService}
-            disabled={!selectedService}
-            className="mt-6"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            新增服務
-          </Button>
-        </div>
 
         {/* 下方項目列表 */}
         {servicePlans.length > 0 ? (
@@ -277,7 +233,7 @@ export const ServicePlanList = () => {
           </div>
         ) : (
           <div className="p-12 text-center text-gray-500 border rounded-md">
-            請從上方選擇並新增服務項目，或點擊右上角 + 按鈕快速選擇
+            點擊右上角 + 按鈕新增服務項目
           </div>
         )}
       </div>
