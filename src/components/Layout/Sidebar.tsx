@@ -28,7 +28,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   DndContext,
   closestCenter,
@@ -434,19 +434,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
   const handleChangePassword = async () => {
     try {
-      if (!newPassword || !user?.email) return;
+      if (!user?.email) return;
 
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
 
-      setNewPassword('');
+      // 關閉彈窗
       setIsPasswordDialogOpen(false);
+      
+      // 顯示成功通知
       toast({
         title: "密碼重設郵件已發送",
-        description: "請檢查您的電子郵件以完成密碼重設"
+        description: "請檢查您的電子郵件以完成密碼重設。如果沒收到郵件，請檢查垃圾郵件資料夾。",
       });
     } catch (error) {
       console.error('Error resetting password:', error);
