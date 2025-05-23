@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -40,8 +41,11 @@ import {CSS} from '@dnd-kit/utilities';
 interface Department {
   id: string;
   name: string;
+  code: string;
   customer_count: number;
-  position: number;
+  sort_order: number;
+  user_id: string;
+  created_at: string;
 }
 
 interface SidebarProps {
@@ -99,31 +103,42 @@ export const Sidebar = ({
           .from('departments')
           .select('*')
           .eq('user_id', user.id)
-          .order('position', { ascending: true });
+          .order('sort_order', { ascending: true });
 
         if (error) {
           console.error("Error fetching departments:", error);
           return;
         }
 
-        setDepartments(data as Department[]);
+        // Transform the data to match our Department interface
+        const transformedDepartments: Department[] = data.map(item => ({
+          ...item,
+          customer_count: totalCustomerCounts[item.id] || 0
+        }));
+
+        setDepartments(transformedDepartments);
       } catch (error) {
         console.error("Unexpected error fetching departments:", error);
       }
     };
 
     fetchDepartments();
-  }, [user]);
+  }, [user, totalCustomerCounts]);
 
   const handleAddDepartment = async () => {
     if (!user || !newDepartmentName.trim()) return;
 
     try {
-      const newPosition = departments.length > 0 ? Math.max(...departments.map(d => d.position)) + 1 : 1;
+      const newSortOrder = departments.length > 0 ? Math.max(...departments.map(d => d.sort_order)) + 1 : 1;
 
       const { data, error } = await supabase
         .from('departments')
-        .insert([{ user_id: user.id, name: newDepartmentName, position: newPosition }])
+        .insert([{ 
+          user_id: user.id, 
+          name: newDepartmentName, 
+          code: newDepartmentName.toLowerCase().replace(/\s+/g, '_'),
+          sort_order: newSortOrder 
+        }])
         .select('*')
         .single();
 
@@ -137,7 +152,12 @@ export const Sidebar = ({
         return;
       }
 
-      setDepartments([...departments, data as Department]);
+      const newDepartment: Department = {
+        ...data,
+        customer_count: 0
+      };
+
+      setDepartments([...departments, newDepartment]);
       setNewDepartmentName('');
       setIsAddingDepartment(false);
       toast({
@@ -209,29 +229,24 @@ export const Sidebar = ({
       // Optimistically update the UI
       setDepartments(updatedDepartments);
 
-      // Update positions in the database
+      // Update sort_order in the database
       try {
         // Prepare updates for all departments
         const updates = updatedDepartments.map((department, index) => ({
           id: department.id,
-          position: index + 1, // Positions should be 1-based
+          sort_order: index + 1, // sort_order should be 1-based
         }));
   
-        // Execute the batch update
-        const { error } = await supabase
-          .from('departments')
-          .upsert(updates);
-  
-        if (error) {
-          console.error("Error updating department positions:", error);
-          toast({
-            title: "Error",
-            description: "Failed to update department positions.",
-            variant: "destructive",
-          });
-          // Revert the UI if the database update fails
-          setDepartments(departments);
-          return;
+        // Execute the batch update using individual updates since upsert might not work as expected
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('departments')
+            .update({ sort_order: update.sort_order })
+            .eq('id', update.id);
+            
+          if (error) {
+            throw error;
+          }
         }
   
         toast({

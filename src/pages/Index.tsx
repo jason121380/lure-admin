@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -171,7 +170,9 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
           isVisible={true} // Always visible by default
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          onCustomerAdded={handleAddCustomer}
+          totalCustomerCounts={{}}
         />
       </div>
       
