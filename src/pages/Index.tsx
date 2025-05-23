@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -27,6 +28,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showCustomerDetail, setShowCustomerDetail] = useState(false);
+  const [sidebarKey, setSidebarKey] = useState(0); // Key to force sidebar re-render
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -90,6 +92,11 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       console.error("Error fetching customers:", error);
     }
   };
+
+  // Force sidebar to refresh when customers data changes
+  const refreshSidebar = () => {
+    setSidebarKey(prev => prev + 1);
+  };
   
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomerId(customer.id);
@@ -112,6 +119,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setCustomers(prevCustomers => 
       prevCustomers.map(c => c.id === updatedCustomer.id ? updatedCustomer : c)
     );
+    // Force sidebar refresh when customer is updated
+    refreshSidebar();
   };
   
   const handleDeleteCustomer = async (customerId: string) => {
@@ -129,6 +138,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       setSelectedCustomerId(null);
       setSelectedCustomer(null);
       fetchCustomers();
+      // Force sidebar refresh when customer is deleted
+      refreshSidebar();
     } catch (error) {
       toast.error("刪除客戶時發生錯誤");
       console.error("Error deleting customer:", error);
@@ -178,6 +189,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       }
       
       fetchCustomers();
+      // Force sidebar refresh when customer is saved
+      refreshSidebar();
       setIsAddEditDialogOpen(false);
     } catch (error) {
       toast.error(editingCustomer ? "更新客戶資料失敗" : "新增客戶失敗");
@@ -204,6 +217,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
       toast.success(`已成功更新 ${customerIds.length} 位客戶的部門`);
       fetchCustomers();
+      // Force sidebar refresh when bulk department update happens
+      refreshSidebar();
     } catch (error) {
       toast.error("批量更新部門失敗");
       console.error("Error bulk updating departments:", error);
@@ -219,6 +234,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       {/* Department Sidebar - Always visible on initial load */}
       <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
+          key={sidebarKey}
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
           isVisible={true}
