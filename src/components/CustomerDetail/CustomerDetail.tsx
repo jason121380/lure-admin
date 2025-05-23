@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { PaymentRecordList } from "./PaymentRecords/PaymentRecordList";
+import { useState } from "react";
+import { NotesEditDialog } from "./NotesEditDialog";
 
 type CustomerDetailProps = {
   customer: Customer | null;
@@ -20,6 +22,7 @@ type CustomerDetailProps = {
 
 export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: CustomerDetailProps) {
   const isMobile = useIsMobile();
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   
   if (!customer) {
     return (
@@ -51,6 +54,14 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const handleUpdateNotes = (notes: string) => {
+    if (customer) {
+      const updatedCustomer = { ...customer, notes };
+      onEditCustomer(updatedCustomer);
+    }
+    setIsNotesDialogOpen(false);
   };
 
   return (
@@ -153,7 +164,18 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           </div>
           
           <div className="mt-6">
-            <label className="text-sm text-gray-500 block">備註</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm text-gray-500 block">備註</label>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1 text-gray-600"
+                onClick={() => setIsNotesDialogOpen(true)}
+              >
+                <PencilLine className="w-4 h-4" />
+                編輯備註
+              </Button>
+            </div>
             <div className="p-3 md:p-4 border rounded-md bg-gray-50 min-h-16 md:min-h-24">
               {customer.notes || "無備註資訊"}
             </div>
@@ -164,6 +186,13 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer }: C
           <PaymentRecordList customerId={customer.id} />
         </TabsContent>
       </Tabs>
+      
+      <NotesEditDialog 
+        open={isNotesDialogOpen}
+        onOpenChange={setIsNotesDialogOpen}
+        notes={customer.notes || ""}
+        onSave={handleUpdateNotes}
+      />
     </div>
   );
 }

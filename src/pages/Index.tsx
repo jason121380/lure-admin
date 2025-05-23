@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -75,10 +76,15 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       
       setCustomers(transformedData);
       
-      // Reset selection if the customer no longer exists in the list
-      if (selectedCustomerId && !transformedData.some(c => c.id === selectedCustomerId)) {
-        setSelectedCustomerId(null);
-        setSelectedCustomer(null);
+      // Update selected customer if it exists in the list
+      if (selectedCustomerId) {
+        const updatedSelectedCustomer = transformedData.find(c => c.id === selectedCustomerId);
+        if (updatedSelectedCustomer) {
+          setSelectedCustomer(updatedSelectedCustomer);
+        } else {
+          setSelectedCustomerId(null);
+          setSelectedCustomer(null);
+        }
       }
     } catch (error) {
       toast.error("無法載入客戶資料");
