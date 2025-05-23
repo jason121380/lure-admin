@@ -346,8 +346,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     if (deletePassword === '1234') {
       if (departmentToDelete) {
         try {
-          // Update customers in Supabase
-          await supabase
+          // First, update all customers with this department to "uncategorized"
+          const { error: updateError } = await supabase
             .from('customers')
             .update({ 
               department: 'uncategorized',
@@ -355,13 +355,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             })
             .eq('department', departmentToDelete.code);
             
-          // Delete the department
-          const { error } = await supabase
+          if (updateError) {
+            console.error("Error updating customers:", updateError);
+            throw updateError;
+          }
+            
+          // Then delete the department
+          const { error: deleteError } = await supabase
             .from('departments')
             .delete()
             .eq('id', departmentToDelete.id);
             
-          if (error) throw error;
+          if (deleteError) {
+            console.error("Error deleting department:", deleteError);
+            throw deleteError;
+          }
           
           // Remove the department from local state
           const updatedDepartments = departmentsList.filter(dept => dept.id !== departmentToDelete.id);
@@ -374,7 +382,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           
           toast({
             title: "部門已刪除",
-            description: `${departmentToDelete.name} 部門已成功刪除`
+            description: `${departmentToDelete.name} 部門已成功刪除，相關客戶已移至未分類`
           });
         } catch (error) {
           console.error("Error deleting department:", error);
