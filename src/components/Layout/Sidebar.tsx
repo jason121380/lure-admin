@@ -343,7 +343,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   };
   
   const handleConfirmDelete = async () => {
-    if (deletePassword === '1234') {
+    if (deletePassword === '96962779') {
       if (departmentToDelete) {
         try {
           // First, update all customers with this department to "uncategorized"
@@ -736,7 +736,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               您確定要刪除「{departmentToDelete?.name}」部門嗎？
               <div className="mt-4">
                 <label className="text-sm text-gray-500 block mb-2">
-                  請輸入密碼「1234」進行確認
+                  請輸入密碼進行確認
                 </label>
                 <Input
                   type="password"
@@ -749,7 +749,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
                   className={cn(passwordError && "border-red-500")}
                 />
                 {passwordError && (
-                  <p className="text-sm text-red-500 mt-1">密碼錯誤</p>
+                  <p className="text-sm text-red-500 mt-1">密碼錯誤，請重新輸入</p>
                 )}
               </div>
             </AlertDialogDescription>
