@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +98,12 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Add navigation bar shadow and glass effect */
+  .navbar-glass {
+    @apply backdrop-blur-md bg-background/80 border-b shadow-sm;
   }
 }
