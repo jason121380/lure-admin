@@ -25,11 +25,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log('Auth state change:', event, currentSession?.user?.email);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setLoading(false);
         
         if (event === 'SIGNED_OUT') {
+          // Force clear any cached state
+          setSession(null);
+          setUser(null);
           navigate("/auth");
         }
       }
@@ -37,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log('Initial session check:', currentSession?.user?.email);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
@@ -71,8 +76,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    try {
+      console.log('Starting signOut process...');
+      
+      // First clear local state immediately to prevent UI lag
+      setLoading(true);
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        throw error;
+      }
+      
+      console.log('Supabase signOut successful');
+      
+      // Force clear all auth state
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+      
+      // Clear any potential browser cache
+      if (typeof window !== 'undefined') {
+        // Clear localStorage keys that might be cached
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Clear sessionStorage as well
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && key.startsWith('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        }
+      }
+      
+      // Navigate to auth page
+      navigate("/auth");
+      
+      // Force a small delay to ensure navigation completes
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error during signOut:', error);
+      
+      // Even if there's an error, clear local state and navigate
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+      navigate("/auth");
+    }
   };
 
   const value = {
