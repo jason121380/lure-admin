@@ -11,18 +11,12 @@ import ResetPassword from "./pages/ResetPassword";
 import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
+// Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 mx-auto bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full animate-pulse"></div>
-          <p className="text-gray-600 font-medium">載入中...</p>
-        </div>
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
   if (!user) {
@@ -37,18 +31,11 @@ const AppRoutes = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 mx-auto bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full animate-pulse"></div>
-          <p className="text-gray-600 font-medium">載入中...</p>
-        </div>
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">      
+    <div className="flex relative">      
       <Routes>
         <Route 
           path="/" 
@@ -60,6 +47,7 @@ const AppRoutes = () => {
         />
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
@@ -67,6 +55,7 @@ const AppRoutes = () => {
 };
 
 const App = () => {
+  // Move queryClient creation inside the component
   const [queryClient] = useState(() => new QueryClient());
   
   return (
