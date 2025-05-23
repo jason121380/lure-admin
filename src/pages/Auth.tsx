@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -89,7 +87,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
@@ -100,7 +98,7 @@ export default function Auth() {
           <p className="text-blue-100">客戶關係管理系統</p>
         </div>
 
-        <Card className="border-0 shadow-2xl bg-gray-900/80 backdrop-blur-sm">
+        <Card className="w-full border-0 shadow-2xl bg-gray-900/80 backdrop-blur-sm">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-800/50">
               <TabsTrigger 
@@ -293,4 +291,3 @@ export default function Auth() {
     </div>
   );
 }
-
