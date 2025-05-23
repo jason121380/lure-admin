@@ -31,7 +31,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     setIsLoading(true);
 
     try {
-      // First, try to generate reset token with Supabase
+      // Generate reset token with Supabase
       console.log("Calling Supabase resetPasswordForEmail...");
       const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -43,39 +43,19 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
         console.error("Supabase reset error:", resetError);
         toast({
           title: "發送失敗",
-          description: `Supabase 錯誤: ${resetError.message}`,
+          description: resetError.message,
           variant: "destructive",
         });
         return;
       }
 
-      // Call our custom edge function to send the email
-      console.log("Calling send-password-reset edge function...");
-      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-password-reset', {
-        body: {
-          email: email,
-          resetLink: `${window.location.origin}/reset-password`
-        }
+      toast({
+        title: "郵件已發送",
+        description: "請檢查您的電子郵件以重設密碼。如果沒收到郵件，請檢查垃圾郵件資料夾。",
       });
+      onOpenChange(false);
+      setEmail("");
 
-      console.log("Edge function result:", { emailData, emailError });
-
-      if (emailError) {
-        console.error("Email sending error:", emailError);
-        toast({
-          title: "發送失敗",
-          description: `郵件發送錯誤: ${emailError.message || "無法發送重設郵件，請稍後再試。"}`,
-          variant: "destructive",
-        });
-      } else {
-        console.log("Email sent successfully:", emailData);
-        toast({
-          title: "郵件已發送",
-          description: "請檢查您的電子郵件以重設密碼。如果沒收到郵件，請檢查垃圾郵件資料夾。",
-        });
-        onOpenChange(false);
-        setEmail("");
-      }
     } catch (error: any) {
       console.error("General error in password reset:", error);
       toast({

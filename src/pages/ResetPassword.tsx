@@ -21,13 +21,28 @@ export default function ResetPassword() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Check if we have the necessary tokens
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
+    // Check for error parameters first
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
     
-    console.log("Tokens from URL:", { accessToken, refreshToken });
+    if (error) {
+      console.log("Error in URL:", error, errorDescription);
+      toast({
+        title: "重設連結無效",
+        description: "密碼重設連結已過期或無效，請重新申請。",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Check for valid reset tokens
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    console.log("Reset password params:", { tokenHash, type });
+    
+    if (!tokenHash || type !== 'recovery') {
       toast({
         title: "無效的重設連結",
         description: "請重新申請密碼重設。",
@@ -37,31 +52,39 @@ export default function ResetPassword() {
       return;
     }
 
-    // Set the session with the tokens
-    const setSessionAsync = async () => {
+    // Verify and exchange the token for a session
+    const verifyTokenAsync = async () => {
       try {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
+        console.log("Verifying token hash:", tokenHash);
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery'
         });
         
-        console.log("Session set result:", { data, error });
+        console.log("Token verification result:", { data, error });
         
         if (error) {
+          console.error("Token verification failed:", error);
           toast({
-            title: "設定會話失敗",
-            description: error.message,
+            title: "驗證失敗",
+            description: "重設連結無效或已過期，請重新申請。",
             variant: "destructive",
           });
           navigate("/auth");
           return;
         }
         
-        setInitialized(true);
+        if (data?.user && data?.session) {
+          console.log("Token verified successfully, user session established");
+          setInitialized(true);
+        } else {
+          throw new Error("No session established after token verification");
+        }
+        
       } catch (err) {
-        console.error("Error setting session:", err);
+        console.error("Error verifying token:", err);
         toast({
-          title: "設定會話失敗",
+          title: "驗證失敗",
           description: "請重新申請密碼重設。",
           variant: "destructive",
         });
@@ -69,7 +92,7 @@ export default function ResetPassword() {
       }
     };
     
-    setSessionAsync();
+    verifyTokenAsync();
   }, [searchParams, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,7 +138,8 @@ export default function ResetPassword() {
           description: "您的密碼已成功更新。",
         });
         
-        // Wait a bit before navigating to allow the user to see the success message
+        // Sign out and redirect to login
+        await supabase.auth.signOut();
         setTimeout(() => {
           navigate("/auth");
         }, 2000);
