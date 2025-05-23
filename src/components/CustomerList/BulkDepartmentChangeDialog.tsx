@@ -39,6 +39,7 @@ export function BulkDepartmentChangeDialog({
 
   const fetchDepartments = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('departments')
         .select('code, name')
@@ -56,6 +57,8 @@ export function BulkDepartmentChangeDialog({
       setDepartments(departmentOptions);
     } catch (error) {
       console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
