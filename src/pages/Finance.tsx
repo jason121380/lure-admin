@@ -12,30 +12,31 @@ type FinanceProps = {
 
 const Finance = ({ sidebarVisible, setSidebarVisible }: FinanceProps) => {
   const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeDepartment, setActiveDepartment] = useState("all");
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Department Sidebar */}
-      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+      {/* Sidebar */}
+      <div className={`${sidebarVisible ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
-          isVisible={true}
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isVisible={sidebarVisible}
+          toggleSidebar={() => setSidebarVisible(!sidebarVisible)}
         />
       </div>
       
       {/* Mobile menu button */}
-      <Button 
-        variant="ghost" 
-        className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <Menu className="h-5 w-5" />
-        <span className="sr-only">開啟部門選單</span>
-      </Button>
+      {isMobile && (
+        <Button 
+          variant="ghost" 
+          className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
+          onClick={() => setSidebarVisible(!sidebarVisible)}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">開啟部門選單</span>
+        </Button>
+      )}
       
       {/* Main content container */}
       <div className="flex flex-1 h-full w-full">
