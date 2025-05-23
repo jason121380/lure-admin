@@ -106,6 +106,8 @@ export default function Auth() {
 
         <Card className="w-full border shadow-sm bg-white">
           <Tabs defaultValue="login" className="w-full">
+            {/* Hide tabs for now, only show login */}
+            {/*
             <TabsList className={`grid w-full grid-cols-2 h-12 p-1 bg-gray-100 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               <TabsTrigger 
                 value="login" 
@@ -122,6 +124,7 @@ export default function Auth() {
                 註冊
               </TabsTrigger>
             </TabsList>
+            */}
 
             <TabsContent value="login" className="mt-0">
               <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
@@ -177,6 +180,8 @@ export default function Auth() {
                     </div>
                   </div>
                   
+                  {/* Hide forgot password link */}
+                  {/*
                   <div className="flex justify-end">
                     <Button
                       type="button"
@@ -187,6 +192,7 @@ export default function Auth() {
                       忘記密碼？
                     </Button>
                   </div>
+                  */}
                 </CardContent>
                 
                 <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
@@ -201,86 +207,12 @@ export default function Auth() {
               </form>
             </TabsContent>
 
+            {/* Hide signup tab content */}
+            {/*
             <TabsContent value="signup" className="mt-0">
-              <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>建立新帳戶</CardTitle>
-                <CardDescription className="text-gray-600">
-                  填寫以下資訊以建立您的帳戶
-                </CardDescription>
-              </CardHeader>
-              
-              <form onSubmit={handleSignUp}>
-                <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-fullname" className="text-sm font-medium text-gray-700">
-                      全名
-                    </Label>
-                    <Input
-                      id="signup-fullname"
-                      placeholder="張小明"
-                      value={signupFullName}
-                      onChange={(e) => setSignupFullName(e.target.value)}
-                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">
-                      電子郵件
-                    </Label>
-                    <Input 
-                      id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">
-                      密碼
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        type={showSignupPassword ? "text" : "password"}
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      >
-                        {showSignupPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-                
-                <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
-                  <Button 
-                    type="submit" 
-                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-emerald-600 hover:bg-emerald-700 text-white`}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "建立帳戶中..." : "建立帳戶"}
-                  </Button>
-                </CardFooter>
-              </form>
+              // ... keep existing code (signup form content)
             </TabsContent>
+            */}
           </Tabs>
         </Card>
 
