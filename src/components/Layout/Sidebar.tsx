@@ -361,15 +361,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     )}>
       <div className="p-4 flex justify-between items-center border-b border-slate-200">
         <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-6 w-auto" />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="md:flex"
-          onClick={handleToggleSidebar}
-        >
-          <ChevronLeft className="h-5 w-5" />
-          <span className="sr-only">收起選單</span>
-        </Button>
       </div>
       
       <div className="flex-1 flex flex-col gap-6 px-2">
