@@ -51,7 +51,7 @@ type DepartmentType = {
   id: string;
   code: string;
   name: string;
-  sort_order?: number;
+  sort_order: number;
 };
 
 type SidebarProps = {
@@ -522,16 +522,22 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         .filter(dept => dept.code !== 'all' && dept.code !== 'uncategorized')
         .map((dept, index) => ({
           id: dept.id,
-          sort_order: index + 1 // Start from 1 (all is 0)
+          sort_order: index + 1, // Start from 1 (all is 0)
+          code: dept.code, // Add these required fields to satisfy TypeScript
+          name: dept.name,
+          user_id: user!.id
         }));
       
       if (updatedDepts.length > 0) {
-        const { error } = await supabase
-          .from('departments')
-          .upsert(updatedDepts, { onConflict: 'id' });
-          
-        if (error) {
-          throw error;
+        for (const dept of updatedDepts) {
+          const { error } = await supabase
+            .from('departments')
+            .update({ sort_order: dept.sort_order })
+            .eq('id', dept.id);
+            
+          if (error) {
+            throw error;
+          }
         }
       }
     } catch (error) {
