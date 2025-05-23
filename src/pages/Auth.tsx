@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -91,8 +92,15 @@ export default function Auth() {
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">L</span>
+          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            {/* Replace the L character with the LURE logo */}
+            <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
+              <img 
+                src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png"
+                alt="LURE CRM Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">LURE CRM</h1>
           <p className="text-gray-600">客戶關係管理系統</p>
