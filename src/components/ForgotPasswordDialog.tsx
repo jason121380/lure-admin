@@ -27,25 +27,30 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting password reset process for:", email);
     setIsLoading(true);
 
     try {
-      // Generate reset link using Supabase auth
+      // First, try to generate reset token with Supabase
+      console.log("Calling Supabase resetPasswordForEmail...");
       const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
+
+      console.log("Supabase resetPasswordForEmail result:", { data, error: resetError });
 
       if (resetError) {
         console.error("Supabase reset error:", resetError);
         toast({
           title: "發送失敗",
-          description: resetError.message,
+          description: `Supabase 錯誤: ${resetError.message}`,
           variant: "destructive",
         });
         return;
       }
 
       // Call our custom edge function to send the email
+      console.log("Calling send-password-reset edge function...");
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: email,
@@ -53,27 +58,29 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
         }
       });
 
+      console.log("Edge function result:", { emailData, emailError });
+
       if (emailError) {
         console.error("Email sending error:", emailError);
         toast({
           title: "發送失敗",
-          description: "無法發送重設郵件，請稍後再試。",
+          description: `郵件發送錯誤: ${emailError.message || "無法發送重設郵件，請稍後再試。"}`,
           variant: "destructive",
         });
       } else {
         console.log("Email sent successfully:", emailData);
         toast({
           title: "郵件已發送",
-          description: "請檢查您的電子郵件以重設密碼。",
+          description: "請檢查您的電子郵件以重設密碼。如果沒收到郵件，請檢查垃圾郵件資料夾。",
         });
         onOpenChange(false);
         setEmail("");
       }
     } catch (error: any) {
-      console.error("General error:", error);
+      console.error("General error in password reset:", error);
       toast({
         title: "錯誤",
-        description: error.message || "發送重設郵件時發生錯誤",
+        description: `發送重設郵件時發生錯誤: ${error.message || "未知錯誤"}`,
         variant: "destructive",
       });
     } finally {
@@ -105,6 +112,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -118,7 +126,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
             >
               取消
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !email.trim()}>
               {isLoading ? "發送中..." : "發送重設連結"}
             </Button>
           </DialogFooter>
