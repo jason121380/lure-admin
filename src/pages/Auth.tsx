@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -287,7 +286,7 @@ export default function Auth() {
 
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-gray-500">
-          <p>© 2024. 版權所有.</p>
+          <p>© 2025 by Jason C 版權所有</p>
         </div>
       </div>
 
