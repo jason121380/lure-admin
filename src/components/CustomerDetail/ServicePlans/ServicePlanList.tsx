@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -66,6 +67,8 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
+  const [editingDescriptionId, setEditingDescriptionId] = useState<string | null>(null);
+  const [editingDescription, setEditingDescription] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   // 從資料庫讀取資料
@@ -257,6 +260,37 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
   const handleCancelEdit = () => {
     setEditingPriceId(null);
     setEditingPrice("");
+    setEditingDescriptionId(null);
+    setEditingDescription("");
+  };
+
+  const handleEditDescription = (id: string, currentDescription: string) => {
+    setEditingDescriptionId(id);
+    setEditingDescription(currentDescription || "");
+  };
+
+  const handleSaveDescription = async (id: string) => {
+    try {
+      // 更新描述到資料庫
+      const { error } = await supabase
+        .from('service_plans')
+        .update({ description: editingDescription, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setServicePlans(prev => 
+        prev.map(plan => 
+          plan.id === id ? { ...plan, description: editingDescription } : plan
+        )
+      );
+      toast.success("描述已更新");
+    } catch (error) {
+      console.error("Error updating description:", error);
+      toast.error("更新描述失敗");
+    }
+    setEditingDescriptionId(null);
+    setEditingDescription("");
   };
 
   const handleRemoveService = async (id: string) => {
@@ -341,7 +375,51 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
                 {servicePlans.map((plan) => (
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.name}</TableCell>
-                    <TableCell className="text-gray-600">{plan.description || "無描述"}</TableCell>
+                    <TableCell>
+                      {editingDescriptionId === plan.id ? (
+                        <div className="flex items-center gap-2">
+                          <Textarea
+                            value={editingDescription}
+                            onChange={(e) => setEditingDescription(e.target.value)}
+                            className="min-h-[60px] resize-none"
+                            placeholder="請輸入描述"
+                            autoFocus
+                          />
+                          <div className="flex flex-col gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSaveDescription(plan.id)}
+                              className="p-1 h-8 w-8"
+                            >
+                              <Check className="w-4 h-4 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={handleCancelEdit}
+                              className="p-1 h-8 w-8"
+                            >
+                              <X className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2 group">
+                          <span className="text-gray-600 flex-1 min-h-[20px]">
+                            {plan.description || "無描述"}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditDescription(plan.id, plan.description)}
+                            className="p-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Edit className="w-4 h-4 text-gray-500" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       {editingPriceId === plan.id ? (
                         <div className="flex items-center justify-end gap-2">
