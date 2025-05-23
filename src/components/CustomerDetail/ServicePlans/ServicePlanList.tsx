@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +42,7 @@ export const serviceItems = [
   { id: 'special', name: '特別專案' },
   { id: 'video', name: '影音拍攝' },
   { id: 'bos', name: 'BOS系統' },
+  { id: 'reputation', name: '口碑行銷' },
 ];
 
 export const advertisingPlatforms = [
