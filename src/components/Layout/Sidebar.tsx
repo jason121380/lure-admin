@@ -196,6 +196,12 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const [departmentToEdit, setDepartmentToEdit] = useState<DepartmentType | null>(null);
   const [editDepartmentName, setEditDepartmentName] = useState('');
 
+  // Virtual departments that always show regardless of DB state
+  const [virtualDepartments, setVirtualDepartments] = useState<{all: boolean; uncategorized: boolean}>({
+    all: false,
+    uncategorized: false
+  });
+
   // DND sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -301,6 +307,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         }
       });
 
+      // Make sure virtual departments have counts
+      if (!('all' in counts)) counts['all'] = data?.length || 0;
+      if (!('uncategorized' in counts)) counts['uncategorized'] = counts['uncategorized'] || 0;
+
       console.log("Updated customer counts:", counts);
       setCustomerCounts(counts);
     } catch (error) {
@@ -313,7 +323,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       setIsLoading(true);
       console.log("Fetching departments for user:", user?.id);
       
-      // 只獲取當前用戶的部門（由於RLS，這會自動過濾）
+      // Get the user's departments
       const { data, error } = await supabase
         .from('departments')
         .select('*')
@@ -324,20 +334,42 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       if (error) throw error;
 
+      // Track if we found the critical departments
+      let hasAllDept = false;
+      let hasUncategorizedDept = false;
+
       if (data && data.length > 0) {
         // Map database fields to our component structure
-        const departments: DepartmentType[] = data.map(dept => ({
-          id: dept.id,
-          code: dept.code,
-          name: dept.name,
-          sort_order: (dept as any).sort_order || 0
-        }));
+        const departments: DepartmentType[] = data.map(dept => {
+          // Check for critical departments
+          if (dept.code === 'all') hasAllDept = true;
+          if (dept.code === 'uncategorized') hasUncategorizedDept = true;
+          
+          return {
+            id: dept.id,
+            code: dept.code,
+            name: dept.name,
+            sort_order: (dept as any).sort_order || 0
+          };
+        });
         
         console.log("Mapped departments:", departments);
         setDepartmentsList(departments);
+        
+        // Update virtual department tracking
+        setVirtualDepartments({
+          all: !hasAllDept,
+          uncategorized: !hasUncategorizedDept
+        });
+
+        // If critical departments are missing, try to create them
+        if (!hasAllDept || !hasUncategorizedDept) {
+          console.log("Critical departments missing, attempting to create them...");
+          await ensureCriticalDepartments();
+        }
       } else {
         console.log("No departments found for user, creating defaults...");
-        // 如果用戶沒有任何部門，創建預設部門
+        // If user has no departments, create default ones
         await createDefaultDepartments();
       }
     } catch (error) {
@@ -347,8 +379,78 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         description: "無法載入部門資料",
         variant: "destructive"
       });
+      
+      // Even if there's an error, ensure we show virtual critical departments
+      setVirtualDepartments({
+        all: true,
+        uncategorized: true
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // New function to ensure critical departments exist
+  const ensureCriticalDepartments = async () => {
+    try {
+      console.log("Ensuring critical departments exist for user:", user?.id);
+      const criticalDepartments = [
+        { code: 'all', name: '所有客戶', sort_order: 0 },
+        { code: 'uncategorized', name: '未分類', sort_order: 1 },
+      ];
+      
+      // Check which critical departments are missing
+      const { data: existingDepts, error: checkError } = await supabase
+        .from('departments')
+        .select('code')
+        .in('code', ['all', 'uncategorized'])
+        .eq('user_id', user!.id);
+        
+      if (checkError) throw checkError;
+      
+      const existingCodes = existingDepts?.map(dept => dept.code) || [];
+      
+      // Create only the missing critical departments
+      for (const dept of criticalDepartments) {
+        if (!existingCodes.includes(dept.code)) {
+          try {
+            const { error } = await supabase.from('departments').insert({
+              code: dept.code,
+              name: dept.name,
+              user_id: user!.id,
+              sort_order: dept.sort_order
+            });
+            
+            if (error) {
+              console.error(`Error creating ${dept.code} department:`, error);
+              // If it fails, mark it as virtual
+              setVirtualDepartments(prev => ({
+                ...prev,
+                [dept.code]: true
+              }));
+            }
+          } catch (err) {
+            console.error(`Failed to create ${dept.code} department:`, err);
+            // If it's a critical department and creation fails, ensure we still show it
+            if (dept.code === 'all' || dept.code === 'uncategorized') {
+              setVirtualDepartments(prev => ({
+                ...prev,
+                [dept.code]: true
+              }));
+            }
+          }
+        }
+      }
+      
+      // Refresh departments after ensuring critical ones
+      fetchDepartments();
+    } catch (error) {
+      console.error("Error ensuring critical departments:", error);
+      // Set virtual departments as fallback
+      setVirtualDepartments({
+        all: true,
+        uncategorized: true
+      });
     }
   };
 
@@ -378,18 +480,32 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       // 只創建不存在的部門
       for (const dept of defaultDepartments) {
         if (!existingCodes.includes(dept.code)) {
-          const { error } = await supabase.from('departments').insert({
-            code: dept.code,
-            name: dept.name,
-            user_id: user!.id,
-            sort_order: dept.sort_order
-          });
-          
-          if (error) {
-            console.error("Error creating department:", dept.name, error);
-            // 如果是重複鍵錯誤，忽略它
-            if (!error.message.includes('duplicate key')) {
-              throw error;
+          try {
+            const { error } = await supabase.from('departments').insert({
+              code: dept.code,
+              name: dept.name,
+              user_id: user!.id,
+              sort_order: dept.sort_order
+            });
+            
+            if (error) {
+              console.error("Error creating department:", dept.name, error);
+              // If it's a critical department and creation fails, mark it as virtual
+              if (dept.code === 'all' || dept.code === 'uncategorized') {
+                setVirtualDepartments(prev => ({
+                  ...prev,
+                  [dept.code]: true
+                }));
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to create ${dept.code} department:`, err);
+            // If it's a critical department and creation fails, ensure we still show it
+            if (dept.code === 'all' || dept.code === 'uncategorized') {
+              setVirtualDepartments(prev => ({
+                ...prev,
+                [dept.code]: true
+              }));
             }
           }
         }
@@ -403,6 +519,12 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         title: "創建預設部門失敗",
         description: "無法創建預設部門，請稍後再試",
         variant: "destructive"
+      });
+      
+      // Set virtual departments as fallback
+      setVirtualDepartments({
+        all: true,
+        uncategorized: true
       });
     }
   };
@@ -759,6 +881,24 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   };
 
+  // Generate virtual department object for rendering
+  const getVirtualDepartment = (code: string): DepartmentType => {
+    if (code === 'all') {
+      return {
+        id: 'virtual-all',
+        code: 'all',
+        name: '所有客戶',
+        sort_order: 0
+      };
+    }
+    return {
+      id: 'virtual-uncategorized',
+      code: 'uncategorized',
+      name: '未分類',
+      sort_order: 1
+    };
+  };
+
   return (
     <div className={cn(
       "w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
@@ -773,39 +913,35 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         <div className="space-y-1">
           <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
           
-          {/* Show "所有客戶" button */}
-          {departmentsList.some(dept => dept.code === 'all') && (
-            <Button 
-              variant="ghost" 
-              className={cn(
-                "w-full justify-start px-4 gap-3 font-normal",
-                activeDepartment === 'all' && "bg-slate-100"
-              )}
-              onClick={() => setActiveDepartment('all')}
-            >
-              <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-              </svg>
-              <span>所有客戶 ({customerCounts['all'] || 0})</span>
-            </Button>
-          )}
+          {/* Always show "所有客戶" button - either from DB or virtual */}
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "w-full justify-start px-4 gap-3 font-normal",
+              activeDepartment === 'all' && "bg-slate-100"
+            )}
+            onClick={() => setActiveDepartment('all')}
+          >
+            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+            </svg>
+            <span>所有客戶 ({customerCounts['all'] || 0})</span>
+          </Button>
           
-          {/* Show "未分類" button right after "所有客戶" */}
-          {departmentsList.some(dept => dept.code === 'uncategorized') && (
-            <Button 
-              variant="ghost" 
-              className={cn(
-                "w-full justify-start px-4 gap-3 font-normal",
-                activeDepartment === 'uncategorized' && "bg-slate-100"
-              )}
-              onClick={() => setActiveDepartment('uncategorized')}
-            >
-              <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-              </svg>
-              <span>未分類 ({customerCounts['uncategorized'] || 0})</span>
-            </Button>
-          )}
+          {/* Always show "未分類" button - either from DB or virtual */}
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "w-full justify-start px-4 gap-3 font-normal",
+              activeDepartment === 'uncategorized' && "bg-slate-100"
+            )}
+            onClick={() => setActiveDepartment('uncategorized')}
+          >
+            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+            </svg>
+            <span>未分類 ({customerCounts['uncategorized'] || 0})</span>
+          </Button>
         </div>
         
         <div className="space-y-1">
