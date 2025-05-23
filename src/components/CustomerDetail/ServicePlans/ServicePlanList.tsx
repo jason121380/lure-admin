@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ServiceSelectionDialog } from "./ServiceSelectionDialog";
+import { AdvertisingSelectionDialog } from "./AdvertisingSelectionDialog";
 
 export type ServicePlanItem = {
   id: string;
@@ -77,6 +77,21 @@ export const ServicePlanList = () => {
     };
     
     setServicePlans([...servicePlans, newServicePlan]);
+  };
+
+  const handleAdvertisingFromDialog = (platformId: string, paymentMethodId: string) => {
+    const platformItem = advertisingPlatforms.find(item => item.id === platformId);
+    const paymentItem = paymentMethods.find(item => item.id === paymentMethodId);
+    if (!platformItem || !paymentItem) return;
+
+    const newAdvertisingPlan: AdvertisingPlanItem = {
+      id: `ad-${Date.now()}`,
+      platform: platformItem.name,
+      paymentMethod: paymentItem.name,
+      amount: 0
+    };
+    
+    setAdvertisingPlans([...advertisingPlans, newAdvertisingPlan]);
   };
 
   const handleAddAdvertising = () => {
@@ -240,10 +255,13 @@ export const ServicePlanList = () => {
 
       {/* 第二區塊：廣告投放 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">廣告投放</h3>
-        
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">廣告投放</h3>
+          <AdvertisingSelectionDialog onSelectAdvertising={handleAdvertisingFromDialog} />
+        </div>
+
         {/* 上方菜單選擇 */}
-        <div className="flex items-center gap-4 p-4 border rounded-md bg-blue-50">
+        {/* <div className="flex items-center gap-4 p-4 border rounded-md bg-blue-50">
           <div className="flex-1">
             <label className="text-sm text-gray-600 block mb-2">平台選擇</label>
             <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
@@ -282,7 +300,7 @@ export const ServicePlanList = () => {
             <Plus className="w-4 h-4 mr-2" />
             新增廣告
           </Button>
-        </div>
+        </div> */}
 
         {/* 下方項目列表 */}
         {advertisingPlans.length > 0 ? (
