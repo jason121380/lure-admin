@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -56,6 +55,8 @@ export function PaymentRecordDialog({
   const [totalAmount, setTotalAmount] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(true);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   
   // Reset form when dialog opens/closes or when paymentRecord changes
   useEffect(() => {
@@ -121,11 +122,29 @@ export function PaymentRecordDialog({
     }
   };
 
-  const handleDelete = () => {
-    if (paymentRecord && onDeletePaymentRecord) {
-      onDeletePaymentRecord(paymentRecord.id);
-      setIsDeleteAlertOpen(false);
+  const handleDeleteClick = () => {
+    setIsDeleteAlertOpen(true);
+    setDeletePassword("");
+    setPasswordError(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletePassword === '96962779') {
+      if (paymentRecord && onDeletePaymentRecord) {
+        onDeletePaymentRecord(paymentRecord.id);
+        setIsDeleteAlertOpen(false);
+        setDeletePassword("");
+        setPasswordError(false);
+      }
+    } else {
+      setPasswordError(true);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteAlertOpen(false);
+    setDeletePassword("");
+    setPasswordError(false);
   };
 
   return (
@@ -260,7 +279,7 @@ export function PaymentRecordDialog({
                 <Button 
                   type="button" 
                   variant="destructive" 
-                  onClick={() => setIsDeleteAlertOpen(true)}
+                  onClick={handleDeleteClick}
                   className="flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -280,12 +299,35 @@ export function PaymentRecordDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>確認刪除付款記錄</AlertDialogTitle>
             <AlertDialogDescription>
-              此操作無法撤銷，確定要刪除此付款記錄嗎？
+              此操作無法撤銷，請輸入密碼確認刪除此付款記錄。
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="py-4">
+            <div className="space-y-2">
+              <Label htmlFor="deletePassword">密碼</Label>
+              <Input
+                id="deletePassword"
+                type="password"
+                placeholder="請輸入密碼"
+                value={deletePassword}
+                onChange={(e) => {
+                  setDeletePassword(e.target.value);
+                  setPasswordError(false);
+                }}
+                className={cn(passwordError && "border-red-500")}
+              />
+              {passwordError && (
+                <p className="text-sm text-red-500 mt-1">密碼錯誤，請重新輸入</p>
+              )}
+            </div>
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogCancel onClick={handleDeleteCancel}>取消</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={!deletePassword}
+            >
               刪除
             </AlertDialogAction>
           </AlertDialogFooter>
