@@ -324,29 +324,41 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     try {
       console.log("Creating default departments for user:", user?.id);
       const defaultDepartments = [
-        { code: 'all', name: '所有部門', sort_order: 0 },
-        { code: 'external', name: '發展 對外', sort_order: 1 },
-        { code: 'internal', name: '發展 對內', sort_order: 2 },
-        { code: 'digital', name: '數位行銷', sort_order: 3 },
-        { code: 'alfred', name: 'Alfred', sort_order: 4 },
-        { code: 'jason', name: 'Jason', sort_order: 5 },
-        { code: 'uncategorized', name: '未分類', sort_order: 6 }
+        { code: 'all', name: '所有客戶', sort_order: 0 },
+        { code: 'uncategorized', name: '未分類', sort_order: 1 },
+        { code: 'external', name: '發展 對外', sort_order: 2 },
+        { code: 'internal', name: '發展 對內', sort_order: 3 },
+        { code: 'digital', name: '數位行銷', sort_order: 4 },
+        { code: 'alfred', name: 'Alfred', sort_order: 5 },
+        { code: 'jason', name: 'Jason', sort_order: 6 }
       ];
       
-      // 為當前用戶創建每個預設部門
-      for (const dept of defaultDepartments) {
-        const { error } = await supabase.from('departments').insert({
-          code: dept.code,
-          name: dept.name,
-          user_id: user!.id, // 確保每個部門都綁定到當前用戶
-          sort_order: dept.sort_order
-        });
+      // 檢查哪些部門已經存在
+      const { data: existingDepts, error: checkError } = await supabase
+        .from('departments')
+        .select('code')
+        .eq('user_id', user!.id);
         
-        if (error) {
-          console.error("Error creating department:", dept.name, error);
-          // 如果是重複鍵錯誤，忽略它（部門可能已存在）
-          if (!error.message.includes('duplicate key')) {
-            throw error;
+      if (checkError) throw checkError;
+      
+      const existingCodes = existingDepts?.map(dept => dept.code) || [];
+      
+      // 只創建不存在的部門
+      for (const dept of defaultDepartments) {
+        if (!existingCodes.includes(dept.code)) {
+          const { error } = await supabase.from('departments').insert({
+            code: dept.code,
+            name: dept.name,
+            user_id: user!.id,
+            sort_order: dept.sort_order
+          });
+          
+          if (error) {
+            console.error("Error creating department:", dept.name, error);
+            // 如果是重複鍵錯誤，忽略它
+            if (!error.message.includes('duplicate key')) {
+              throw error;
+            }
           }
         }
       }
@@ -740,7 +752,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               onClick={() => setActiveDepartment('all')}
             >
               <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3 3 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
               </svg>
               <span>所有客戶 ({customerCounts['all'] || 0})</span>
             </Button>
