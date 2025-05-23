@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -53,8 +52,14 @@ export function BulkDepartmentChangeDialog({
 
       if (error) throw error;
 
-      // Add uncategorized option only if it doesn't exist in the data
-      const hasUncategorized = data?.some(dept => dept.code === 'uncategorized');
+      // Filter out any "all departments" or similar options and add uncategorized option only if it doesn't exist
+      const filteredData = data?.filter(dept => 
+        dept.code !== 'all' && 
+        dept.name !== '所有部門' && 
+        dept.name !== 'All Departments'
+      ) || [];
+
+      const hasUncategorized = filteredData.some(dept => dept.code === 'uncategorized');
       
       const departmentOptions: Department[] = [];
       
@@ -62,8 +67,8 @@ export function BulkDepartmentChangeDialog({
         departmentOptions.push({ code: 'uncategorized', name: '未分類' });
       }
       
-      // Add all other departments
-      departmentOptions.push(...(data || []));
+      // Add all other departments (excluding any "all departments" options)
+      departmentOptions.push(...filteredData);
       
       setDepartments(departmentOptions);
     } catch (error) {
