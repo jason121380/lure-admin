@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 export default function Auth() {
   const { signIn, signUp } = useAuth();
@@ -15,6 +15,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -169,6 +170,17 @@ export default function Auth() {
                       </Button>
                     </div>
                   </div>
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 h-auto text-sm text-blue-600 hover:text-blue-700"
+                      onClick={() => setForgotPasswordOpen(true)}
+                    >
+                      忘記密碼？
+                    </Button>
+                  </div>
                 </CardContent>
                 
                 <CardFooter>
@@ -271,6 +283,11 @@ export default function Auth() {
           <p>© 2024 LURE CRM. 版權所有.</p>
         </div>
       </div>
+
+      <ForgotPasswordDialog
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
+      />
     </div>
   );
 }

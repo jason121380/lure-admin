@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -45,6 +46,7 @@ const AppRoutes = () => {
           } 
         />
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
