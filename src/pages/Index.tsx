@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
-import { Navbar } from "@/components/Layout/Navbar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
 import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
@@ -9,7 +7,7 @@ import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDial
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -216,71 +214,73 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setShowCustomerDetail(false);
   };
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-gray-50">
-      {/* Navbar - New fixed navigation bar at the top */}
-      <Navbar toggleSidebar={toggleSidebar} />
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
+      {/* Department Sidebar - Always visible on initial load */}
+      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+        <Sidebar 
+          activeDepartment={activeDepartment} 
+          setActiveDepartment={setActiveDepartment} 
+          isVisible={true}
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </div>
       
-      {/* Main content with adjusted top padding for navbar */}
-      <div className="flex flex-1 pt-16 h-full w-full">
-        {/* Department Sidebar */}
-        <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block h-full`}>
-          <Sidebar 
-            activeDepartment={activeDepartment} 
-            setActiveDepartment={setActiveDepartment} 
-            isVisible={true}
-            toggleSidebar={toggleSidebar}
+      {/* Mobile menu button */}
+      <Button 
+        variant="ghost" 
+        className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">開啟部門選單</span>
+      </Button>
+      
+      {/* Main content container */}
+      <div className="flex flex-1 h-full w-full">
+        {/* Customer List Panel - Increased width from 1/3 to 2/5 */}
+        <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
+          <CustomerList 
+            customers={customers} 
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={handleSelectCustomer}
+            onAddCustomer={handleAddCustomer}
+            onBulkUpdateDepartment={handleBulkUpdateDepartment}
           />
         </div>
         
-        {/* Main content container */}
-        <div className="flex flex-1 h-full w-full">
-          {/* Customer List Panel */}
-          <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
-            <CustomerList 
-              customers={customers} 
-              selectedCustomerId={selectedCustomerId}
-              onSelectCustomer={handleSelectCustomer}
-              onAddCustomer={handleAddCustomer}
-              onBulkUpdateDepartment={handleBulkUpdateDepartment}
-            />
-          </div>
+        {/* Customer Detail Panel - Decreased width from 2/3 to 3/5 */}
+        <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-3/5 h-full bg-white overflow-y-auto`}>
+          {isMobile && (
+            <Button
+              variant="ghost"
+              className="ml-4 mt-4 mb-2 p-2 flex items-center text-sm"
+              onClick={handleBackToList}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              返回客戶列表
+            </Button>
+          )}
           
-          {/* Customer Detail Panel */}
-          <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-3/5 h-full bg-white overflow-y-auto`}>
-            {isMobile && (
-              <Button
-                variant="ghost"
-                className="ml-4 mt-4 mb-2 p-2 flex items-center text-sm"
-                onClick={handleBackToList}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                返回客戶列表
-              </Button>
-            )}
-            
-            {selectedCustomer ? (
-              <CustomerDetail 
-                customer={selectedCustomer} 
-                onEditCustomer={handleEditCustomer}
-                onDeleteCustomer={handleDeleteCustomer}
-                onUpdateCustomer={handleUpdateCustomer}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center p-6 max-w-sm">
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">
-                    請選擇客戶
-                  </h3>
-                  <p className="text-gray-500">
-                    從左側清單中選擇一個客戶以查看詳細資訊
-                  </p>
-                </div>
+          {selectedCustomer ? (
+            <CustomerDetail 
+              customer={selectedCustomer} 
+              onEditCustomer={handleEditCustomer}
+              onDeleteCustomer={handleDeleteCustomer}
+              onUpdateCustomer={handleUpdateCustomer}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center p-6 max-w-sm">
+                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                  請選擇客戶
+                </h3>
+                <p className="text-gray-500">
+                  從左側清單中選擇一個客戶以查看詳細資訊
+                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
       
