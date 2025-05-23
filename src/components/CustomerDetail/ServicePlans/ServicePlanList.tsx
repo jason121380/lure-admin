@@ -24,7 +24,6 @@ export type AdvertisingPlanItem = {
   id: string;
   platform: string;
   paymentMethod: string;
-  amount: number;
   details: {
     serviceFeePercentage?: string;
     prepaidAmount?: string;
@@ -58,8 +57,6 @@ export const ServicePlanList = () => {
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
-  const [editingAmountId, setEditingAmountId] = useState<string | null>(null);
-  const [editingAmount, setEditingAmount] = useState<string>("");
 
   const handleServiceFromDialog = (serviceId: string) => {
     const serviceItem = serviceItems.find(item => item.id === serviceId);
@@ -85,7 +82,6 @@ export const ServicePlanList = () => {
       id: `ad-${Date.now()}`,
       platform: platformItem.name,
       paymentMethod: paymentItem.name,
-      amount: 0,
       details: {
         serviceFeePercentage: formData?.serviceFeePercentage || undefined,
         prepaidAmount: formData?.prepaidAmount || undefined,
@@ -115,29 +111,9 @@ export const ServicePlanList = () => {
     setEditingPrice("");
   };
 
-  const handleEditAmount = (id: string, currentAmount: number) => {
-    setEditingAmountId(id);
-    setEditingAmount(currentAmount.toString());
-  };
-
-  const handleSaveAmount = (id: string) => {
-    const newAmount = parseFloat(editingAmount);
-    if (!isNaN(newAmount) && newAmount >= 0) {
-      setAdvertisingPlans(prev => 
-        prev.map(plan => 
-          plan.id === id ? { ...plan, amount: newAmount } : plan
-        )
-      );
-    }
-    setEditingAmountId(null);
-    setEditingAmount("");
-  };
-
   const handleCancelEdit = () => {
     setEditingPriceId(null);
     setEditingPrice("");
-    setEditingAmountId(null);
-    setEditingAmount("");
   };
 
   const handleRemoveService = (id: string) => {
@@ -273,7 +249,6 @@ export const ServicePlanList = () => {
                   <TableHead>投放平台</TableHead>
                   <TableHead>付款方式</TableHead>
                   <TableHead>詳細資訊</TableHead>
-                  <TableHead className="text-right">金額 (元)</TableHead>
                   <TableHead className="w-20">操作</TableHead>
                 </TableRow>
               </TableHeader>
@@ -283,49 +258,6 @@ export const ServicePlanList = () => {
                     <TableCell className="font-medium">{plan.platform}</TableCell>
                     <TableCell>{plan.paymentMethod}</TableCell>
                     <TableCell>{renderAdvertisingDetails(plan)}</TableCell>
-                    <TableCell className="text-right">
-                      {editingAmountId === plan.id ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <Input
-                            type="number"
-                            value={editingAmount}
-                            onChange={(e) => setEditingAmount(e.target.value)}
-                            className="w-24 text-right"
-                            min="0"
-                            step="0.01"
-                            autoFocus
-                          />
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleSaveAmount(plan.id)}
-                            className="p-1 h-8 w-8"
-                          >
-                            <Check className="w-4 h-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleCancelEdit}
-                            className="p-1 h-8 w-8"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-end gap-2">
-                          <span>{plan.amount.toLocaleString()}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditAmount(plan.id, plan.amount)}
-                            className="p-1 h-8 w-8"
-                          >
-                            <Edit className="w-4 h-4 text-gray-500" />
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
                     <TableCell>
                       <Button
                         size="sm"
