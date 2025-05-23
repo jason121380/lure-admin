@@ -25,12 +25,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Password reset request received for:", email);
     console.log("Reset token provided:", token ? "Yes" : "No");
 
-    // Use the correct domain for the reset link
-    const baseUrl = "https://lure.lovable.app";
-    
-    // We'll use the email in the URL to help with identification
-    // The actual token hash will be in the link that Supabase generates
-    const resetLink = `${baseUrl}/reset-password?email=${encodeURIComponent(email)}`;
+    // Use the correct reset password URL
+    const resetLink = `https://lure.lovable.app/reset-password?email=${encodeURIComponent(email)}`;
 
     const emailResponse = await resend.emails.send({
       from: "密碼重設 <onboarding@resend.dev>",
@@ -47,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
             <div style="background: white; padding: 40px; text-align: center; border-radius: 16px 16px 0 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-              <img src="${baseUrl}/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" style="width: 64px; height: 64px; margin: 0 auto 20px;">
+              <img src="https://lure.lovable.app/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" style="width: 64px; height: 64px; margin: 0 auto 20px;">
               <h1 style="color: #1f2937; margin: 0 0 20px; font-size: 24px; font-weight: 600;">重設您的密碼</h1>
               
               <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
