@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,13 +11,6 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ServiceSelectionDialog } from "./ServiceSelectionDialog";
 import { AdvertisingSelectionDialog } from "./AdvertisingSelectionDialog";
 
@@ -32,6 +26,11 @@ export type AdvertisingPlanItem = {
   platform: string;
   paymentMethod: string;
   amount: number;
+  details: {
+    serviceFeePercentage?: string;
+    prepaidAmount?: string;
+    placementLimit?: string;
+  };
 };
 
 export const serviceItems = [
@@ -58,8 +57,6 @@ export const paymentMethods = [
 export const ServicePlanList = () => {
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
-  const [selectedPlatform, setSelectedPlatform] = useState<string>("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
   const [editingAmountId, setEditingAmountId] = useState<string | null>(null);
@@ -79,38 +76,26 @@ export const ServicePlanList = () => {
     setServicePlans([...servicePlans, newServicePlan]);
   };
 
-  const handleAdvertisingFromDialog = (platformId: string, paymentMethodId: string) => {
+  const handleAdvertisingFromDialog = (platformId: string, paymentMethodId: string, formData?: any) => {
     const platformItem = advertisingPlatforms.find(item => item.id === platformId);
     const paymentItem = paymentMethods.find(item => item.id === paymentMethodId);
     if (!platformItem || !paymentItem) return;
-
+    
+    // Create a new advertising plan with the form data
     const newAdvertisingPlan: AdvertisingPlanItem = {
       id: `ad-${Date.now()}`,
       platform: platformItem.name,
       paymentMethod: paymentItem.name,
-      amount: 0
+      amount: 0,
+      details: {
+        serviceFeePercentage: formData?.serviceFeePercentage || undefined,
+        prepaidAmount: formData?.prepaidAmount || undefined,
+        placementLimit: formData?.placementLimit || undefined,
+      }
     };
     
-    setAdvertisingPlans([...advertisingPlans, newAdvertisingPlan]);
-  };
-
-  const handleAddAdvertising = () => {
-    if (!selectedPlatform || !selectedPaymentMethod) return;
-    
-    const platformItem = advertisingPlatforms.find(item => item.id === selectedPlatform);
-    const paymentItem = paymentMethods.find(item => item.id === selectedPaymentMethod);
-    if (!platformItem || !paymentItem) return;
-
-    const newAdvertisingPlan: AdvertisingPlanItem = {
-      id: `ad-${Date.now()}`,
-      platform: platformItem.name,
-      paymentMethod: paymentItem.name,
-      amount: 0
-    };
-    
-    setAdvertisingPlans([...advertisingPlans, newAdvertisingPlan]);
-    setSelectedPlatform("");
-    setSelectedPaymentMethod("");
+    // Replace any existing advertising plan
+    setAdvertisingPlans([newAdvertisingPlan]);
   };
 
   const handleEditPrice = (id: string, currentPrice: number) => {
@@ -161,7 +146,24 @@ export const ServicePlanList = () => {
   };
 
   const handleRemoveAdvertising = (id: string) => {
-    setAdvertisingPlans(prev => prev.filter(plan => plan.id !== id));
+    setAdvertisingPlans([]);
+  };
+  
+  // Render advertising details based on payment method
+  const renderAdvertisingDetails = (plan: AdvertisingPlanItem) => {
+    switch (true) {
+      case plan.paymentMethod === "次月算上月" && plan.details.serviceFeePercentage:
+        return `服務費: ${plan.details.serviceFeePercentage}%`;
+      
+      case plan.paymentMethod === "預收內扣" && plan.details.prepaidAmount && plan.details.placementLimit:
+        return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 上限: ${parseFloat(plan.details.placementLimit).toLocaleString()}`;
+      
+      case plan.paymentMethod === "預收外+%" && plan.details.prepaidAmount && plan.details.serviceFeePercentage:
+        return `預收: ${parseFloat(plan.details.prepaidAmount).toLocaleString()} / 服務費: ${plan.details.serviceFeePercentage}%`;
+      
+      default:
+        return "";
+    }
   };
 
   return (
@@ -257,50 +259,11 @@ export const ServicePlanList = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">廣告投放</h3>
-          <AdvertisingSelectionDialog onSelectAdvertising={handleAdvertisingFromDialog} />
+          <AdvertisingSelectionDialog 
+            onSelectAdvertising={handleAdvertisingFromDialog} 
+            disabled={advertisingPlans.length > 0}
+          />
         </div>
-
-        {/* 上方菜單選擇 */}
-        {/* <div className="flex items-center gap-4 p-4 border rounded-md bg-blue-50">
-          <div className="flex-1">
-            <label className="text-sm text-gray-600 block mb-2">平台選擇</label>
-            <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="請選擇投放平台" />
-              </SelectTrigger>
-              <SelectContent>
-                {advertisingPlatforms.map((platform) => (
-                  <SelectItem key={platform.id} value={platform.id}>
-                    {platform.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm text-gray-600 block mb-2">付款方式</label>
-            <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="請選擇付款方式" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((method) => (
-                  <SelectItem key={method.id} value={method.id}>
-                    {method.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button 
-            onClick={handleAddAdvertising}
-            disabled={!selectedPlatform || !selectedPaymentMethod}
-            className="mt-6"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            新增廣告
-          </Button>
-        </div> */}
 
         {/* 下方項目列表 */}
         {advertisingPlans.length > 0 ? (
@@ -310,6 +273,7 @@ export const ServicePlanList = () => {
                 <TableRow>
                   <TableHead>投放平台</TableHead>
                   <TableHead>付款方式</TableHead>
+                  <TableHead>詳細資訊</TableHead>
                   <TableHead className="text-right">金額 (元)</TableHead>
                   <TableHead className="w-20">操作</TableHead>
                 </TableRow>
@@ -319,6 +283,7 @@ export const ServicePlanList = () => {
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.platform}</TableCell>
                     <TableCell>{plan.paymentMethod}</TableCell>
+                    <TableCell>{renderAdvertisingDetails(plan)}</TableCell>
                     <TableCell className="text-right">
                       {editingAmountId === plan.id ? (
                         <div className="flex items-center justify-end gap-2">
@@ -379,7 +344,7 @@ export const ServicePlanList = () => {
           </div>
         ) : (
           <div className="p-12 text-center text-gray-500 border rounded-md">
-            請從上方選擇平台和付款方式並新增廣告投放項目
+            點擊右上角 + 按鈕新增廣告投放項目
           </div>
         )}
       </div>

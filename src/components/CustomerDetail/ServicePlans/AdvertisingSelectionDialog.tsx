@@ -16,9 +16,13 @@ import { advertisingPlatforms, paymentMethods } from "./ServicePlanList";
 
 type AdvertisingSelectionDialogProps = {
   onSelectAdvertising: (platformId: string, paymentMethodId: string, formData?: any) => void;
+  disabled?: boolean;
 };
 
-export const AdvertisingSelectionDialog = ({ onSelectAdvertising }: AdvertisingSelectionDialogProps) => {
+export const AdvertisingSelectionDialog = ({ 
+  onSelectAdvertising, 
+  disabled = false 
+}: AdvertisingSelectionDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
@@ -148,7 +152,7 @@ export const AdvertisingSelectionDialog = ({ onSelectAdvertising }: AdvertisingS
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+        <Button size="sm" variant="outline" className="h-8 w-8 p-0" disabled={disabled}>
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
