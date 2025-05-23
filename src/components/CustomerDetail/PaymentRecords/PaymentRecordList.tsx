@@ -30,6 +30,17 @@ const accountOptions = [
   { id: "development", name: "發展處帳戶" }
 ];
 
+type PaymentRecord = {
+  id: string;
+  date: string;
+  paymentMethod: string;
+  account: string | null;
+  amount: number;
+  taxAmount: number;
+  totalAmount: number;
+  isConfirmed: boolean;
+};
+
 type PaymentRecordListProps = {
   customerId: string;
 };
