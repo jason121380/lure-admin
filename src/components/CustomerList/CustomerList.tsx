@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -227,7 +226,7 @@ export function CustomerList({
                   <TableHead className="w-[50px]">
                     <Checkbox
                       checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
+                      onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
                       aria-label="選取全部"
                     />
                   </TableHead>
@@ -248,7 +247,7 @@ export function CustomerList({
                         <div className="flex items-center justify-between w-full mb-2">
                           <Checkbox
                             checked={selectedCustomerIds.includes(customer.id)}
-                            onCheckedChange={(checked) => handleCheckboxChange(customer.id, checked)}
+                            onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
                             aria-label={`選取 ${customer.name}`}
                           />
                           <div className="flex-1 ml-3" onClick={() => onSelectCustomer(customer)}>
@@ -268,7 +267,7 @@ export function CustomerList({
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={selectedCustomerIds.includes(customer.id)}
-                            onCheckedChange={(checked) => handleCheckboxChange(customer.id, checked)}
+                            onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
                             aria-label={`選取 ${customer.name}`}
                           />
                         </TableCell>
