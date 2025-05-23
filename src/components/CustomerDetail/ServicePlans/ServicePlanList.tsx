@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ServiceSelectionDialog } from "./ServiceSelectionDialog";
 
 export type ServicePlanItem = {
   id: string;
@@ -80,6 +80,20 @@ export const ServicePlanList = () => {
     
     setServicePlans([...servicePlans, newServicePlan]);
     setSelectedService("");
+  };
+
+  const handleServiceFromDialog = (serviceId: string) => {
+    const serviceItem = serviceItems.find(item => item.id === serviceId);
+    if (!serviceItem) return;
+
+    const newServicePlan: ServicePlanItem = {
+      id: `service-${Date.now()}`,
+      name: serviceItem.name,
+      description: "",
+      price: 0
+    };
+    
+    setServicePlans([...servicePlans, newServicePlan]);
   };
 
   const handleAddAdvertising = () => {
@@ -156,7 +170,10 @@ export const ServicePlanList = () => {
     <div className="space-y-8">
       {/* 第一區塊：服務項目 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">服務項目</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">服務項目</h3>
+          <ServiceSelectionDialog onSelectService={handleServiceFromDialog} />
+        </div>
         
         {/* 上方菜單選擇 */}
         <div className="flex items-center gap-4 p-4 border rounded-md bg-gray-50">
@@ -260,7 +277,7 @@ export const ServicePlanList = () => {
           </div>
         ) : (
           <div className="p-12 text-center text-gray-500 border rounded-md">
-            請從上方選擇並新增服務項目
+            請從上方選擇並新增服務項目，或點擊右上角 + 按鈕快速選擇
           </div>
         )}
       </div>
