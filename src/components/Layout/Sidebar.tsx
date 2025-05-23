@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, ChevronDown } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -27,12 +27,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -570,21 +564,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       
       <div className="flex-1 flex flex-col gap-6 px-2">
         <div className="space-y-1">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-4 py-2 text-sm font-medium">
-                功能選單
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setActiveDepartment('all')}>
-                客戶管理
-              </DropdownMenuItem>
-              {/* You can add more menu items here in the future */}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
+          <h2 className="text-sm font-medium px-4 py-2">客戶管理</h2>
           {departmentsList.some(dept => dept.code === 'all') && (
             <Button 
               variant="ghost" 
