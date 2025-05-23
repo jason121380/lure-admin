@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -211,7 +210,85 @@ export default function Auth() {
             {/* Hide signup tab content */}
             {/*
             <TabsContent value="signup" className="mt-0">
-              // ... keep existing code (signup form content)
+              <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
+                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>建立帳戶</CardTitle>
+                <CardDescription className="text-gray-600">
+                  輸入您的資訊以建立一個新帳戶
+                </CardDescription>
+              </CardHeader>
+              
+              <form onSubmit={handleSignUp}>
+                <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">
+                      電子郵件
+                    </Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-full-name" className="text-sm font-medium text-gray-700">
+                      全名
+                    </Label>
+                    <Input
+                      id="signup-full-name"
+                      type="text"
+                      placeholder="您的全名"
+                      value={signupFullName}
+                      onChange={(e) => setSignupFullName(e.target.value)}
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">
+                      密碼
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type={showSignupPassword ? "text" : "password"}
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      >
+                        {showSignupPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+                
+                <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
+                  <Button 
+                    type="submit"
+                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-blue-600 hover:bg-blue-700 text-white`}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "註冊中..." : "註冊"}
+                  </Button>
+                </CardFooter>
+              </form>
             </TabsContent>
             */}
           </Tabs>
@@ -219,7 +296,7 @@ export default function Auth() {
 
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-gray-500">
-          <p>© 2025 by LURE CRM 版權所有</p>
+          <p>© 2025 by Lure</p>
         </div>
       </div>
 
