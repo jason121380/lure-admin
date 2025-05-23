@@ -173,6 +173,31 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     }
   };
 
+  // Handle bulk department update
+  const handleBulkUpdateDepartment = async (
+    customerIds: string[], 
+    departmentData: { department: string; departmentName: string }
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({
+          department: departmentData.department,
+          department_name: departmentData.departmentName,
+          updated_at: new Date().toISOString()
+        })
+        .in('id', customerIds);
+
+      if (error) throw error;
+
+      toast.success(`已成功更新 ${customerIds.length} 位客戶的部門`);
+      fetchCustomers();
+    } catch (error) {
+      toast.error("批量更新部門失敗");
+      console.error("Error bulk updating departments:", error);
+    }
+  };
+
   const handleBackToList = () => {
     setShowCustomerDetail(false);
   };
@@ -208,6 +233,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
             selectedCustomerId={selectedCustomerId}
             onSelectCustomer={handleSelectCustomer}
             onAddCustomer={handleAddCustomer}
+            onBulkUpdateDepartment={handleBulkUpdateDepartment}
           />
         </div>
         

@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, SearchIcon } from 'lucide-react';
+import { PlusCircle, SearchIcon, Edit2 } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BulkDepartmentChangeDialog } from './BulkDepartmentChangeDialog';
 import {
   Table,
   TableBody,
@@ -21,18 +23,29 @@ type CustomerListProps = {
   selectedCustomerId: string | null;
   onSelectCustomer: (customer: Customer) => void;
   onAddCustomer: () => void;
+  onBulkUpdateDepartment?: (customerIds: string[], departmentData: { department: string; departmentName: string }) => Promise<void>;
 };
 
-export function CustomerList({ customers: initialCustomers, selectedCustomerId, onSelectCustomer, onAddCustomer }: CustomerListProps) {
+export function CustomerList({ 
+  customers: initialCustomers, 
+  selectedCustomerId, 
+  onSelectCustomer, 
+  onAddCustomer,
+  onBulkUpdateDepartment 
+}: CustomerListProps) {
   const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [displayedCount, setDisplayedCount] = useState(20); // Start with 20 items
-  const itemsPerLoad = 20; // Load 20 more items each time
+  const [displayedCount, setDisplayedCount] = useState(20);
+  const itemsPerLoad = 20;
   
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [loading, setLoading] = useState(true);
   const observerRef = useRef<HTMLDivElement>(null);
+  
+  // Bulk selection state
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([]);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   
   useEffect(() => {
     setCustomers(initialCustomers);
@@ -80,6 +93,11 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
   useEffect(() => {
     setDisplayedCount(20);
   }, [statusFilter, searchQuery]);
+
+  // Clear selection when customers change
+  useEffect(() => {
+    setSelectedCustomerIds([]);
+  }, [customers]);
   
   // Function to get status text in Chinese
   const getStatusText = (status: string) => {
@@ -106,6 +124,36 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
         return "bg-red-100 text-red-700 font-medium";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Handle individual checkbox change
+  const handleCheckboxChange = (customerId: string, checked: boolean) => {
+    setSelectedCustomerIds(prev => 
+      checked 
+        ? [...prev, customerId]
+        : prev.filter(id => id !== customerId)
+    );
+  };
+
+  // Handle select all checkbox
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedCustomerIds(checked ? displayedCustomers.map(c => c.id) : []);
+  };
+
+  // Check if all displayed customers are selected
+  const isAllSelected = displayedCustomers.length > 0 && 
+    displayedCustomers.every(customer => selectedCustomerIds.includes(customer.id));
+
+  // Check if some customers are selected
+  const isSomeSelected = selectedCustomerIds.length > 0;
+
+  // Handle bulk department change
+  const handleBulkDepartmentChange = async (departmentData: { department: string; departmentName: string }) => {
+    if (onBulkUpdateDepartment && selectedCustomerIds.length > 0) {
+      await onBulkUpdateDepartment(selectedCustomerIds, departmentData);
+      setSelectedCustomerIds([]);
+      setIsBulkDialogOpen(false);
     }
   };
   
@@ -137,6 +185,24 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
             </SelectContent>
           </Select>
         </div>
+
+        {/* Bulk actions */}
+        {isSomeSelected && (
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
+            <span className="text-sm text-blue-700">
+              已選擇 {selectedCustomerIds.length} 位客戶
+            </span>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setIsBulkDialogOpen(true)}
+              className="text-blue-700 border-blue-200 hover:bg-blue-100"
+            >
+              <Edit2 className="w-4 h-4 mr-1" />
+              批量更改部門
+            </Button>
+          </div>
+        )}
         
         <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={onAddCustomer}>
           <PlusCircle className="w-4 h-4 mr-2" />
@@ -158,9 +224,16 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
             <Table>
               <TableHeader className={isMobile ? 'hidden' : ''}>
                 <TableRow>
-                  <TableHead className="w-[40%]">名稱</TableHead>
-                  <TableHead className="w-[30%]">部門</TableHead>
-                  <TableHead className="w-[30%]">狀態</TableHead>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="選取全部"
+                    />
+                  </TableHead>
+                  <TableHead className="w-[35%]">名稱</TableHead>
+                  <TableHead className="w-[25%]">部門</TableHead>
+                  <TableHead className="w-[25%]">狀態</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -168,13 +241,21 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
                   <TableRow 
                     key={customer.id} 
                     className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''} ${isMobile ? 'flex flex-col p-3 border-b' : ''}`}
-                    onClick={() => onSelectCustomer(customer)}
                   >
                     {isMobile ? (
                       // Mobile layout
                       <>
-                        <div className="font-medium text-base mb-1">{customer.name}</div>
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between w-full mb-2">
+                          <Checkbox
+                            checked={selectedCustomerIds.includes(customer.id)}
+                            onCheckedChange={(checked) => handleCheckboxChange(customer.id, checked)}
+                            aria-label={`選取 ${customer.name}`}
+                          />
+                          <div className="flex-1 ml-3" onClick={() => onSelectCustomer(customer)}>
+                            <div className="font-medium text-base">{customer.name}</div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center w-full" onClick={() => onSelectCustomer(customer)}>
                           <span className="text-sm text-gray-500">{customer.departmentName}</span>
                           <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
                             {getStatusText(customer.status)}
@@ -184,9 +265,20 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
                     ) : (
                       // Desktop layout
                       <>
-                        <TableCell className="font-medium">{customer.name}</TableCell>
-                        <TableCell>{customer.departmentName}</TableCell>
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            checked={selectedCustomerIds.includes(customer.id)}
+                            onCheckedChange={(checked) => handleCheckboxChange(customer.id, checked)}
+                            aria-label={`選取 ${customer.name}`}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium" onClick={() => onSelectCustomer(customer)}>
+                          {customer.name}
+                        </TableCell>
+                        <TableCell onClick={() => onSelectCustomer(customer)}>
+                          {customer.departmentName}
+                        </TableCell>
+                        <TableCell onClick={() => onSelectCustomer(customer)}>
                           <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
                             {getStatusText(customer.status)}
                           </span>
@@ -220,6 +312,13 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
           </div>
         )}
       </div>
+
+      <BulkDepartmentChangeDialog
+        open={isBulkDialogOpen}
+        onOpenChange={setIsBulkDialogOpen}
+        selectedCount={selectedCustomerIds.length}
+        onConfirm={handleBulkDepartmentChange}
+      />
     </div>
   );
 }
