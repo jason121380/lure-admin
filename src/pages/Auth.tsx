@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
@@ -98,7 +99,7 @@ export default function Auth() {
           <p className="text-gray-600">客戶關係管理系統</p>
         </div>
 
-        <Card className="border-0 shadow-lg mx-auto w-full">
+        <Card className="border-0 shadow-lg">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-100">
               <TabsTrigger 
