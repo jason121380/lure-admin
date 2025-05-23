@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import Finance from "./pages/Finance";
 import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -42,6 +43,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Index sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/finance" 
+          element={
+            <ProtectedRoute>
+              <Finance sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />
             </ProtectedRoute>
           } 
         />
