@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -88,18 +89,18 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <span className="text-white text-2xl font-bold">L</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">LURE CRM</h1>
-          <p className="text-gray-600">客戶關係管理系統</p>
+          <h1 className="text-3xl font-bold text-white mb-2">LURE CRM</h1>
+          <p className="text-blue-100">客戶關係管理系統</p>
         </div>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-100">
               <TabsTrigger 
@@ -280,7 +281,7 @@ export default function Auth() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500">
+        <div className="text-center mt-8 text-sm text-blue-100">
           <p>© 2024 LURE CRM. 版權所有.</p>
         </div>
       </div>
@@ -292,3 +293,4 @@ export default function Auth() {
     </div>
   );
 }
+
