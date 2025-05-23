@@ -23,11 +23,15 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, token }: PasswordResetRequest = await req.json();
     console.log("Password reset request received for:", email);
-    console.log("Reset token:", token);
+    console.log("Reset token provided:", token ? "Yes" : "No");
 
-    // Create the actual reset link with the token
+    // Create reset link - note we don't need the actual token as Supabase handles this
+    // with resetPasswordForEmail
     const baseUrl = req.headers.get("origin") || "http://localhost:3000";
-    const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
+    
+    // We'll use the email in the URL to help with identification
+    // The actual token hash will be in the link that Supabase generates
+    const resetLink = `${baseUrl}/reset-password?email=${encodeURIComponent(email)}`;
 
     const emailResponse = await resend.emails.send({
       from: "密碼重設 <onboarding@resend.dev>",
@@ -51,19 +55,18 @@ const handler = async (req: Request): Promise<Response> => {
                 您收到這封郵件是因為您要求重設帳戶的密碼。請點擊下方按鈕以重設密碼。
               </p>
               
-              <a href="${resetLink}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0;">
-                重設密碼
-              </a>
+              <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
+                請查看您的郵箱中另一封由 Supabase Auth 發送的郵件，其中包含密碼重設連結。
+              </p>
+              
+              <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
+                如果您沒有收到包含重設連結的郵件，請檢查垃圾郵件資料夾或重新申請密碼重設。
+              </p>
             </div>
             
             <div style="background: white; padding: 20px 40px 40px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
               <p style="color: #9ca3af; font-size: 14px; margin: 20px 0 0; text-align: center;">
                 如果您沒有要求重設密碼，請忽略這封郵件。<br>此連結將在 1 小時後失效。
-              </p>
-              
-              <p style="color: #9ca3af; font-size: 12px; margin: 20px 0 0; text-align: center;">
-                如果按鈕無法點擊，請複製以下連結到瀏覽器：<br>
-                <span style="word-break: break-all;">${resetLink}</span>
               </p>
             </div>
             

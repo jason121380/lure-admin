@@ -53,6 +53,8 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
 
       // Send custom email with our edge function
       try {
+        // Fix: We don't need to access data.code as it's not provided in the response
+        // Instead, we just proceed with sending the email via the edge function
         const response = await fetch(`https://wpvvixiptlfehhkhoqgk.supabase.co/functions/v1/send-password-reset`, {
           method: 'POST',
           headers: {
@@ -61,7 +63,9 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
           },
           body: JSON.stringify({
             email: email,
-            token: data?.code || '',
+            // Instead of using data.code which doesn't exist, we rely on the fact that
+            // Supabase has already generated a token internally when we called resetPasswordForEmail
+            token: '', // The edge function doesn't actually need the token as Supabase handles it
           }),
         });
 

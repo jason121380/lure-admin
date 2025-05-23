@@ -41,10 +41,14 @@ export default function ResetPassword() {
       try {
         console.log("Verifying token:", token);
         
-        // Exchange the token for a session
+        // Fix: The verifyOtp function requires the correct parameters based on the type
+        // For a recovery token, we need to use the VerifyOtpParams with email parameter
+        const email = searchParams.get('email'); // Extract email from URL if available
+        
+        // If we don't have the email, use verifyOTP with token hash method
         const { data, error } = await supabase.auth.verifyOtp({
-          token: token,
-          type: 'recovery'
+          token_hash: token,
+          type: 'recovery',
         });
         
         console.log("Token verification result:", { data, error });
