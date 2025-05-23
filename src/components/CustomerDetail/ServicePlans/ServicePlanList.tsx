@@ -332,6 +332,7 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
               <TableHeader>
                 <TableRow>
                   <TableHead>服務項目</TableHead>
+                  <TableHead>描述</TableHead>
                   <TableHead className="text-right">價格 (元)</TableHead>
                   <TableHead className="w-20">操作</TableHead>
                 </TableRow>
@@ -340,6 +341,7 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
                 {servicePlans.map((plan) => (
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.name}</TableCell>
+                    <TableCell className="text-gray-600">{plan.description || "無描述"}</TableCell>
                     <TableCell className="text-right">
                       {editingPriceId === plan.id ? (
                         <div className="flex items-center justify-end gap-2">
