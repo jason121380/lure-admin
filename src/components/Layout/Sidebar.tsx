@@ -204,10 +204,16 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const fetchDepartments = async () => {
     try {
       setIsLoading(true);
+      console.log("Fetching all departments...");
+      
+      // 獲取所有部門，不進行任何用戶過濾
       const { data, error } = await supabase
         .from('departments')
         .select('*')
         .order('sort_order', { ascending: true });
+
+      console.log("Departments data:", data);
+      console.log("Departments error:", error);
 
       if (error) throw error;
 
@@ -220,10 +226,13 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           sort_order: (dept as any).sort_order || 0
         }));
         
-        // Set departments without any filtering or default creation
+        console.log("Mapped departments:", departments);
+        
+        // 設置所有部門，不進行任何過濾
         setDepartmentsList(departments);
       } else {
-        // Only create defaults if NO departments exist at all
+        console.log("No departments found, creating defaults...");
+        // 只有在完全沒有部門時才創建預設部門
         await createDefaultDepartments();
       }
     } catch (error) {
@@ -240,6 +249,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
   const createDefaultDepartments = async () => {
     try {
+      console.log("Creating default departments...");
       const defaultDepartments = [
         { code: 'all', name: '所有部門', sort_order: 0 },
         { code: 'external', name: '發展 對外', sort_order: 1 },
@@ -251,12 +261,16 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       ];
       
       for (const dept of defaultDepartments) {
-        await supabase.from('departments').insert({
+        const { error } = await supabase.from('departments').insert({
           code: dept.code,
           name: dept.name,
-          user_id: user!.id,
+          user_id: user!.id, // 使用當前用戶創建預設部門
           sort_order: dept.sort_order
         });
+        
+        if (error && !error.message.includes('duplicate key')) {
+          console.error("Error creating department:", dept.name, error);
+        }
       }
       
       await fetchDepartments();
@@ -576,7 +590,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     <div className={cn(
       "w-64 min-h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
       isVisible ? "translate-x-0" : "-translate-x-full", 
-      "h-screen fixed md:static z-30" // Change from absolute to fixed for mobile and static for md+
+      "h-screen fixed md:static z-30"
     )}>
       <div className="p-4 flex justify-between items-center border-b border-slate-200">
         <img src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" alt="LURE" className="h-6 w-auto" />
