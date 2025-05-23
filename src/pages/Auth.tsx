@@ -100,19 +100,19 @@ export default function Auth() {
           <p className="text-blue-100">客戶關係管理系統</p>
         </div>
 
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <Card className="border-0 shadow-2xl bg-gray-900/80 backdrop-blur-sm">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-100">
+            <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-gray-800/50">
               <TabsTrigger 
                 value="login" 
-                className="h-10 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="h-10 text-sm font-medium text-gray-300 data-[state=active]:bg-gray-700/80 data-[state=active]:text-white data-[state=active]:shadow-sm"
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 登入
               </TabsTrigger>
               <TabsTrigger 
                 value="signup"
-                className="h-10 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="h-10 text-sm font-medium text-gray-300 data-[state=active]:bg-gray-700/80 data-[state=active]:text-white data-[state=active]:shadow-sm"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 註冊
@@ -121,8 +121,8 @@ export default function Auth() {
 
             <TabsContent value="login" className="mt-0">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl">歡迎回來</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl text-white">歡迎回來</CardTitle>
+                <CardDescription className="text-gray-300">
                   輸入您的登入資訊以存取您的帳戶
                 </CardDescription>
               </CardHeader>
@@ -130,7 +130,7 @@ export default function Auth() {
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-sm font-medium">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-gray-200">
                       電子郵件
                     </Label>
                     <Input 
@@ -139,13 +139,13 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="h-11"
+                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-medium">
+                    <Label htmlFor="login-password" className="text-sm font-medium text-gray-200">
                       密碼
                     </Label>
                     <div className="relative">
@@ -154,7 +154,7 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="h-11 pr-10"
+                        className="h-11 pr-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
                         required
                       />
                       <Button
@@ -165,9 +165,9 @@ export default function Auth() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-500" />
+                          <EyeOff className="h-4 w-4 text-gray-400" />
                         ) : (
-                          <Eye className="h-4 w-4 text-gray-500" />
+                          <Eye className="h-4 w-4 text-gray-400" />
                         )}
                       </Button>
                     </div>
@@ -177,7 +177,7 @@ export default function Auth() {
                     <Button
                       type="button"
                       variant="link"
-                      className="px-0 h-auto text-sm text-blue-600 hover:text-blue-700"
+                      className="px-0 h-auto text-sm text-blue-400 hover:text-blue-300"
                       onClick={() => setForgotPasswordOpen(true)}
                     >
                       忘記密碼？
@@ -199,8 +199,8 @@ export default function Auth() {
 
             <TabsContent value="signup" className="mt-0">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl">建立新帳戶</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl text-white">建立新帳戶</CardTitle>
+                <CardDescription className="text-gray-300">
                   填寫以下資訊以建立您的帳戶
                 </CardDescription>
               </CardHeader>
@@ -208,7 +208,7 @@ export default function Auth() {
               <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-fullname" className="text-sm font-medium">
+                    <Label htmlFor="signup-fullname" className="text-sm font-medium text-gray-200">
                       全名
                     </Label>
                     <Input
@@ -216,13 +216,13 @@ export default function Auth() {
                       placeholder="張小明"
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
-                      className="h-11"
+                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-sm font-medium">
+                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-200">
                       電子郵件
                     </Label>
                     <Input 
@@ -231,13 +231,13 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="h-11"
+                      className="h-11 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-sm font-medium">
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-200">
                       密碼
                     </Label>
                     <div className="relative">
@@ -246,7 +246,7 @@ export default function Auth() {
                         type={showSignupPassword ? "text" : "password"}
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="h-11 pr-10"
+                        className="h-11 pr-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
                         required
                       />
                       <Button
@@ -257,9 +257,9 @@ export default function Auth() {
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
                       >
                         {showSignupPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-500" />
+                          <EyeOff className="h-4 w-4 text-gray-400" />
                         ) : (
-                          <Eye className="h-4 w-4 text-gray-500" />
+                          <Eye className="h-4 w-4 text-gray-400" />
                         )}
                       </Button>
                     </div>
