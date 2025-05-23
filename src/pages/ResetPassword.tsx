@@ -9,11 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -173,7 +175,7 @@ export default function ResetPassword() {
   // If not initialized yet, show a loading state
   if (!initialized) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4">
             <div className="w-16 h-16 border-4 border-t-blue-600 border-b-blue-600 border-l-gray-200 border-r-gray-200 rounded-full animate-spin"></div>
@@ -185,9 +187,10 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto">
-        <div className="text-center mb-8">
+    <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
+      <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
+        {/* Logo and Header */}
+        <div className="text-center mb-6">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
               <img 
@@ -197,29 +200,29 @@ export default function ResetPassword() {
               />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">重設密碼</h1>
-          <p className="text-gray-600">請輸入您的新密碼</p>
         </div>
 
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">設定新密碼</CardTitle>
-            <CardDescription>
-              密碼必須至少 6 個字符
+        <Card className="w-full border shadow-sm bg-white">
+          <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
+            <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>重設密碼</CardTitle>
+            <CardDescription className="text-gray-600">
+              請輸入您的新密碼
             </CardDescription>
           </CardHeader>
           
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
               <div className="space-y-2">
-                <Label htmlFor="password">新密碼</Label>
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  新密碼
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
+                    className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                     placeholder="請輸入新密碼"
                     required
                     minLength={6}
@@ -228,27 +231,29 @@ export default function ResetPassword() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
+                    className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
+                      <EyeOff className="h-4 w-4 text-gray-400" />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4 text-gray-400" />
                     )}
                   </Button>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">確認新密碼</Label>
+                <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">
+                  確認新密碼
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirm-password"
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pr-10"
+                    className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
                     placeholder="請再次輸入新密碼"
                     required
                     minLength={6}
@@ -257,34 +262,34 @@ export default function ResetPassword() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
+                    className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
+                      <EyeOff className="h-4 w-4 text-gray-400" />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4 text-gray-400" />
                     )}
                   </Button>
                 </div>
               </div>
             </CardContent>
             
-            <CardContent className="pt-0">
+            <CardContent className={`pt-0 ${isMobile ? 'px-4' : ''}`}>
               <Button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-blue-600 hover:bg-blue-700 text-white mb-4`}
                 disabled={isLoading}
               >
                 {isLoading ? "更新中..." : "更新密碼"}
               </Button>
               
-              <div className="mt-4 text-center">
+              <div className="text-center">
                 <Button 
                   type="button"
-                  variant="ghost"
+                  variant="link"
                   onClick={() => navigate("/auth")}
-                  className="text-sm text-gray-600 hover:text-gray-800"
+                  className="px-0 h-auto text-sm text-blue-600 hover:text-blue-700"
                 >
                   返回登入頁面
                 </Button>
@@ -292,6 +297,11 @@ export default function ResetPassword() {
             </CardContent>
           </form>
         </Card>
+
+        {/* Footer */}
+        <div className="text-center mt-6 text-sm text-gray-500">
+          <p>© 2025 by Jason C 版權所有</p>
+        </div>
       </div>
     </div>
   );
