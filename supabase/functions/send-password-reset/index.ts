@@ -12,7 +12,7 @@ const corsHeaders = {
 
 interface PasswordResetRequest {
   email: string;
-  token: string;
+  resetLink: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -21,12 +21,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, token }: PasswordResetRequest = await req.json();
+    const { email, resetLink }: PasswordResetRequest = await req.json();
     console.log("Password reset request received for:", email);
-    console.log("Reset token provided:", token ? "Yes" : "No");
-
-    // Use the correct reset password URL
-    const resetLink = `https://lure.lovable.app/reset-password?email=${encodeURIComponent(email)}`;
+    console.log("Reset link provided:", resetLink ? "Yes" : "No");
 
     const emailResponse = await resend.emails.send({
       from: "密碼重設 <onboarding@resend.dev>",
@@ -50,12 +47,13 @@ const handler = async (req: Request): Promise<Response> => {
                 您收到這封郵件是因為您要求重設帳戶的密碼。請點擊下方按鈕以重設密碼。
               </p>
               
-              <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
-                請查看您的郵箱中另一封由 Supabase Auth 發送的郵件，其中包含密碼重設連結。
-              </p>
+              <a href="${resetLink}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0;">
+                重設密碼
+              </a>
               
-              <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px; font-size: 16px;">
-                如果您沒有收到包含重設連結的郵件，請檢查垃圾郵件資料夾或重新申請密碼重設。
+              <p style="color: #6b7280; line-height: 1.6; margin: 30px 0 0; font-size: 14px;">
+                或複製以下連結至瀏覽器：<br>
+                <a href="${resetLink}" style="color: #3b82f6; word-break: break-all;">${resetLink}</a>
               </p>
             </div>
             

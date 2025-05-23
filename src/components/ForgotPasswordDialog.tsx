@@ -31,9 +31,11 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     setIsLoading(true);
 
     try {
-      // Generate reset token with Supabase
+      // Generate reset token with Supabase and configure redirect URL
       console.log("Calling Supabase resetPasswordForEmail...");
-      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://lure.lovable.app/reset-password',
+      });
 
       console.log("Supabase resetPasswordForEmail result:", { data, error: resetError });
 
@@ -47,40 +49,9 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
         return;
       }
 
-      // Get access token for custom email
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token || '';
-
-      // Send custom email with our edge function
-      try {
-        // Fix: We don't need to access data.code as it's not provided in the response
-        // Instead, we just proceed with sending the email via the edge function
-        const response = await fetch(`https://wpvvixiptlfehhkhoqgk.supabase.co/functions/v1/send-password-reset`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            email: email,
-            // Instead of using data.code which doesn't exist, we rely on the fact that
-            // Supabase has already generated a token internally when we called resetPasswordForEmail
-            token: '', // The edge function doesn't actually need the token as Supabase handles it
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Edge function error:", errorText);
-          throw new Error(`發送自訂郵件失敗: ${errorText}`);
-        }
-
-        console.log("Custom email sent successfully");
-      } catch (emailError: any) {
-        console.error("Error sending custom email:", emailError);
-        // Continue with default email if custom email fails
-        console.log("Using default Supabase email as fallback");
-      }
+      // Don't send custom email anymore since Supabase will send the proper reset email
+      // with the correct token and redirect URL
+      console.log("Password reset email will be sent by Supabase with proper reset link");
 
       toast({
         title: "郵件已發送",
