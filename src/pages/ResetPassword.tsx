@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -300,7 +299,7 @@ export default function ResetPassword() {
 
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-gray-500">
-          <p>© 2025 by Jason C 版權所有</p>
+          <p>© 2025 by Lure</p>
         </div>
       </div>
     </div>
