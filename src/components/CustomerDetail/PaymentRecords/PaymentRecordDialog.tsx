@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Trash2 } from "lucide-react";
-import { PaymentRecord, paymentMethods } from "./PaymentRecordList";
+import { PaymentRecord, paymentMethods, billingCycleOptions } from "./PaymentRecordList";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +50,7 @@ export function PaymentRecordDialog({
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [paymentMethod, setPaymentMethod] = useState("transfer");
   const [account, setAccount] = useState("");
+  const [billingCycle, setBillingCycle] = useState("當月");
   const [amount, setAmount] = useState("");
   const [taxAmount, setTaxAmount] = useState("");
   const [totalAmount, setTotalAmount] = useState("");
@@ -64,6 +65,7 @@ export function PaymentRecordDialog({
         setDate(paymentRecord.date ? new Date(paymentRecord.date) : new Date());
         setPaymentMethod(paymentRecord.paymentMethod);
         setAccount(paymentRecord.account || "");
+        setBillingCycle(paymentRecord.billingCycle);
         setAmount(paymentRecord.amount.toString());
         setTaxAmount(paymentRecord.taxAmount.toString());
         setTotalAmount(paymentRecord.totalAmount.toString());
@@ -73,6 +75,7 @@ export function PaymentRecordDialog({
         setDate(new Date());
         setPaymentMethod("transfer");
         setAccount("");
+        setBillingCycle("當月");
         setAmount("");
         setTaxAmount("0");
         setTotalAmount("");
@@ -104,6 +107,7 @@ export function PaymentRecordDialog({
       date: formattedDate,
       paymentMethod,
       account: account || null,
+      billingCycle,
       amount: numAmount,
       taxAmount: numTaxAmount,
       totalAmount: numTotalAmount,
@@ -181,6 +185,20 @@ export function PaymentRecordDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {accountOptions.map(option => (
+                    <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="billingCycle">週期</Label>
+              <Select value={billingCycle} onValueChange={setBillingCycle}>
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇週期" />
+                </SelectTrigger>
+                <SelectContent>
+                  {billingCycleOptions.map(option => (
                     <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
                   ))}
                 </SelectContent>

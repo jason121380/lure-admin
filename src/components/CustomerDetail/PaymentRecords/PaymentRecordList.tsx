@@ -31,6 +31,13 @@ const accountOptions = [
   { id: "development", name: "發展處帳戶" }
 ];
 
+// 週期選項
+export const billingCycleOptions = [
+  { id: '當月', name: '當月' },
+  { id: '次月後付', name: '次月後付' },
+  { id: '預儲', name: '預儲' },
+];
+
 export type PaymentRecord = {
   id: string;
   date: string;
@@ -40,6 +47,7 @@ export type PaymentRecord = {
   taxAmount: number;
   totalAmount: number;
   isConfirmed: boolean;
+  billingCycle: string;
 };
 
 type PaymentRecordListProps = {
@@ -80,7 +88,8 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
             amount: Number(record.amount),
             taxAmount: Number(record.tax_amount || 0),
             totalAmount: Number(record.total_amount),
-            isConfirmed: record.is_confirmed
+            isConfirmed: record.is_confirmed,
+            billingCycle: record.billing_cycle
           }));
           
           setPaymentRecords(formattedRecords);
@@ -114,6 +123,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
           tax_amount: newPaymentRecord.taxAmount,
           total_amount: newPaymentRecord.totalAmount,
           is_confirmed: newPaymentRecord.isConfirmed,
+          billing_cycle: newPaymentRecord.billingCycle,
           user_id: user?.id
         })
         .select('*')
@@ -131,7 +141,8 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
           amount: Number(data.amount),
           taxAmount: Number(data.tax_amount || 0),
           totalAmount: Number(data.total_amount),
-          isConfirmed: data.is_confirmed
+          isConfirmed: data.is_confirmed,
+          billingCycle: data.billing_cycle
         };
         
         setPaymentRecords([formattedRecord, ...paymentRecords]);
@@ -164,6 +175,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
           tax_amount: updatedPaymentRecord.taxAmount,
           total_amount: updatedPaymentRecord.totalAmount,
           is_confirmed: updatedPaymentRecord.isConfirmed,
+          billing_cycle: updatedPaymentRecord.billingCycle,
         })
         .eq('id', updatedPaymentRecord.id);
       
@@ -235,6 +247,12 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     return account ? account.name : accountId;
   };
 
+  // 獲取週期名稱
+  const getBillingCycleName = (cycleId: string) => {
+    const cycle = billingCycleOptions.find(c => c.id === cycleId);
+    return cycle ? cycle.name : cycleId;
+  };
+
   const handleEditClick = (record: PaymentRecord) => {
     setEditingPaymentRecord(record);
     setIsPaymentRecordOpen(true);
@@ -274,6 +292,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                 <TableHead>日期</TableHead>
                 <TableHead>支付方式</TableHead>
                 <TableHead>帳戶</TableHead>
+                <TableHead>週期</TableHead>
                 <TableHead className="text-right">金額</TableHead>
                 <TableHead className="text-right">稅金</TableHead>
                 <TableHead className="text-right">總額</TableHead>
@@ -287,6 +306,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                   <TableCell>{record.date}</TableCell>
                   <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
                   <TableCell>{getAccountName(record.account)}</TableCell>
+                  <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
                   <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
                   <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
                   <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>

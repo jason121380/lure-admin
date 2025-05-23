@@ -138,6 +138,7 @@ export type Database = {
         Row: {
           account: string | null
           amount: number
+          billing_cycle: string
           created_at: string
           customer_id: string
           date: string
@@ -152,6 +153,7 @@ export type Database = {
         Insert: {
           account?: string | null
           amount: number
+          billing_cycle?: string
           created_at?: string
           customer_id: string
           date?: string
@@ -166,6 +168,7 @@ export type Database = {
         Update: {
           account?: string | null
           amount?: number
+          billing_cycle?: string
           created_at?: string
           customer_id?: string
           date?: string
