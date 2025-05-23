@@ -4,8 +4,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 type Department = {
   code: string;
@@ -29,6 +31,9 @@ export function BulkDepartmentChangeDialog({
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordStep, setShowPasswordStep] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
 
   // Fetch departments when dialog opens
   useEffect(() => {
@@ -68,25 +73,42 @@ export function BulkDepartmentChangeDialog({
     }
   };
 
-  const handleConfirm = async () => {
+  const handleNext = () => {
     if (!selectedDepartment) return;
+    setShowPasswordStep(true);
+  };
 
-    const department = departments.find(d => d.code === selectedDepartment);
-    if (!department) return;
+  const handleBack = () => {
+    setShowPasswordStep(false);
+    setPassword("");
+    setPasswordError(false);
+  };
 
-    setIsLoading(true);
-    try {
-      await onConfirm({
-        department: department.code,
-        departmentName: department.name
-      });
-    } finally {
-      setIsLoading(false);
+  const handleConfirm = async () => {
+    if (password === '96962779') {
+      const department = departments.find(d => d.code === selectedDepartment);
+      if (!department) return;
+
+      setIsLoading(true);
+      try {
+        await onConfirm({
+          department: department.code,
+          departmentName: department.name
+        });
+        handleClose();
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setPasswordError(true);
     }
   };
 
   const handleClose = () => {
     setSelectedDepartment("");
+    setShowPasswordStep(false);
+    setPassword("");
+    setPasswordError(false);
     onOpenChange(false);
   };
 
@@ -96,38 +118,77 @@ export function BulkDepartmentChangeDialog({
         <DialogHeader>
           <DialogTitle>批量更改部門</DialogTitle>
           <DialogDescription>
-            將 {selectedCount} 位客戶的部門更改為指定部門
+            {!showPasswordStep 
+              ? `將 ${selectedCount} 位客戶的部門更改為指定部門`
+              : "請輸入密碼進行確認"
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="department">選擇部門</Label>
-            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-              <SelectTrigger>
-                <SelectValue placeholder="請選擇部門" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.code} value={dept.code}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!showPasswordStep ? (
+            <div className="space-y-2">
+              <Label htmlFor="department">選擇部門</Label>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger>
+                  <SelectValue placeholder="請選擇部門" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.code} value={dept.code}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="password">密碼</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="請輸入密碼"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError(false);
+                }}
+                className={cn(passwordError && "border-red-500")}
+              />
+              {passwordError && (
+                <p className="text-sm text-red-500 mt-1">密碼錯誤，請重新輸入</p>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-            取消
-          </Button>
-          <Button 
-            onClick={handleConfirm} 
-            disabled={!selectedDepartment || isLoading}
-          >
-            {isLoading ? "更新中..." : "確認更改"}
-          </Button>
+          {!showPasswordStep ? (
+            <>
+              <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+                取消
+              </Button>
+              <Button 
+                onClick={handleNext} 
+                disabled={!selectedDepartment || isLoading}
+              >
+                下一步
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={handleBack} disabled={isLoading}>
+                返回
+              </Button>
+              <Button 
+                onClick={handleConfirm} 
+                disabled={!password || isLoading}
+              >
+                {isLoading ? "更新中..." : "確認更改"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
