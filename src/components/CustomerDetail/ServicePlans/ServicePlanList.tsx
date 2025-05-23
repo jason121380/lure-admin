@@ -375,9 +375,9 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
                 {servicePlans.map((plan) => (
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.name}</TableCell>
-                    <TableCell>
+                    <TableCell className="align-top">
                       {editingDescriptionId === plan.id ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                           <Textarea
                             value={editingDescription}
                             onChange={(e) => setEditingDescription(e.target.value)}
@@ -406,14 +406,14 @@ export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
                         </div>
                       ) : (
                         <div className="flex items-start gap-2 group">
-                          <span className="text-gray-600 flex-1 min-h-[20px]">
+                          <span className="text-gray-600 flex-1 leading-6">
                             {plan.description || "無描述"}
                           </span>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => handleEditDescription(plan.id, plan.description)}
-                            className="p-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="p-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                           >
                             <Edit className="w-4 h-4 text-gray-500" />
                           </Button>
