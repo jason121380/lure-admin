@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      advertising_plans: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          payment_method: string
+          placement_limit: string | null
+          platform: string
+          prepaid_amount: string | null
+          service_fee_percentage: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          payment_method: string
+          placement_limit?: string | null
+          platform: string
+          prepaid_amount?: string | null
+          service_fee_percentage?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          payment_method?: string
+          placement_limit?: string | null
+          platform?: string
+          prepaid_amount?: string | null
+          service_fee_percentage?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertising_plans_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -160,6 +207,47 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      service_plans: {
+        Row: {
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          name: string
+          price?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_plans_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,9 @@ import {
 } from "@/components/ui/table";
 import { ServiceSelectionDialog } from "./ServiceSelectionDialog";
 import { AdvertisingSelectionDialog } from "./AdvertisingSelectionDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export type ServicePlanItem = {
   id: string;
@@ -52,45 +56,170 @@ export const paymentMethods = [
   { id: 'prepaid-plus', name: '預收外+%' },
 ];
 
-export const ServicePlanList = () => {
+type ServicePlanListProps = {
+  customerId?: string;
+};
+
+export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
+  const { user } = useAuth();
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
-  const handleServiceFromDialog = (serviceId: string) => {
+  // 從資料庫讀取資料
+  useEffect(() => {
+    if (customerId && user) {
+      fetchServicePlans();
+      fetchAdvertisingPlans();
+    } else {
+      setServicePlans([]);
+      setAdvertisingPlans([]);
+      setLoading(false);
+    }
+  }, [customerId, user]);
+
+  const fetchServicePlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_plans')
+        .select('*')
+        .eq('customer_id', customerId);
+      
+      if (error) throw error;
+      
+      const formattedData: ServicePlanItem[] = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || "",
+        price: item.price
+      }));
+      
+      setServicePlans(formattedData);
+    } catch (error) {
+      console.error("Error fetching service plans:", error);
+      toast.error("無法讀取服務項目資料");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAdvertisingPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('advertising_plans')
+        .select('*')
+        .eq('customer_id', customerId);
+      
+      if (error) throw error;
+      
+      const formattedData: AdvertisingPlanItem[] = data.map(item => ({
+        id: item.id,
+        platform: item.platform,
+        paymentMethod: item.payment_method,
+        details: {
+          serviceFeePercentage: item.service_fee_percentage || undefined,
+          prepaidAmount: item.prepaid_amount || undefined,
+          placementLimit: item.placement_limit || undefined
+        }
+      }));
+      
+      setAdvertisingPlans(formattedData);
+    } catch (error) {
+      console.error("Error fetching advertising plans:", error);
+      toast.error("無法讀取廣告投放資料");
+    }
+  };
+
+  const handleServiceFromDialog = async (serviceId: string) => {
+    if (!customerId || !user) {
+      toast.error("請先選擇客戶");
+      return;
+    }
+
     const serviceItem = serviceItems.find(item => item.id === serviceId);
     if (!serviceItem) return;
 
-    const newServicePlan: ServicePlanItem = {
-      id: `service-${Date.now()}`,
-      name: serviceItem.name,
-      description: "",
-      price: 0
-    };
-    
-    setServicePlans([...servicePlans, newServicePlan]);
+    try {
+      // 新增服務項目到資料庫
+      const { data, error } = await supabase
+        .from('service_plans')
+        .insert({
+          customer_id: customerId,
+          name: serviceItem.name,
+          description: "",
+          price: 0,
+          user_id: user.id
+        })
+        .select();
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const newServicePlan: ServicePlanItem = {
+          id: data[0].id,
+          name: data[0].name,
+          description: data[0].description || "",
+          price: data[0].price
+        };
+        
+        setServicePlans(prev => [...prev, newServicePlan]);
+        toast.success("成功新增服務項目");
+      }
+    } catch (error) {
+      console.error("Error adding service plan:", error);
+      toast.error("新增服務項目失敗");
+    }
   };
 
-  const handleAdvertisingFromDialog = (platformId: string, paymentMethodId: string, formData?: any) => {
+  const handleAdvertisingFromDialog = async (platformId: string, paymentMethodId: string, formData?: any) => {
+    if (!customerId || !user) {
+      toast.error("請先選擇客戶");
+      return;
+    }
+
     const platformItem = advertisingPlatforms.find(item => item.id === platformId);
     const paymentItem = paymentMethods.find(item => item.id === paymentMethodId);
     if (!platformItem || !paymentItem) return;
     
-    // Create a new advertising plan with the form data
-    const newAdvertisingPlan: AdvertisingPlanItem = {
-      id: `ad-${Date.now()}`,
-      platform: platformItem.name,
-      paymentMethod: paymentItem.name,
-      details: {
-        serviceFeePercentage: formData?.serviceFeePercentage || undefined,
-        prepaidAmount: formData?.prepaidAmount || undefined,
-        placementLimit: formData?.placementLimit || undefined,
+    try {
+      // 新增廣告投放到資料庫
+      const { data, error } = await supabase
+        .from('advertising_plans')
+        .insert({
+          customer_id: customerId,
+          platform: platformItem.name,
+          payment_method: paymentItem.name,
+          service_fee_percentage: formData?.serviceFeePercentage || null,
+          prepaid_amount: formData?.prepaidAmount || null,
+          placement_limit: formData?.placementLimit || null,
+          user_id: user.id
+        })
+        .select();
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const newAdvertisingPlan: AdvertisingPlanItem = {
+          id: data[0].id,
+          platform: data[0].platform,
+          paymentMethod: data[0].payment_method,
+          details: {
+            serviceFeePercentage: data[0].service_fee_percentage || undefined,
+            prepaidAmount: data[0].prepaid_amount || undefined,
+            placementLimit: data[0].placement_limit || undefined,
+          }
+        };
+        
+        // 替換任何現有廣告計劃
+        setAdvertisingPlans([newAdvertisingPlan]);
+        toast.success("成功新增廣告投放");
       }
-    };
-    
-    // Replace any existing advertising plan
-    setAdvertisingPlans([newAdvertisingPlan]);
+    } catch (error) {
+      console.error("Error adding advertising plan:", error);
+      toast.error("新增廣告投放失敗");
+    }
   };
 
   const handleEditPrice = (id: string, currentPrice: number) => {
@@ -98,14 +227,28 @@ export const ServicePlanList = () => {
     setEditingPrice(currentPrice.toString());
   };
 
-  const handleSavePrice = (id: string) => {
+  const handleSavePrice = async (id: string) => {
     const newPrice = parseFloat(editingPrice);
     if (!isNaN(newPrice) && newPrice >= 0) {
-      setServicePlans(prev => 
-        prev.map(plan => 
-          plan.id === id ? { ...plan, price: newPrice } : plan
-        )
-      );
+      try {
+        // 更新價格到資料庫
+        const { error } = await supabase
+          .from('service_plans')
+          .update({ price: newPrice, updated_at: new Date().toISOString() })
+          .eq('id', id);
+        
+        if (error) throw error;
+        
+        setServicePlans(prev => 
+          prev.map(plan => 
+            plan.id === id ? { ...plan, price: newPrice } : plan
+          )
+        );
+        toast.success("價格已更新");
+      } catch (error) {
+        console.error("Error updating price:", error);
+        toast.error("更新價格失敗");
+      }
     }
     setEditingPriceId(null);
     setEditingPrice("");
@@ -116,15 +259,43 @@ export const ServicePlanList = () => {
     setEditingPrice("");
   };
 
-  const handleRemoveService = (id: string) => {
-    setServicePlans(prev => prev.filter(plan => plan.id !== id));
+  const handleRemoveService = async (id: string) => {
+    try {
+      // 從資料庫刪除服務項目
+      const { error } = await supabase
+        .from('service_plans')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setServicePlans(prev => prev.filter(plan => plan.id !== id));
+      toast.success("服務項目已刪除");
+    } catch (error) {
+      console.error("Error removing service plan:", error);
+      toast.error("刪除服務項目失敗");
+    }
   };
 
-  const handleRemoveAdvertising = (id: string) => {
-    setAdvertisingPlans([]);
+  const handleRemoveAdvertising = async (id: string) => {
+    try {
+      // 從資料庫刪除廣告投放
+      const { error } = await supabase
+        .from('advertising_plans')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setAdvertisingPlans([]);
+      toast.success("廣告投放已刪除");
+    } catch (error) {
+      console.error("Error removing advertising plan:", error);
+      toast.error("刪除廣告投放失敗");
+    }
   };
   
-  // Render advertising details based on payment method
+  // 根據付款方式渲染廣告詳細資訊
   const renderAdvertisingDetails = (plan: AdvertisingPlanItem) => {
     if (plan.paymentMethod === "次月算上月" && plan.details.serviceFeePercentage) {
       return `服務費: ${plan.details.serviceFeePercentage}%`;
@@ -140,6 +311,10 @@ export const ServicePlanList = () => {
     
     return "";
   };
+
+  if (loading) {
+    return <div className="py-12 text-center text-gray-500">載入中...</div>;
+  }
 
   return (
     <div className="space-y-8">

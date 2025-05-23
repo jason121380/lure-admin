@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Customer } from "../CustomerList/CustomerListItem";
@@ -185,7 +184,7 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onU
         </TabsContent>
         
         <TabsContent value="services">
-          <ServicePlanList />
+          <ServicePlanList customerId={customer.id} />
         </TabsContent>
         
         <TabsContent value="payments">
