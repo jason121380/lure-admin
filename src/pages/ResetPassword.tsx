@@ -189,9 +189,9 @@ export default function ResetPassword() {
     <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
       <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
         {/* Logo and Header */}
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <div className="w-16 h-16 flex items-center justify-center rounded-2xl overflow-hidden">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center p-2">
+            <div className="w-full h-full flex items-center justify-center rounded-2xl overflow-hidden">
               <img 
                 src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png"
                 alt="Logo"
