@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -27,6 +27,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -67,12 +73,14 @@ const SortableDepartment = ({
   activeDepartment,
   onSelectDepartment,
   onDeleteClick,
+  onEditClick,
   customerCount
 }: { 
   department: DepartmentType;
   activeDepartment: string;
   onSelectDepartment: (code: string) => void;
   onDeleteClick: (e: React.MouseEvent, dept: DepartmentType) => void;
+  onEditClick: (e: React.MouseEvent, dept: DepartmentType) => void;
   customerCount: number;
 }) => {
   const {
@@ -115,9 +123,9 @@ const SortableDepartment = ({
       <Button 
         variant="ghost" 
         className={cn(
-          "w-full justify-start px-4 gap-3 font-normal",
+          "w-full justify-start gap-3 font-normal",
           activeDepartment === department.code && "bg-slate-100",
-          department.code !== 'all' && department.code !== 'uncategorized' && "pl-7"
+          department.code !== 'all' && department.code !== 'uncategorized' && "pl-7 pr-10"
         )}
         onClick={() => onSelectDepartment(department.code)}
       >
@@ -127,16 +135,34 @@ const SortableDepartment = ({
         <span>{department.name} ({customerCount})</span>
       </Button>
       
-      {/* Delete button */}
+      {/* Dropdown menu for department actions */}
       {department.code !== 'all' && department.code !== 'uncategorized' && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => onDeleteClick(e, department)}
-        >
-          <X className="h-3 w-3" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">部門選項</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuItem onClick={(e) => onEditClick(e, department)}>
+              <Edit className="h-4 w-4 mr-2" />
+              編輯名稱
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={(e) => onDeleteClick(e, department)}
+              className="text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              刪除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
@@ -164,6 +190,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
   const [fullName, setFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+
+  // For edit department
+  const [isEditDepartmentOpen, setIsEditDepartmentOpen] = useState(false);
+  const [departmentToEdit, setDepartmentToEdit] = useState<DepartmentType | null>(null);
+  const [editDepartmentName, setEditDepartmentName] = useState('');
 
   // DND sensors
   const sensors = useSensors(
@@ -478,6 +509,51 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     }
   };
 
+  const handleEditClick = (e: React.MouseEvent, dept: DepartmentType) => {
+    e.stopPropagation();
+    setDepartmentToEdit(dept);
+    setEditDepartmentName(dept.name);
+    setIsEditDepartmentOpen(true);
+  };
+
+  const handleUpdateDepartment = async () => {
+    if (departmentToEdit && editDepartmentName.trim()) {
+      try {
+        const { error } = await supabase
+          .from('departments')
+          .update({ name: editDepartmentName.trim() })
+          .eq('id', departmentToEdit.id);
+
+        if (error) throw error;
+
+        // Update local state
+        setDepartmentsList(prev => 
+          prev.map(dept => 
+            dept.id === departmentToEdit.id 
+              ? { ...dept, name: editDepartmentName.trim() }
+              : dept
+          )
+        );
+
+        setIsEditDepartmentOpen(false);
+        setEditDepartmentName('');
+        setDepartmentToEdit(null);
+
+        toast({
+          title: "部門名稱已更新",
+          description: `部門名稱已成功更新為「${editDepartmentName.trim()}」`,
+        });
+      } catch (error) {
+        console.error("Error updating department:", error);
+        toast({
+          title: "更新部門失敗",
+          description: "無法更新部門名稱，請稍後再試",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   const handleLogout = async () => {
     await signOut();
   };
@@ -664,7 +740,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               onClick={() => setActiveDepartment('all')}
             >
               <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3 3 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
               </svg>
               <span>所有客戶 ({customerCounts['all'] || 0})</span>
             </Button>
@@ -727,6 +803,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
                       activeDepartment={activeDepartment}
                       onSelectDepartment={setActiveDepartment}
                       onDeleteClick={handleDeleteClick}
+                      onEditClick={handleEditClick}
                       customerCount={customerCounts[dept.code] || 0}
                     />
                   ))}
@@ -895,6 +972,34 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             </Button>
             <Button onClick={handleUpdateProfile}>
               儲存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Department Dialog */}
+      <Dialog open={isEditDepartmentOpen} onOpenChange={setIsEditDepartmentOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>編輯部門名稱</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-500 block mb-2">部門名稱</label>
+              <Input 
+                placeholder="部門名稱"
+                value={editDepartmentName}
+                onChange={(e) => setEditDepartmentName(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDepartmentOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleUpdateDepartment}>
+              更新
             </Button>
           </DialogFooter>
         </DialogContent>
