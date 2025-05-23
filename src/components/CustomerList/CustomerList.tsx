@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -161,7 +162,7 @@ export function CustomerList({
       <div className="p-4 md:p-5 border-b sticky top-0 bg-white z-10">
         <h2 className="text-xl font-semibold mb-4">客戶列表</h2>
         
-        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-2'} mb-4`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-3'} mb-4`}>
           <div className="flex-1 relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
@@ -173,7 +174,7 @@ export function CustomerList({
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={`${isMobile ? 'w-full' : 'w-32'} shrink-0`}>
+            <SelectTrigger className={`${isMobile ? 'w-full' : 'w-40'} shrink-0`}>
               <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
@@ -230,9 +231,9 @@ export function CustomerList({
                       aria-label="選取全部"
                     />
                   </TableHead>
-                  <TableHead className="w-[35%]">名稱</TableHead>
-                  <TableHead className="w-[25%]">部門</TableHead>
-                  <TableHead className="w-[25%]">狀態</TableHead>
+                  <TableHead className="w-[40%]">名稱</TableHead>
+                  <TableHead className="w-[30%]">部門</TableHead>
+                  <TableHead className="w-[30%]">狀態</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

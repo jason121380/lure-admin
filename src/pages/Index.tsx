@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -226,8 +225,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       
       {/* Main content container */}
       <div className="flex flex-1 h-full w-full">
-        {/* Customer List Panel */}
-        <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-1/3 min-w-0 md:min-w-[300px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
+        {/* Customer List Panel - Increased width from 1/3 to 2/5 */}
+        <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
           <CustomerList 
             customers={customers} 
             selectedCustomerId={selectedCustomerId}
@@ -237,8 +236,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           />
         </div>
         
-        {/* Customer Detail Panel */}
-        <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/3 h-full bg-white overflow-y-auto`}>
+        {/* Customer Detail Panel - Decreased width from 2/3 to 3/5 */}
+        <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-3/5 h-full bg-white overflow-y-auto`}>
           {isMobile && (
             <Button
               variant="ghost"
