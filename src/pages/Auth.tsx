@@ -31,20 +31,20 @@ export default function Auth() {
       
       if (error) {
         toast({
-          title: "Login failed",
+          title: "登入失敗",
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Login successful",
-          description: "Welcome back!",
+          title: "登入成功",
+          description: "歡迎回來！",
         });
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "An error occurred during login",
+        title: "錯誤",
+        description: error.message || "登入過程中發生錯誤",
         variant: "destructive",
       });
     } finally {
@@ -61,20 +61,20 @@ export default function Auth() {
       
       if (error) {
         toast({
-          title: "Sign up failed",
+          title: "註冊失敗",
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Sign up successful",
-          description: "Please check your email to confirm your account.",
+          title: "註冊成功",
+          description: "請檢查您的電子郵件以確認您的帳戶。",
         });
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "An error occurred during sign up",
+        title: "錯誤",
+        description: error.message || "註冊過程中發生錯誤",
         variant: "destructive",
       });
     } finally {
@@ -92,26 +92,26 @@ export default function Auth() {
         
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="login">登入</TabsTrigger>
+            <TabsTrigger value="signup">註冊</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
             <Card className="border-2">
               <CardHeader>
-                <CardTitle>Login</CardTitle>
+                <CardTitle>登入</CardTitle>
                 <CardDescription>
-                  Enter your credentials to access your account
+                  輸入您的憑證以訪問您的帳戶
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email">電子郵件</Label>
                     <Input 
                       id="login-email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder="your@email.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
@@ -119,7 +119,7 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">Password</Label>
+                      <Label htmlFor="login-password">密碼</Label>
                     </div>
                     <Input
                       id="login-password"
@@ -132,7 +132,7 @@ export default function Auth() {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Logging in..." : "Login"}
+                    {isLoading ? "登入中..." : "登入"}
                   </Button>
                 </CardFooter>
               </form>
@@ -142,36 +142,36 @@ export default function Auth() {
           <TabsContent value="signup">
             <Card className="border-2">
               <CardHeader>
-                <CardTitle>Create an account</CardTitle>
+                <CardTitle>創建帳戶</CardTitle>
                 <CardDescription>
-                  Enter your information to create a new account
+                  輸入您的資料以創建新帳戶
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-fullname">Full Name</Label>
+                    <Label htmlFor="signup-fullname">全名</Label>
                     <Input
                       id="signup-fullname"
-                      placeholder="John Doe"
+                      placeholder="張三"
                       value={signupFullName}
                       onChange={(e) => setSignupFullName(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">電子郵件</Label>
                     <Input 
                       id="signup-email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder="your@email.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">密碼</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -183,7 +183,7 @@ export default function Auth() {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
+                    {isLoading ? "創建帳戶中..." : "創建帳戶"}
                   </Button>
                 </CardFooter>
               </form>
