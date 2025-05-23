@@ -1,18 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, SearchIcon } from 'lucide-react';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -33,11 +25,12 @@ type CustomerListProps = {
 export function CustomerList({ customers: initialCustomers, selectedCustomerId, onSelectCustomer, onAddCustomer }: CustomerListProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [displayedCount, setDisplayedCount] = useState(20); // Start with 20 items
+  const itemsPerLoad = 20; // Load 20 more items each time
   
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [loading, setLoading] = useState(true);
+  const observerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     setCustomers(initialCustomers);
@@ -52,12 +45,39 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
     return matchesStatus && matchesSearch;
   });
   
-  // Pagination logic
-  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
-  const paginatedCustomers = filteredCustomers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Get the customers to display (limited by displayedCount)
+  const displayedCustomers = filteredCustomers.slice(0, displayedCount);
+  const hasMore = displayedCount < filteredCustomers.length;
+  
+  // Load more items when intersection observer triggers
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      setDisplayedCount(prev => prev + itemsPerLoad);
+    }
+  }, [hasMore, loading]);
+  
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [loadMore]);
+  
+  // Reset displayed count when filters change
+  useEffect(() => {
+    setDisplayedCount(20);
+  }, [statusFilter, searchQuery]);
   
   // Function to get status text in Chinese
   const getStatusText = (status: string) => {
@@ -132,71 +152,56 @@ export function CustomerList({ customers: initialCustomers, selectedCustomerId, 
             ))}
           </div>
         ) : filteredCustomers.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40%]">名稱</TableHead>
-                <TableHead className="w-[30%]">部門</TableHead>
-                <TableHead className="w-[30%]">狀態</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedCustomers.map((customer) => (
-                <TableRow 
-                  key={customer.id} 
-                  className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
-                  onClick={() => onSelectCustomer(customer)}
-                >
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{customer.departmentName}</TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                      {getStatusText(customer.status)}
-                    </span>
-                  </TableCell>
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40%]">名稱</TableHead>
+                  <TableHead className="w-[30%]">部門</TableHead>
+                  <TableHead className="w-[30%]">狀態</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {displayedCustomers.map((customer) => (
+                  <TableRow 
+                    key={customer.id} 
+                    className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
+                    onClick={() => onSelectCustomer(customer)}
+                  >
+                    <TableCell className="font-medium">{customer.name}</TableCell>
+                    <TableCell>{customer.departmentName}</TableCell>
+                    <TableCell>
+                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                        {getStatusText(customer.status)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            
+            {/* Intersection observer target for infinite scroll */}
+            {hasMore && (
+              <div ref={observerRef} className="p-4 text-center">
+                <div className="flex items-center justify-center space-x-2">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              </div>
+            )}
+            
+            {/* Show total count */}
+            {!hasMore && filteredCustomers.length > 20 && (
+              <div className="p-4 text-center text-gray-500 text-sm">
+                已顯示全部 {filteredCustomers.length} 位客戶
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-10 text-gray-500">
             未找到客戶
           </div>
         )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="p-4 border-t">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-              
-              {[...Array(totalPages)].map((_, index) => (
-                <PaginationItem key={index}>
-                  <PaginationLink
-                    isActive={currentPage === index + 1}
-                    onClick={() => setCurrentPage(index + 1)}
-                  >
-                    {index + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
     </div>
   );
 }
