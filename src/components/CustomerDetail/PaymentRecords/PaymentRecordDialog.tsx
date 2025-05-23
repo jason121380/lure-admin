@@ -32,6 +32,13 @@ interface PaymentRecordDialogProps {
   onDeletePaymentRecord?: (recordId: string) => void;
 }
 
+// Define the account options
+const accountOptions = [
+  { id: "attraction-personal", name: "吸引力個人" },
+  { id: "attraction-company", name: "吸引力公司" },
+  { id: "development", name: "發展處" }
+];
+
 export function PaymentRecordDialog({
   isOpen,
   onOpenChange,
@@ -168,12 +175,16 @@ export function PaymentRecordDialog({
             
             <div className="space-y-2">
               <Label htmlFor="account">帳戶</Label>
-              <Input
-                id="account"
-                value={account}
-                onChange={(e) => setAccount(e.target.value)}
-                placeholder="可選"
-              />
+              <Select value={account} onValueChange={setAccount}>
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇帳戶" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accountOptions.map(option => (
+                    <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
