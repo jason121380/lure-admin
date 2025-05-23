@@ -8,6 +8,7 @@ export type Customer = {
   name: string;
   department: string;
   departmentName: string;
+  departmentCreatorName?: string; // Added creator name field
   status: string; // Changed from "active" | "paused" | "inactive" to string
   email?: string;
   phone?: string;
@@ -53,6 +54,11 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
     }
   };
 
+  // Format department name with creator
+  const formattedDepartmentName = customer.departmentCreatorName 
+    ? `${customer.departmentName} (${customer.departmentCreatorName})`
+    : customer.departmentName;
+
   return (
     <Button
       variant="ghost"
@@ -79,7 +85,7 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
           variant="outline" 
           className="text-xs px-2 py-0.5 border"
         >
-          {customer.departmentName}
+          {formattedDepartmentName}
         </Badge>
       </div>
     </Button>

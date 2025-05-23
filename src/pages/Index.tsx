@@ -44,7 +44,15 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   
   const fetchCustomers = async () => {
     try {
-      let query = supabase.from('customers').select('*');
+      let query = supabase
+        .from('customers')
+        .select(`
+          *,
+          department_creator:departments!inner(
+            user_id,
+            profiles:user_id(full_name)
+          )
+        `);
       
       // Filter by department if not showing all
       if (activeDepartment !== 'all') {
@@ -63,6 +71,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         name: item.name,
         department: item.department,
         departmentName: item.department_name,
+        departmentCreatorName: item.department_creator?.profiles?.full_name,
         status: item.status,
         email: item.email || undefined,
         phone: item.phone || undefined,

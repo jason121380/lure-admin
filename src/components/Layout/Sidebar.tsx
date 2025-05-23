@@ -52,6 +52,7 @@ type DepartmentType = {
   code: string;
   name: string;
   sort_order: number;
+  creator_name?: string; // Add creator name field
 };
 
 type SidebarProps = {
@@ -92,6 +93,11 @@ const SortableDepartment = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Format department name with creator if available
+  const displayName = department.creator_name 
+    ? `${department.name} (${department.creator_name})`
+    : department.name;
+
   return (
     <div 
       ref={setNodeRef} 
@@ -122,7 +128,7 @@ const SortableDepartment = ({
         <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
         </svg>
-        {department.name}
+        {displayName}
       </Button>
       
       {/* Delete button */}
@@ -206,10 +212,15 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       setIsLoading(true);
       console.log("Fetching all departments...");
       
-      // 獲取所有部門，不進行任何用戶過濾
+      // 獲取部門並加入用戶資訊
       const { data, error } = await supabase
         .from('departments')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name
+          )
+        `)
         .order('sort_order', { ascending: true });
 
       console.log("Departments data:", data);
@@ -218,15 +229,16 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       if (error) throw error;
 
       if (data) {
-        // Map database fields to our component structure
+        // Map database fields to our component structure with creator names
         const departments: DepartmentType[] = data.map(dept => ({
           id: dept.id,
           code: dept.code,
           name: dept.name,
-          sort_order: (dept as any).sort_order || 0
+          sort_order: (dept as any).sort_order || 0,
+          creator_name: dept.profiles?.full_name || null
         }));
         
-        console.log("Mapped departments:", departments);
+        console.log("Mapped departments with creators:", departments);
         
         // 設置所有部門，不進行任何過濾
         setDepartmentsList(departments);
