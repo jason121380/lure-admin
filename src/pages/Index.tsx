@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -23,7 +24,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Changed default to true
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -164,12 +165,12 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Department Sidebar */}
+      {/* Department Sidebar - Always visible on initial load */}
       <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
           activeDepartment={activeDepartment} 
           setActiveDepartment={setActiveDepartment} 
-          isVisible={isSidebarOpen}
+          isVisible={true} // Always visible by default
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
       </div>
