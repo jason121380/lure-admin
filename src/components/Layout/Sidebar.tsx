@@ -272,7 +272,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
     if (newDepartmentName.trim()) {
       const newDepartmentCode = newDepartmentName.toLowerCase().replace(/\s+/g, '-');
       
-      // First check if this department already exists
+      // First check if this department already exists in local state
       const existingDept = departmentsList.find(dept => dept.code === newDepartmentCode);
       if (existingDept) {
         toast({
@@ -298,7 +298,20 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           .select('*')
           .single();
           
-        if (error) throw error;
+        if (error) {
+          // Handle duplicate key error specifically
+          if (error.code === '23505' && error.message.includes('departments_code_key')) {
+            toast({
+              title: "部門已存在",
+              description: `${newDepartmentName} 部門已經存在於資料庫中`,
+              variant: "destructive"
+            });
+            // Refresh the departments list to sync with database
+            await fetchDepartments();
+            return;
+          }
+          throw error;
+        }
         
         // Add the new department to the local state
         if (data) {
