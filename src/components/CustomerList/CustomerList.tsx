@@ -109,17 +109,17 @@ export function CustomerList({
     }
   };
 
-  // Function to get status color
+  // Function to get status color - simplified and minimalist
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-700 font-medium";
+        return "bg-slate-100 text-slate-800 font-medium";
       case "paused":
-        return "bg-amber-100 text-amber-700 font-medium";
+        return "bg-slate-100 text-slate-600 font-medium";
       case "inactive":
-        return "bg-red-100 text-red-700 font-medium";
+        return "bg-slate-100 text-slate-500 font-medium";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-slate-100 text-slate-800";
     }
   };
 
@@ -158,11 +158,11 @@ export function CustomerList({
       <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
         {!isMobile && (
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">客戶列表</h2>
+            <h2 className="text-xl font-semibold text-slate-900">客戶列表</h2>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="p-1 h-8 w-8"
+              className="p-1 h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               onClick={onAddCustomer}
             >
               <Plus className="w-4 h-4" />
@@ -172,27 +172,27 @@ export function CustomerList({
         
         <div>
           <div className="relative">
-            <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
+            <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-slate-400" />
             <Input 
               placeholder="搜尋客戶名稱..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9"
+              className="w-full pl-9 border-slate-200 focus:border-slate-400 focus:ring-slate-400"
             />
           </div>
         </div>
 
-        {/* Bulk Actions Section */}
+        {/* Bulk Actions Section - Minimalist design */}
         {!isMobile && isSomeSelected && (
-          <div className="mt-4 p-3 bg-gray-900 border border-gray-700 rounded-lg">
+          <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white">
+              <span className="text-sm text-slate-700">
                 已選取 {selectedCustomerIds.length} 位客戶
               </span>
               <Button
                 size="sm"
                 variant="outline"
-                className="text-white border-gray-600 hover:bg-gray-800 bg-transparent"
+                className="text-slate-700 border-slate-300 hover:bg-slate-100 hover:border-slate-400"
                 onClick={() => setIsBulkDialogOpen(true)}
               >
                 <Edit2 className="w-3 h-3 mr-1" />
@@ -217,24 +217,25 @@ export function CustomerList({
             <div className={isMobile ? 'w-full' : ''}>
               <Table>
                 <TableHeader className={isMobile ? 'hidden' : ''}>
-                  <TableRow>
+                  <TableRow className="border-slate-200">
                     <TableHead className="w-[50px]">
                       <Checkbox
                         checked={isAllSelected}
                         onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
                         aria-label="選取全部"
+                        className="border-slate-300"
                       />
                     </TableHead>
-                    <TableHead className="w-[40%]">名稱</TableHead>
-                    <TableHead className="w-[30%]">部門</TableHead>
-                    <TableHead className="w-[30%]">狀態</TableHead>
+                    <TableHead className="w-[40%] text-slate-700">名稱</TableHead>
+                    <TableHead className="w-[30%] text-slate-700">部門</TableHead>
+                    <TableHead className="w-[30%] text-slate-700">狀態</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {displayedCustomers.map((customer) => (
                     <TableRow 
                       key={customer.id} 
-                      className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
+                      className={`cursor-pointer hover:bg-slate-50 border-slate-100 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
                       onClick={() => onSelectCustomer(customer)}
                     >
                       {isMobile ? (
@@ -242,12 +243,12 @@ export function CustomerList({
                         <TableCell className="w-full p-4">
                           <div className="flex items-center justify-between w-full">
                             <div className="flex-1 min-w-0 mr-3">
-                              <div className="font-medium text-sm truncate">{customer.name}</div>
+                              <div className="font-medium text-sm truncate text-slate-900">{customer.name}</div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <Badge 
                                 variant="outline" 
-                                className="text-xs px-2 py-0.5 border"
+                                className="text-xs px-2 py-0.5 border-slate-300 text-slate-600"
                               >
                                 {customer.departmentName}
                               </Badge>
@@ -265,15 +266,16 @@ export function CustomerList({
                               checked={selectedCustomerIds.includes(customer.id)}
                               onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
                               aria-label={`選取 ${customer.name}`}
+                              className="border-slate-300"
                             />
                           </TableCell>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-slate-900">
                             {customer.name}
                           </TableCell>
                           <TableCell>
                             <Badge 
                               variant="outline" 
-                              className="text-xs px-2 py-0.5 border"
+                              className="text-xs px-2 py-0.5 border-slate-300 text-slate-600"
                             >
                               {customer.departmentName}
                             </Badge>
@@ -302,13 +304,13 @@ export function CustomerList({
             
             {/* Show total count */}
             {!hasMore && filteredCustomers.length > 20 && (
-              <div className={`p-4 text-center text-gray-500 text-sm ${isMobile ? 'w-full' : ''}`}>
+              <div className={`p-4 text-center text-slate-500 text-sm ${isMobile ? 'w-full' : ''}`}>
                 已顯示全部 {filteredCustomers.length} 位客戶
               </div>
             )}
           </>
         ) : (
-          <div className={`text-center py-10 text-gray-500 ${isMobile ? 'w-full' : ''}`}>
+          <div className={`text-center py-10 text-slate-500 ${isMobile ? 'w-full' : ''}`}>
             未找到客戶
           </div>
         )}
