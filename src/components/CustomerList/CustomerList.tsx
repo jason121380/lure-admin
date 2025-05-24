@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -109,17 +110,17 @@ export function CustomerList({
     }
   };
 
-  // Function to get status color - simplified and minimalist
+  // Function to get status color - using the defined status colors
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-slate-100 text-slate-800 font-medium";
+        return "bg-green-100 text-green-800 border-green-200";
       case "paused":
-        return "bg-slate-100 text-slate-600 font-medium";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "inactive":
-        return "bg-slate-100 text-slate-500 font-medium";
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-slate-100 text-slate-800";
+        return "bg-slate-100 text-slate-800 border-slate-200";
     }
   };
 
@@ -182,7 +183,7 @@ export function CustomerList({
           </div>
         </div>
 
-        {/* Bulk Actions Section - Minimalist design */}
+        {/* Bulk Actions Section */}
         {!isMobile && isSomeSelected && (
           <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
             <div className="flex items-center justify-between">
@@ -252,7 +253,7 @@ export function CustomerList({
                               >
                                 {customer.departmentName}
                               </Badge>
-                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                              <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
                                 {getStatusText(customer.status)}
                               </span>
                             </div>
@@ -281,7 +282,7 @@ export function CustomerList({
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
                               {getStatusText(customer.status)}
                             </span>
                           </TableCell>
@@ -302,7 +303,6 @@ export function CustomerList({
               </div>
             )}
             
-            {/* Show total count */}
             {!hasMore && filteredCustomers.length > 20 && (
               <div className={`p-4 text-center text-slate-500 text-sm ${isMobile ? 'w-full' : ''}`}>
                 已顯示全部 {filteredCustomers.length} 位客戶
