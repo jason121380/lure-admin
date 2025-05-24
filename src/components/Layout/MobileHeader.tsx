@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Plus, Filter } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileHeaderProps {
   title: string;
@@ -11,6 +13,7 @@ interface MobileHeaderProps {
   showLogo?: boolean;
   onAddCustomer?: () => void;
   onFilter?: () => void;
+  onUserProfile?: () => void;
 }
 
 export const MobileHeader = ({ 
@@ -20,8 +23,11 @@ export const MobileHeader = ({
   rightAction, 
   showLogo = false,
   onAddCustomer,
-  onFilter
+  onFilter,
+  onUserProfile
 }: MobileHeaderProps) => {
+  const { user } = useAuth();
+
   return (
     <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-40 md:hidden">
       <div className="flex items-center justify-between">
@@ -54,20 +60,33 @@ export const MobileHeader = ({
             {rightAction}
           </div>
         ) : (
-          showLogo && (onAddCustomer || onFilter) && (
-            <div className="flex items-center space-x-2">
-              {onFilter && (
-                <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onFilter}>
-                  <Filter className="h-4 w-4" />
-                </Button>
-              )}
-              {onAddCustomer && (
-                <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onAddCustomer}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          )
+          <div className="flex items-center space-x-2">
+            {showLogo && onFilter && (
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onFilter}>
+                <Filter className="h-4 w-4" />
+              </Button>
+            )}
+            {showLogo && onAddCustomer && (
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onAddCustomer}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+            {user && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-1 h-8 w-8" 
+                onClick={onUserProfile}
+              >
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={user.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-xs">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </div>

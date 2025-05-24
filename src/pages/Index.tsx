@@ -6,6 +6,7 @@ import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
 import { MobileHeader } from "@/components/Layout/MobileHeader";
 import { FilterDialog } from "@/components/CustomerList/FilterDialog";
+import { UserProfileDialog } from "@/components/Layout/UserProfileDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarKey, setSidebarKey] = useState(0);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     department: "all"
@@ -260,6 +262,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setIsFilterDialogOpen(true);
   };
 
+  const handleOpenUserProfile = () => {
+    setIsUserProfileDialogOpen(true);
+  };
+
   const getDepartmentName = (dept: string) => {
     const names: Record<string, string> = {
       'all': '全部客戶',
@@ -281,6 +287,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           showLogo={!selectedCustomer}
           onAddCustomer={() => handleAddCustomer()}
           onFilter={!selectedCustomer ? handleOpenFilter : undefined}
+          onUserProfile={handleOpenUserProfile}
         />
 
         {/* Main Content */}
@@ -319,6 +326,11 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           onOpenChange={setIsFilterDialogOpen}
           onApplyFilters={handleApplyFilters}
           currentFilters={filters}
+        />
+
+        <UserProfileDialog
+          open={isUserProfileDialogOpen}
+          onOpenChange={setIsUserProfileDialogOpen}
         />
       </div>
     );
