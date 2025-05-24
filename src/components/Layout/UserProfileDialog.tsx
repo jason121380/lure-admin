@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Edit } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserProfileDialogProps {
@@ -33,6 +33,11 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditName = () => {
+    // TODO: Implement edit name functionality
+    toast.info("編輯名稱功能開發中");
   };
 
   if (!user) return null;
@@ -60,20 +65,15 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-sm">
-              <span className="font-medium">帳戶類型：</span>
-              <span className="text-gray-600 ml-2">一般使用者</span>
-            </div>
-            <div className="text-sm">
-              <span className="font-medium">註冊時間：</span>
-              <span className="text-gray-600 ml-2">
-                {new Date(user.created_at).toLocaleDateString('zh-TW')}
-              </span>
-            </div>
-          </div>
-
           <div className="flex justify-end space-x-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={handleEditName}
+              className="flex items-center space-x-2"
+            >
+              <Edit className="h-4 w-4" />
+              <span>編輯名稱</span>
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleSignOut}
