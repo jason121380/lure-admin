@@ -182,6 +182,26 @@ export function CustomerList({
             />
           </div>
         </div>
+
+        {/* Bulk Actions Section */}
+        {!isMobile && isSomeSelected && (
+          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-orange-700">
+                已選取 {selectedCustomerIds.length} 位客戶
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                onClick={() => setIsBulkDialogOpen(true)}
+              >
+                <Edit2 className="w-3 h-3 mr-1" />
+                批量更改部門
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className={`flex-1 overflow-auto ${isMobile ? 'w-full' : ''}`}>
