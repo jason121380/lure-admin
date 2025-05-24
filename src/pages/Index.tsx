@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -5,11 +6,14 @@ import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
 import { MobileBottomNav } from "@/components/Layout/MobileBottomNav";
-import { CustomerManagementPage } from "@/pages/CustomerManagementPage";
-import { ProfilePage } from "@/pages/ProfilePage";
+import { MobileHeader } from "@/components/Layout/MobileHeader";
+import { CustomerManagementPage } from "@/components/CustomerManagement/CustomerManagementPage";
+import { ProfilePage } from "@/components/Profile/ProfilePage";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Menu, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type IndexProps = {
@@ -21,16 +25,15 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [activeDepartment, setActiveDepartment] = useState("all");
+  const [activeTab, setActiveTab] = useState("customers"); // New state for mobile tabs
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showCustomerDetail, setShowCustomerDetail] = useState(false);
   const [sidebarKey, setSidebarKey] = useState(0);
-  
-  // Mobile tab state
-  const [activeTab, setActiveTab] = useState("management");
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -38,7 +41,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       fetchCustomers();
     }
   }, [user, activeDepartment]);
-  
+
   // Show customer detail panel on mobile when a customer is selected
   useEffect(() => {
     if (isMobile && selectedCustomer) {
@@ -50,6 +53,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     try {
       let query = supabase.from('customers').select('*');
       
+      // Filter by department if not showing all
       if (activeDepartment !== 'all') {
         query = query.eq('department', activeDepartment);
       }
@@ -60,6 +64,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         throw error;
       }
       
+      // Transform Supabase data to match our Customer type
       const transformedData: Customer[] = data.map(item => ({
         id: item.id,
         name: item.name,
@@ -77,6 +82,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       
       setCustomers(transformedData);
       
+      // Update selected customer if it exists in the list
       if (selectedCustomerId) {
         const updatedSelectedCustomer = transformedData.find(c => c.id === selectedCustomerId);
         if (updatedSelectedCustomer) {
@@ -114,9 +120,11 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   
   const handleUpdateCustomer = (updatedCustomer: Customer) => {
     setSelectedCustomer(updatedCustomer);
+    // Update the customers list
     setCustomers(prevCustomers => 
       prevCustomers.map(c => c.id === updatedCustomer.id ? updatedCustomer : c)
     );
+    // Force sidebar refresh when customer is updated
     refreshSidebar();
   };
   
@@ -135,6 +143,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       setSelectedCustomerId(null);
       setSelectedCustomer(null);
       fetchCustomers();
+      // Force sidebar refresh when customer is deleted
       refreshSidebar();
     } catch (error) {
       toast.error("刪除客戶時發生錯誤");
@@ -144,6 +153,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   
   const handleSaveCustomer = async (customerData: Partial<Customer>) => {
     try {
+      // Transform data for Supabase
       const supabaseCustomerData = {
         name: customerData.name,
         department: customerData.department,
@@ -159,6 +169,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       };
       
       if (editingCustomer) {
+        // Update existing customer
         const { error } = await supabase
           .from('customers')
           .update(supabaseCustomerData)
@@ -167,6 +178,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         if (error) throw error;
         toast.success("客戶資料已更新");
       } else {
+        // Create new customer
         const { data, error } = await supabase
           .from('customers')
           .insert(supabaseCustomerData)
@@ -182,6 +194,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       }
       
       fetchCustomers();
+      // Force sidebar refresh when customer is saved
       refreshSidebar();
       setIsAddEditDialogOpen(false);
     } catch (error) {
@@ -209,6 +222,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
       toast.success(`已成功更新 ${customerIds.length} 位客戶的部門`);
       fetchCustomers();
+      // Force sidebar refresh when bulk department update happens
       refreshSidebar();
     } catch (error) {
       toast.error("批量更新部門失敗");
@@ -232,14 +246,46 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     return names[dept] || dept;
   };
 
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-gray-50 pb-20">
-        {/* Mobile Content */}
-        <div className="h-full">
-          {activeTab === 'management' && <CustomerManagementPage />}
-          {activeTab === 'list' && (
-            <div className="h-full">
+  // Mobile tab content renderer
+  const renderMobileTabContent = () => {
+    switch (activeTab) {
+      case 'customers':
+        return (
+          <CustomerManagementPage 
+            customers={customers}
+            onAddCustomer={handleAddCustomer}
+          />
+        );
+      case 'list':
+        return showCustomerDetail ? (
+          <div className="min-h-screen bg-gray-50">
+            <MobileHeader 
+              title={selectedCustomer?.name || '客戶詳情'}
+              showBackButton={true}
+              onBack={handleBackToList}
+            />
+            <div className="pt-16 pb-20">
+              {selectedCustomer && (
+                <CustomerDetail 
+                  customer={selectedCustomer} 
+                  onEditCustomer={handleEditCustomer}
+                  onDeleteCustomer={handleDeleteCustomer}
+                  onUpdateCustomer={handleUpdateCustomer}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="min-h-screen bg-gray-50">
+            <MobileHeader 
+              title="客戶列表"
+              rightAction={
+                <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
+                  <Search className="h-4 w-4" />
+                </Button>
+              }
+            />
+            <div className="pt-16 pb-20">
               <CustomerList 
                 customers={customers} 
                 selectedCustomerId={selectedCustomerId}
@@ -248,9 +294,19 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
                 onBulkUpdateDepartment={handleBulkUpdateDepartment}
               />
             </div>
-          )}
-          {activeTab === 'profile' && <ProfilePage />}
-        </div>
+          </div>
+        );
+      case 'profile':
+        return <ProfilePage />;
+      default:
+        return null;
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {renderMobileTabContent()}
 
         {/* Mobile Bottom Navigation */}
         <MobileBottomNav 
@@ -270,6 +326,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
+      {/* Desktop Sidebar */}
       <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
           key={sidebarKey}
@@ -280,6 +337,17 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         />
       </div>
       
+      {/* Desktop menu button */}
+      <Button 
+        variant="ghost" 
+        className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">開啟部門選單</span>
+      </Button>
+      
+      {/* Desktop main content */}
       <div className="flex flex-1 h-full w-full">
         <div className="w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto">
           <CustomerList 
