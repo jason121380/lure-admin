@@ -25,6 +25,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -40,7 +41,12 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     if (user) {
       fetchCustomers();
     }
-  }, [user, activeDepartment]);
+  }, [user]);
+  
+  // Apply filters whenever customers or filters change
+  useEffect(() => {
+    applyFilters();
+  }, [customers, filters]);
   
   const fetchCustomers = async () => {
     try {
@@ -89,6 +95,23 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       toast.error("無法載入客戶資料");
       console.error("Error fetching customers:", error);
     }
+  };
+
+  // Apply filters to customers
+  const applyFilters = () => {
+    let filtered = [...customers];
+
+    // Apply status filter
+    if (filters.status !== "all") {
+      filtered = filtered.filter(customer => customer.status === filters.status);
+    }
+
+    // Apply department filter
+    if (filters.department !== "all") {
+      filtered = filtered.filter(customer => customer.department === filters.department);
+    }
+
+    setFilteredCustomers(filtered);
   };
 
   // Force sidebar to refresh when customers data changes
@@ -265,7 +288,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           {!selectedCustomer ? (
             <div className="h-full w-full">
               <CustomerList 
-                customers={customers} 
+                customers={filteredCustomers} 
                 selectedCustomerId={selectedCustomerId}
                 onSelectCustomer={handleSelectCustomer}
                 onAddCustomer={handleAddCustomer}
@@ -328,7 +351,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       <div className="flex flex-1 h-full w-full">
         <div className="w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto">
           <CustomerList 
-            customers={customers} 
+            customers={filteredCustomers} 
             selectedCustomerId={selectedCustomerId}
             onSelectCustomer={handleSelectCustomer}
             onAddCustomer={handleAddCustomer}
