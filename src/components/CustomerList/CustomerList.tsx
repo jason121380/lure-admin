@@ -158,7 +158,7 @@ export function CustomerList({
   
   return (
     <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
-      <div className={`${isMobile ? 'mobile-customer-list mobile-search-container p-4' : 'p-4 md:p-5'} border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
+      <div className={`${isMobile ? 'mobile-customer-list p-3' : 'p-4 md:p-5'} border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
         {!isMobile && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">客戶列表</h2>
@@ -174,14 +174,14 @@ export function CustomerList({
         )}
         
         {(searchExpanded || !isMobile) && (
-          <div className={isMobile ? 'mb-0' : 'mb-4'}>
+          <div className={isMobile ? 'mb-3' : 'mb-4'}>
             <div className="relative">
-              <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
+              <SearchIcon className={`h-4 w-4 absolute text-gray-400 ${isMobile ? 'left-3 top-3' : 'left-2.5 top-2.5'}`} />
               <Input 
                 placeholder="搜尋客戶名稱..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9"
+                className={`w-full ${isMobile ? 'pl-10 pr-3 py-2.5 text-base border-gray-200 focus:border-blue-400 focus:ring-1 focus:ring-blue-400' : 'pl-9'}`}
               />
             </div>
           </div>

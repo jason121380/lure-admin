@@ -115,15 +115,25 @@
     overflow: hidden;
   }
 
-  /* 移除手機版 CustomerList 的頂部 padding */
+  /* 移除手機版 CustomerList 的頂部 padding，優化搜尋框樣式 */
   .mobile-customer-list {
     padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 
-  /* 手機版搜尋框緊貼頭部 */
-  .mobile-search-container {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+  /* 優化手機版搜尋框樣式 */
+  .mobile-search-optimized {
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-search-optimized:focus-within {
+    background-color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 }
 
