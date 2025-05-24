@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 interface MobileHeaderProps {
   title: string;
@@ -9,7 +9,7 @@ interface MobileHeaderProps {
   onBack?: () => void;
   rightAction?: React.ReactNode;
   showLogo?: boolean;
-  onSearchClick?: () => void;
+  onAddCustomer?: () => void;
 }
 
 export const MobileHeader = ({ 
@@ -18,7 +18,7 @@ export const MobileHeader = ({
   onBack, 
   rightAction, 
   showLogo = false,
-  onSearchClick 
+  onAddCustomer 
 }: MobileHeaderProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-40 md:hidden">
@@ -52,9 +52,9 @@ export const MobileHeader = ({
             {rightAction}
           </div>
         ) : (
-          showLogo && onSearchClick && (
-            <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onSearchClick}>
-              <Search className="h-4 w-4" />
+          showLogo && onAddCustomer && (
+            <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onAddCustomer}>
+              <Plus className="h-4 w-4" />
             </Button>
           )
         )}

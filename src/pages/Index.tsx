@@ -9,7 +9,7 @@ import { SearchDialog } from "@/components/Search/SearchDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -250,7 +250,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           showBackButton={!!selectedCustomer}
           onBack={handleBackToList}
           showLogo={!selectedCustomer}
-          onSearchClick={() => setIsSearchDialogOpen(true)}
+          onAddCustomer={() => handleAddCustomer()}
         />
 
         {/* Main Content */}
