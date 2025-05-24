@@ -7,6 +7,7 @@ import { Plus, SearchIcon, Edit2 } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BulkDepartmentChangeDialog } from './BulkDepartmentChangeDialog';
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -242,9 +243,12 @@ export function CustomerList({
                               <div className="font-medium text-sm truncate">{customer.name}</div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs px-2 py-0.5 border"
+                              >
                                 {customer.departmentName}
-                              </span>
+                              </Badge>
                               <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
                                 {getStatusText(customer.status)}
                               </span>
@@ -265,7 +269,12 @@ export function CustomerList({
                             {customer.name}
                           </TableCell>
                           <TableCell>
-                            {customer.departmentName}
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs px-2 py-0.5 border"
+                            >
+                              {customer.departmentName}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
