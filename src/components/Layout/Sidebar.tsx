@@ -999,11 +999,9 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           <Popover>
             <PopoverTrigger asChild>
               <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 p-2 rounded-md">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <User className="h-4 w-4 text-indigo-600" />
+                </div>
                 <div className="overflow-hidden">
                   <p className="text-sm font-medium truncate">{userFullName || user?.email}</p>
                 </div>
@@ -1012,11 +1010,9 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             <PopoverContent className="w-56 p-3" align="start">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 pb-2 border-b">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <User className="h-5 w-5 text-indigo-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">{userFullName || '未設定姓名'}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
