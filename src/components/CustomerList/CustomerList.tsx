@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -156,7 +157,7 @@ export function CustomerList({
   return (
     <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
       <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           {!isMobile && (
             <Button 
               variant="ghost" 
@@ -169,7 +170,7 @@ export function CustomerList({
           )}
         </div>
         
-        <div className="mb-4">
+        <div className="mb-2">
           <div className="relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
