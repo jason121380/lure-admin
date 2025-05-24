@@ -106,12 +106,24 @@
     left: 0;
     right: 0;
     z-index: 40;
+    height: 60px; /* 固定頭部高度 */
   }
   
   .mobile-content-with-header {
-    padding-top: 64px; /* 調整為實際頭部高度 */
+    padding-top: 60px; /* 與頭部高度一致 */
     height: 100vh;
     overflow: hidden;
+  }
+
+  /* 移除手機版 CustomerList 的頂部 padding */
+  .mobile-customer-list {
+    padding-top: 0 !important;
+  }
+
+  /* 手機版搜尋框緊貼頭部 */
+  .mobile-search-container {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }
 

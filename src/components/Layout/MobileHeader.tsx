@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,8 +31,8 @@ export const MobileHeader = ({
   const { user } = useAuth();
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3 md:hidden">
-      <div className="flex items-center justify-between">
+    <div className="bg-white border-b border-gray-200 px-4 py-3 md:hidden h-[60px] flex items-center">
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-3">
           {showBackButton && onBack && (
             <Button
