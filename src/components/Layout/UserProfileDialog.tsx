@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,16 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState("");
+
+  // Update current user name when user changes or dialog opens
+  useEffect(() => {
+    if (user && open) {
+      const userName = user.user_metadata?.full_name || "";
+      setCurrentUserName(userName);
+      setEditedName(userName);
+    }
+  }, [user, open]);
 
   const handleSignOut = async () => {
     try {
@@ -41,7 +51,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
   };
 
   const handleEditName = () => {
-    setEditedName(user?.user_metadata?.full_name || "");
+    setEditedName(currentUserName);
     setIsEditingName(true);
   };
 
@@ -74,8 +84,17 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
         console.log("Profile table update failed (may not exist):", profileError);
       }
 
+      // Update local state to reflect the change immediately
+      setCurrentUserName(editedName.trim());
       toast.success("名稱已更新");
       setIsEditingName(false);
+      
+      // Force a small delay to ensure UI updates properly across devices
+      setTimeout(() => {
+        // Trigger a re-render by updating component state
+        setCurrentUserName(editedName.trim());
+      }, 100);
+      
     } catch (error) {
       toast.error("更新名稱時發生錯誤");
       console.error("Error updating name:", error);
@@ -86,7 +105,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
 
   const handleCancelEdit = () => {
     setIsEditingName(false);
-    setEditedName("");
+    setEditedName(currentUserName);
   };
 
   if (!user) return null;
@@ -115,6 +134,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
                     placeholder="輸入姓名"
                     className="text-lg font-medium"
                     disabled={updateLoading}
+                    autoFocus
                   />
                   <div className="flex space-x-2">
                     <Button
@@ -140,7 +160,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
                 </div>
               ) : (
                 <h3 className="font-medium text-lg">
-                  {user.user_metadata?.full_name || "使用者"}
+                  {currentUserName || "使用者"}
                 </h3>
               )}
               <p className="text-sm text-gray-500">{user.email}</p>
