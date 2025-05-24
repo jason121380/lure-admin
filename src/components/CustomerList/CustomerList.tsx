@@ -227,8 +227,8 @@ export function CustomerList({
                         className="border-slate-300"
                       />
                     </TableHead>
-                    <TableHead className="w-[40%] text-slate-700">名稱</TableHead>
                     <TableHead className="w-[30%] text-slate-700">部門</TableHead>
+                    <TableHead className="w-[40%] text-slate-700">名稱</TableHead>
                     <TableHead className="w-[30%] text-slate-700">狀態</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -243,16 +243,16 @@ export function CustomerList({
                         // Mobile layout - single horizontal row
                         <TableCell className="w-full p-4">
                           <div className="flex items-center justify-between w-full">
-                            <div className="flex-1 min-w-0 mr-3">
-                              <div className="font-medium text-sm truncate text-slate-900">{customer.name}</div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
                               <Badge 
                                 variant="outline" 
-                                className="text-xs px-2 py-0.5 border-slate-300 text-slate-600"
+                                className="text-xs px-2 py-0.5 border-slate-300 text-slate-600 shrink-0"
                               >
                                 {customer.departmentName}
                               </Badge>
+                              <div className="font-medium text-sm truncate text-slate-900">{customer.name}</div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
                               <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
                                 {getStatusText(customer.status)}
                               </span>
@@ -270,9 +270,6 @@ export function CustomerList({
                               className="border-slate-300"
                             />
                           </TableCell>
-                          <TableCell className="font-medium text-slate-900">
-                            {customer.name}
-                          </TableCell>
                           <TableCell>
                             <Badge 
                               variant="outline" 
@@ -280,6 +277,9 @@ export function CustomerList({
                             >
                               {customer.departmentName}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium text-slate-900">
+                            {customer.name}
                           </TableCell>
                           <TableCell>
                             <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
