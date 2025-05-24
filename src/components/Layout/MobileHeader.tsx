@@ -9,9 +9,17 @@ interface MobileHeaderProps {
   onBack?: () => void;
   rightAction?: React.ReactNode;
   showLogo?: boolean;
+  onSearchClick?: () => void;
 }
 
-export const MobileHeader = ({ title, showBackButton, onBack, rightAction, showLogo = false }: MobileHeaderProps) => {
+export const MobileHeader = ({ 
+  title, 
+  showBackButton, 
+  onBack, 
+  rightAction, 
+  showLogo = false,
+  onSearchClick 
+}: MobileHeaderProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-40 md:hidden">
       <div className="flex items-center justify-between">
@@ -39,10 +47,16 @@ export const MobileHeader = ({ title, showBackButton, onBack, rightAction, showL
           )}
         </div>
         
-        {rightAction && (
+        {rightAction ? (
           <div className="flex items-center">
             {rightAction}
           </div>
+        ) : (
+          !selectedCustomer && onSearchClick && (
+            <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onSearchClick}>
+              <Search className="h-4 w-4" />
+            </Button>
+          )
         )}
       </div>
     </div>

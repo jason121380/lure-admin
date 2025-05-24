@@ -5,6 +5,7 @@ import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
 import { MobileHeader } from "@/components/Layout/MobileHeader";
+import { SearchDialog } from "@/components/Search/SearchDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarKey, setSidebarKey] = useState(0);
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -222,6 +224,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setSelectedCustomerId(null);
   };
 
+  const handleSearch = (query: string) => {
+    // For now, we'll just show a toast. In a real implementation,
+    // you might want to filter the customer list or navigate to a search results page
+    toast.success(`搜尋: ${query}`);
+    console.log("搜尋查詢:", query);
+  };
+
   const getDepartmentName = (dept: string) => {
     const names: Record<string, string> = {
       'all': '全部客戶',
@@ -241,13 +250,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           showBackButton={!!selectedCustomer}
           onBack={handleBackToList}
           showLogo={!selectedCustomer}
-          rightAction={
-            !selectedCustomer ? (
-              <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
-                <Search className="h-4 w-4" />
-              </Button>
-            ) : undefined
-          }
+          onSearchClick={() => setIsSearchDialogOpen(true)}
         />
 
         {/* Main Content */}
@@ -279,6 +282,12 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           open={isAddEditDialogOpen}
           onOpenChange={setIsAddEditDialogOpen}
           onSave={handleSaveCustomer}
+        />
+
+        <SearchDialog
+          open={isSearchDialogOpen}
+          onOpenChange={setIsSearchDialogOpen}
+          onSearch={handleSearch}
         />
       </div>
     );
