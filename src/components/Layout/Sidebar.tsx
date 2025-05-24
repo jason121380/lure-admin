@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Department = {
   id: string;
@@ -33,6 +34,7 @@ interface SidebarProps {
 
 export default function Sidebar({ sidebarVisible, setSidebarVisible }: SidebarProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDeptCode, setNewDeptCode] = useState("");
@@ -88,10 +90,19 @@ export default function Sidebar({ sidebarVisible, setSidebarVisible }: SidebarPr
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "錯誤",
+        description: "請先登入。",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("departments")
-        .insert([{ name: newDeptName, code: newDeptCode }]);
+        .insert([{ name: newDeptName, code: newDeptCode, user_id: user.id }]);
 
       if (error) {
         toast({
