@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -182,24 +181,6 @@ export function CustomerList({
             />
           </div>
         </div>
-
-        {/* Bulk actions - only show on desktop */}
-        {!isMobile && isSomeSelected && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
-            <span className="text-sm text-blue-700">
-              已選擇 {selectedCustomerIds.length} 位客戶
-            </span>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => setIsBulkDialogOpen(true)}
-              className="text-blue-700 border-blue-200 hover:bg-blue-100"
-            >
-              <Edit2 className="w-4 h-4 mr-1" />
-              批量更改部門
-            </Button>
-          </div>
-        )}
       </div>
       
       <div className={`flex-1 overflow-auto ${isMobile ? 'w-full' : ''}`}>
