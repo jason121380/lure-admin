@@ -27,8 +27,12 @@ export const MobileHeader = ({ title, showBackButton, onBack, rightAction, showL
             </Button>
           )}
           {showLogo ? (
-            <div className="text-xl font-bold text-indigo-600">
-              LOGO
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" 
+                alt="Logo" 
+                className="h-8 w-auto"
+              />
             </div>
           ) : (
             <h1 className="text-lg font-semibold text-gray-900 truncate">{title}</h1>
