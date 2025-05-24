@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
 import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
-import { MobileBottomNav } from "@/components/Layout/MobileBottomNav";
 import { MobileHeader } from "@/components/Layout/MobileHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,7 +28,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showCustomerDetail, setShowCustomerDetail] = useState(false);
   const [sidebarKey, setSidebarKey] = useState(0);
   
   // Fetch customers on initial load
@@ -37,13 +36,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       fetchCustomers();
     }
   }, [user, activeDepartment]);
-
-  // Show customer detail panel on mobile when a customer is selected
-  useEffect(() => {
-    if (isMobile && selectedCustomer) {
-      setShowCustomerDetail(true);
-    }
-  }, [selectedCustomer, isMobile]);
   
   const fetchCustomers = async () => {
     try {
@@ -227,7 +219,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   };
 
   const handleBackToList = () => {
-    setShowCustomerDetail(false);
     setSelectedCustomer(null);
     setSelectedCustomerId(null);
   };
@@ -244,14 +235,14 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20 pt-16">
+      <div className="min-h-screen bg-gray-50">
         {/* Mobile Header */}
         <MobileHeader 
-          title={showCustomerDetail ? (selectedCustomer?.name || '客戶詳情') : getDepartmentName(activeDepartment)}
-          showBackButton={showCustomerDetail}
+          title={selectedCustomer ? selectedCustomer.name : getDepartmentName(activeDepartment)}
+          showBackButton={!!selectedCustomer}
           onBack={handleBackToList}
           rightAction={
-            !showCustomerDetail ? (
+            !selectedCustomer ? (
               <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
                 <Search className="h-4 w-4" />
               </Button>
@@ -260,8 +251,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         />
 
         {/* Main Content */}
-        <div className="h-full">
-          {!showCustomerDetail ? (
+        <div className="pt-16 h-screen">
+          {!selectedCustomer ? (
             <div className="h-full">
               <CustomerList 
                 customers={customers} 
@@ -273,24 +264,15 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
             </div>
           ) : (
             <div className="h-full">
-              {selectedCustomer && (
-                <CustomerDetail 
-                  customer={selectedCustomer} 
-                  onEditCustomer={handleEditCustomer}
-                  onDeleteCustomer={handleDeleteCustomer}
-                  onUpdateCustomer={handleUpdateCustomer}
-                />
-              )}
+              <CustomerDetail 
+                customer={selectedCustomer} 
+                onEditCustomer={handleEditCustomer}
+                onDeleteCustomer={handleDeleteCustomer}
+                onUpdateCustomer={handleUpdateCustomer}
+              />
             </div>
           )}
         </div>
-
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav 
-          activeDepartment={activeDepartment}
-          setActiveDepartment={setActiveDepartment}
-          onAddCustomer={handleAddCustomer}
-        />
 
         <CustomerEditDialog
           customer={editingCustomer}
