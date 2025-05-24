@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -158,12 +157,11 @@ export function CustomerList({
     <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
       <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">客戶列表</h2>
           {!isMobile && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="p-1 h-8 w-8"
+              className="p-1 h-8 w-8 ml-auto"
               onClick={onAddCustomer}
             >
               <Plus className="w-4 h-4" />
