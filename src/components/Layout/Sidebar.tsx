@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Department = {
   id: string;
@@ -28,15 +27,12 @@ type Department = {
 };
 
 interface SidebarProps {
-  activeDepartment: string;
-  setActiveDepartment: (department: string) => void;
-  isVisible: boolean;
-  toggleSidebar: () => void;
+  sidebarVisible: boolean;
+  setSidebarVisible: (visible: boolean) => void;
 }
 
-export default function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
+export default function Sidebar({ sidebarVisible, setSidebarVisible }: SidebarProps) {
   const { toast } = useToast();
-  const { user } = useAuth();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDeptCode, setNewDeptCode] = useState("");
@@ -92,19 +88,10 @@ export default function Sidebar({ activeDepartment, setActiveDepartment, isVisib
       return;
     }
 
-    if (!user) {
-      toast({
-        title: "錯誤",
-        description: "請先登入。",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const { error } = await supabase
         .from("departments")
-        .insert([{ name: newDeptName, code: newDeptCode, user_id: user.id }]);
+        .insert([{ name: newDeptName, code: newDeptCode }]);
 
       if (error) {
         toast({
@@ -294,11 +281,11 @@ export default function Sidebar({ activeDepartment, setActiveDepartment, isVisib
     <>
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-gray-100 p-4 ${
-          isVisible ? "translate-x-0" : "-translate-x-full"
+          sidebarVisible ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out z-50`}
       >
         <button
-          onClick={toggleSidebar}
+          onClick={() => setSidebarVisible(false)}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
         >
           關閉

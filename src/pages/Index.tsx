@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/Layout/Sidebar";
+import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
 import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
