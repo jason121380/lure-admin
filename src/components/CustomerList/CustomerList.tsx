@@ -247,23 +247,26 @@ export function CustomerList({
                   {displayedCustomers.map((customer) => (
                     <TableRow 
                       key={customer.id} 
-                      className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''} ${isMobile ? 'flex flex-col p-4 border-b w-full' : ''}`}
+                      className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
+                      onClick={() => onSelectCustomer(customer)}
                     >
                       {isMobile ? (
-                        // Mobile layout - full width
-                        <div className="w-full">
-                          <div className="flex items-center justify-between w-full mb-2">
-                            <div className="flex-1" onClick={() => onSelectCustomer(customer)}>
-                              <div className="font-medium text-base">{customer.name}</div>
+                        // Mobile layout - single horizontal row
+                        <TableCell className="w-full p-4">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex-1 min-w-0 mr-3">
+                              <div className="font-medium text-sm truncate">{customer.name}</div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {customer.departmentName}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                                {getStatusText(customer.status)}
+                              </span>
                             </div>
                           </div>
-                          <div className="flex justify-between items-center w-full" onClick={() => onSelectCustomer(customer)}>
-                            <span className="text-sm text-gray-500">{customer.departmentName}</span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                              {getStatusText(customer.status)}
-                            </span>
-                          </div>
-                        </div>
+                        </TableCell>
                       ) : (
                         // Desktop layout
                         <>
@@ -274,13 +277,13 @@ export function CustomerList({
                               aria-label={`選取 ${customer.name}`}
                             />
                           </TableCell>
-                          <TableCell className="font-medium" onClick={() => onSelectCustomer(customer)}>
+                          <TableCell className="font-medium">
                             {customer.name}
                           </TableCell>
-                          <TableCell onClick={() => onSelectCustomer(customer)}>
+                          <TableCell>
                             {customer.departmentName}
                           </TableCell>
-                          <TableCell onClick={() => onSelectCustomer(customer)}>
+                          <TableCell>
                             <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
                               {getStatusText(customer.status)}
                             </span>
