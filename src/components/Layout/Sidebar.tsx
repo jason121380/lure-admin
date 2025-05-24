@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -999,8 +1000,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           <Popover>
             <PopoverTrigger asChild>
               <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 p-2 rounded-md">
-                <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <User className="h-4 w-4 text-indigo-600" />
+                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="h-4 w-4 text-gray-600" />
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-sm font-medium truncate">{userFullName || user?.email}</p>
@@ -1010,8 +1011,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             <PopoverContent className="w-56 p-3" align="start">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 pb-2 border-b">
-                  <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <User className="h-5 w-5 text-indigo-600" />
+                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="h-5 w-5 text-gray-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{userFullName || '未設定姓名'}</p>
