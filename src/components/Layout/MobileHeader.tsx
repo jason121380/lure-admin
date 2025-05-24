@@ -52,7 +52,7 @@ export const MobileHeader = ({
             {rightAction}
           </div>
         ) : (
-          !selectedCustomer && onSearchClick && (
+          showLogo && onSearchClick && (
             <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onSearchClick}>
               <Search className="h-4 w-4" />
             </Button>
