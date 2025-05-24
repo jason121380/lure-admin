@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Plus, Filter, User } from "lucide-react";
+import { ArrowLeft, Plus, Filter, User, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileHeaderProps {
@@ -14,6 +14,7 @@ interface MobileHeaderProps {
   onAddCustomer?: () => void;
   onFilter?: () => void;
   onUserProfile?: () => void;
+  onSearch?: () => void;
 }
 
 export const MobileHeader = ({ 
@@ -24,7 +25,8 @@ export const MobileHeader = ({
   showLogo = false,
   onAddCustomer,
   onFilter,
-  onUserProfile
+  onUserProfile,
+  onSearch
 }: MobileHeaderProps) => {
   const { user } = useAuth();
 
@@ -61,6 +63,11 @@ export const MobileHeader = ({
           </div>
         ) : (
           <div className="flex items-center space-x-2">
+            {showLogo && onSearch && (
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onSearch}>
+                <Search className="h-4 w-4" />
+              </Button>
+            )}
             {showLogo && onFilter && (
               <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onFilter}>
                 <Filter className="h-4 w-4" />

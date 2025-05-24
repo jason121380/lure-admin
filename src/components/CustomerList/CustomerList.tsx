@@ -24,6 +24,7 @@ type CustomerListProps = {
   onSelectCustomer: (customer: Customer) => void;
   onAddCustomer: () => void;
   onBulkUpdateDepartment?: (customerIds: string[], departmentData: { department: string; departmentName: string }) => Promise<void>;
+  searchExpanded?: boolean;
 };
 
 export function CustomerList({ 
@@ -31,7 +32,8 @@ export function CustomerList({
   selectedCustomerId, 
   onSelectCustomer, 
   onAddCustomer,
-  onBulkUpdateDepartment 
+  onBulkUpdateDepartment,
+  searchExpanded = false
 }: CustomerListProps) {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -157,9 +159,9 @@ export function CustomerList({
   return (
     <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
       <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">客戶列表</h2>
-          {!isMobile && (
+        {!isMobile && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">客戶列表</h2>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -168,20 +170,22 @@ export function CustomerList({
             >
               <Plus className="w-4 h-4" />
             </Button>
-          )}
-        </div>
-        
-        <div className="mb-4">
-          <div className="relative">
-            <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
-            <Input 
-              placeholder="搜尋客戶名稱..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9"
-            />
           </div>
-        </div>
+        )}
+        
+        {(searchExpanded || !isMobile) && (
+          <div className="mb-4">
+            <div className="relative">
+              <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
+              <Input 
+                placeholder="搜尋客戶名稱..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Bulk actions - only show on desktop */}
         {!isMobile && isSomeSelected && (

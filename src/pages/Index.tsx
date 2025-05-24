@@ -33,6 +33,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [sidebarKey, setSidebarKey] = useState(0);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     department: "all"
@@ -272,6 +273,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setIsFilterDialogOpen(true);
   };
 
+  const handleToggleSearch = () => {
+    setSearchExpanded(!searchExpanded);
+  };
+
   const handleOpenUserProfile = () => {
     setIsUserProfileDialogOpen(true);
   };
@@ -297,6 +302,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           showLogo={!selectedCustomer}
           onAddCustomer={() => handleAddCustomer()}
           onFilter={!selectedCustomer ? handleOpenFilter : undefined}
+          onSearch={!selectedCustomer ? handleToggleSearch : undefined}
           onUserProfile={handleOpenUserProfile}
         />
 
@@ -310,6 +316,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
                 onSelectCustomer={handleSelectCustomer}
                 onAddCustomer={handleAddCustomer}
                 onBulkUpdateDepartment={handleBulkUpdateDepartment}
+                searchExpanded={searchExpanded}
               />
             </div>
           ) : (
@@ -378,6 +385,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
             onSelectCustomer={handleSelectCustomer}
             onAddCustomer={handleAddCustomer}
             onBulkUpdateDepartment={handleBulkUpdateDepartment}
+            searchExpanded={searchExpanded}
           />
         </div>
         
