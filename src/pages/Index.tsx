@@ -1,14 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
 import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
+import { MobileBottomNav } from "@/components/Layout/MobileBottomNav";
+import { MobileHeader } from "@/components/Layout/MobileHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Menu, ArrowLeft } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -28,7 +29,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showCustomerDetail, setShowCustomerDetail] = useState(false);
-  const [sidebarKey, setSidebarKey] = useState(0); // Key to force sidebar re-render
+  const [sidebarKey, setSidebarKey] = useState(0);
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -227,11 +228,83 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   const handleBackToList = () => {
     setShowCustomerDetail(false);
+    setSelectedCustomer(null);
+    setSelectedCustomerId(null);
   };
+
+  const getDepartmentName = (dept: string) => {
+    const names: Record<string, string> = {
+      'all': '全部客戶',
+      'sales': '業務部門',
+      'support': '客服部門',
+      'marketing': '行銷部門'
+    };
+    return names[dept] || dept;
+  };
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20 pt-16">
+        {/* Mobile Header */}
+        <MobileHeader 
+          title={showCustomerDetail ? (selectedCustomer?.name || '客戶詳情') : getDepartmentName(activeDepartment)}
+          showBackButton={showCustomerDetail}
+          onBack={handleBackToList}
+          rightAction={
+            !showCustomerDetail ? (
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
+                <Search className="h-4 w-4" />
+              </Button>
+            ) : undefined
+          }
+        />
+
+        {/* Main Content */}
+        <div className="h-full">
+          {!showCustomerDetail ? (
+            <div className="h-full">
+              <CustomerList 
+                customers={customers} 
+                selectedCustomerId={selectedCustomerId}
+                onSelectCustomer={handleSelectCustomer}
+                onAddCustomer={handleAddCustomer}
+                onBulkUpdateDepartment={handleBulkUpdateDepartment}
+              />
+            </div>
+          ) : (
+            <div className="h-full">
+              {selectedCustomer && (
+                <CustomerDetail 
+                  customer={selectedCustomer} 
+                  onEditCustomer={handleEditCustomer}
+                  onDeleteCustomer={handleDeleteCustomer}
+                  onUpdateCustomer={handleUpdateCustomer}
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav 
+          activeDepartment={activeDepartment}
+          setActiveDepartment={setActiveDepartment}
+          onAddCustomer={handleAddCustomer}
+        />
+
+        <CustomerEditDialog
+          customer={editingCustomer}
+          open={isAddEditDialogOpen}
+          onOpenChange={setIsAddEditDialogOpen}
+          onSave={handleSaveCustomer}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Department Sidebar - Always visible on initial load */}
+      {/* Desktop Sidebar */}
       <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
           key={sidebarKey}
@@ -242,7 +315,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         />
       </div>
       
-      {/* Mobile menu button */}
+      {/* Desktop menu button */}
       <Button 
         variant="ghost" 
         className="fixed top-4 left-4 z-40 p-2 h-10 w-10 md:hidden"
@@ -252,10 +325,9 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         <span className="sr-only">開啟部門選單</span>
       </Button>
       
-      {/* Main content container */}
+      {/* Desktop main content */}
       <div className="flex flex-1 h-full w-full">
-        {/* Customer List Panel - Increased width from 1/3 to 2/5 */}
-        <div className={`${isMobile && showCustomerDetail ? 'hidden' : 'block'} w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto`}>
+        <div className="w-full md:w-2/5 min-w-0 md:min-w-[400px] h-full border-r border-gray-200 bg-white overflow-y-auto">
           <CustomerList 
             customers={customers} 
             selectedCustomerId={selectedCustomerId}
@@ -265,19 +337,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           />
         </div>
         
-        {/* Customer Detail Panel - Decreased width from 2/3 to 3/5 */}
-        <div className={`${isMobile && !showCustomerDetail ? 'hidden' : 'block'} w-full md:w-3/5 h-full bg-white overflow-y-auto`}>
-          {isMobile && (
-            <Button
-              variant="ghost"
-              className="ml-4 mt-4 mb-2 p-2 flex items-center text-sm"
-              onClick={handleBackToList}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              返回客戶列表
-            </Button>
-          )}
-          
+        <div className="w-full md:w-3/5 h-full bg-white overflow-y-auto">
           {selectedCustomer ? (
             <CustomerDetail 
               customer={selectedCustomer} 
