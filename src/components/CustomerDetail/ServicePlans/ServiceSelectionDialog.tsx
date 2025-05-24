@@ -29,11 +29,9 @@ export const ServiceSelectionDialog = ({ onSelectService }: ServiceSelectionDial
       <DialogTrigger asChild>
         <Button 
           size="sm" 
-          variant="outline" 
-          className="flex items-center gap-2"
+          className="flex items-center justify-center w-8 h-8 p-0"
         >
           <Plus className="h-4 w-4" />
-          新增
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
