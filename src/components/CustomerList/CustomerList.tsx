@@ -265,7 +265,9 @@ export function CustomerList({
                             {customer.name}
                           </TableCell>
                           <TableCell>
-                            {customer.departmentName}
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              {customer.departmentName}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
