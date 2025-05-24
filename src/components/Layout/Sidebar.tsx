@@ -28,11 +28,13 @@ type Department = {
 };
 
 interface SidebarProps {
-  sidebarVisible: boolean;
-  setSidebarVisible: (visible: boolean) => void;
+  activeDepartment: string;
+  setActiveDepartment: (department: string) => void;
+  isVisible: boolean;
+  toggleSidebar: () => void;
 }
 
-export default function Sidebar({ sidebarVisible, setSidebarVisible }: SidebarProps) {
+export default function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -292,11 +294,11 @@ export default function Sidebar({ sidebarVisible, setSidebarVisible }: SidebarPr
     <>
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-gray-100 p-4 ${
-          sidebarVisible ? "translate-x-0" : "-translate-x-full"
+          isVisible ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out z-50`}
       >
         <button
-          onClick={() => setSidebarVisible(false)}
+          onClick={toggleSidebar}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
         >
           關閉
