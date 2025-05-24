@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -170,7 +171,7 @@ export function CustomerList({
           </div>
         )}
         
-        <div className={isMobile ? "mb-4" : "mb-4"}>
+        <div>
           <div className="relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
