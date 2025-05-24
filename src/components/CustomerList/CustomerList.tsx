@@ -1,8 +1,9 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
-import { Plus, SearchIcon, Edit2 } from 'lucide-react';
+import { Plus, SearchIcon, Edit2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BulkDepartmentChangeDialog } from './BulkDepartmentChangeDialog';
@@ -25,6 +26,9 @@ type CustomerListProps = {
   onBulkUpdateDepartment?: (customerIds: string[], departmentData: { department: string; departmentName: string }) => Promise<void>;
 };
 
+type SortField = 'department' | 'name' | 'status';
+type SortDirection = 'asc' | 'desc';
+
 export function CustomerList({ 
   customers: initialCustomers, 
   selectedCustomerId, 
@@ -41,6 +45,10 @@ export function CustomerList({
   const [loading, setLoading] = useState(true);
   const observerRef = useRef<HTMLDivElement>(null);
   
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  
   // Bulk selection state
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([]);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
@@ -50,15 +58,41 @@ export function CustomerList({
     setLoading(false);
   }, [initialCustomers]);
   
-  // Filter customers based on search only
-  const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
+  // Filter and sort customers
+  const filteredAndSortedCustomers = customers
+    .filter(customer => {
+      const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      let aValue: string;
+      let bValue: string;
+      
+      switch (sortField) {
+        case 'department':
+          aValue = a.departmentName || '';
+          bValue = b.departmentName || '';
+          break;
+        case 'name':
+          aValue = a.name;
+          bValue = b.name;
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          aValue = a.name;
+          bValue = b.name;
+      }
+      
+      const comparison = aValue.localeCompare(bValue, 'zh-TW');
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
   
   // Get the customers to display (limited by displayedCount)
-  const displayedCustomers = filteredCustomers.slice(0, displayedCount);
-  const hasMore = displayedCount < filteredCustomers.length;
+  const displayedCustomers = filteredAndSortedCustomers.slice(0, displayedCount);
+  const hasMore = displayedCount < filteredAndSortedCustomers.length;
   
   // Load more items when intersection observer triggers
   const loadMore = useCallback(() => {
@@ -85,15 +119,25 @@ export function CustomerList({
     return () => observer.disconnect();
   }, [loadMore]);
   
-  // Reset displayed count when filters change
+  // Reset displayed count when filters or sorting change
   useEffect(() => {
     setDisplayedCount(20);
-  }, [searchQuery]);
+  }, [searchQuery, sortField, sortDirection]);
 
   // Clear selection when customers change
   useEffect(() => {
     setSelectedCustomerIds([]);
   }, [customers]);
+  
+  // Handle sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
   
   // Function to get status text in Chinese
   const getStatusText = (status: string) => {
@@ -151,6 +195,24 @@ export function CustomerList({
       setSelectedCustomerIds([]);
       setIsBulkDialogOpen(false);
     }
+  };
+
+  // Render sort icon
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return (
+        <div className="flex flex-col ml-1">
+          <ArrowUp className="w-3 h-3 text-slate-300" />
+          <ArrowDown className="w-3 h-3 text-slate-300 -mt-1" />
+        </div>
+      );
+    }
+    
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="w-3 h-3 ml-1 text-slate-600" />
+    ) : (
+      <ArrowDown className="w-3 h-3 ml-1 text-slate-600" />
+    );
   };
   
   return (
@@ -212,7 +274,7 @@ export function CustomerList({
               </div>
             ))}
           </div>
-        ) : filteredCustomers.length > 0 ? (
+        ) : filteredAndSortedCustomers.length > 0 ? (
           <>
             <div className={isMobile ? 'w-full' : ''}>
               <Table>
@@ -228,9 +290,33 @@ export function CustomerList({
                         />
                       </TableHead>
                     )}
-                    <TableHead className="w-[30%] text-slate-700">部門</TableHead>
-                    <TableHead className="w-[40%] text-slate-700">名稱</TableHead>
-                    <TableHead className="w-[30%] text-slate-700">狀態</TableHead>
+                    <TableHead 
+                      className="w-[30%] text-slate-700 cursor-pointer hover:bg-slate-50"
+                      onClick={() => handleSort('department')}
+                    >
+                      <div className="flex items-center">
+                        部門
+                        {renderSortIcon('department')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="w-[40%] text-slate-700 cursor-pointer hover:bg-slate-50"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center">
+                        名稱
+                        {renderSortIcon('name')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="w-[30%] text-slate-700 cursor-pointer hover:bg-slate-50"
+                      onClick={() => handleSort('status')}
+                    >
+                      <div className="flex items-center">
+                        狀態
+                        {renderSortIcon('status')}
+                      </div>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -281,9 +367,9 @@ export function CustomerList({
               </div>
             )}
             
-            {!hasMore && filteredCustomers.length > 20 && (
+            {!hasMore && filteredAndSortedCustomers.length > 20 && (
               <div className={`p-4 text-center text-slate-500 text-sm ${isMobile ? 'w-full' : ''}`}>
-                已顯示全部 {filteredCustomers.length} 位客戶
+                已顯示全部 {filteredAndSortedCustomers.length} 位客戶
               </div>
             )}
           </>
