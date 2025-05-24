@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -235,7 +234,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 w-full">
         {/* Mobile Header */}
         <MobileHeader 
           title={selectedCustomer ? selectedCustomer.name : getDepartmentName(activeDepartment)}
@@ -251,9 +250,9 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         />
 
         {/* Main Content */}
-        <div className="pt-16 h-screen">
+        <div className="pt-16 h-screen w-full">
           {!selectedCustomer ? (
-            <div className="h-full">
+            <div className="h-full w-full">
               <CustomerList 
                 customers={customers} 
                 selectedCustomerId={selectedCustomerId}
@@ -263,7 +262,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
               />
             </div>
           ) : (
-            <div className="h-full">
+            <div className="h-full w-full">
               <CustomerDetail 
                 customer={selectedCustomer} 
                 onEditCustomer={handleEditCustomer}

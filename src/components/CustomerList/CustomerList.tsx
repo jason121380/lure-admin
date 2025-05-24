@@ -158,17 +158,19 @@ export function CustomerList({
   };
   
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 md:p-5 border-b sticky top-0 bg-white z-10">
+    <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
+      <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">客戶列表</h2>
-          <Button 
-            size="sm" 
-            className="bg-indigo-600 hover:bg-indigo-700"
-            onClick={onAddCustomer}
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
+          {!isMobile && (
+            <Button 
+              size="sm" 
+              className="bg-indigo-600 hover:bg-indigo-700"
+              onClick={onAddCustomer}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          )}
         </div>
         
         <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-3'} mb-4`}>
@@ -195,8 +197,8 @@ export function CustomerList({
           </Select>
         </div>
 
-        {/* Bulk actions */}
-        {isSomeSelected && (
+        {/* Bulk actions - only show on desktop */}
+        {!isMobile && isSomeSelected && (
           <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
             <span className="text-sm text-blue-700">
               已選擇 {selectedCustomerIds.length} 位客戶
@@ -214,9 +216,9 @@ export function CustomerList({
         )}
       </div>
       
-      <div className="flex-1 overflow-auto">
+      <div className={`flex-1 overflow-auto ${isMobile ? 'w-full' : ''}`}>
         {loading ? (
-          <div className="p-4 space-y-4">
+          <div className={`p-4 space-y-4 ${isMobile ? 'w-full' : ''}`}>
             {Array(5).fill(0).map((_, i) => (
               <div key={i} className="flex items-center space-x-4">
                 <Skeleton className="h-12 w-full" />
@@ -225,78 +227,75 @@ export function CustomerList({
           </div>
         ) : filteredCustomers.length > 0 ? (
           <>
-            <Table>
-              <TableHeader className={isMobile ? 'hidden' : ''}>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
-                      aria-label="選取全部"
-                    />
-                  </TableHead>
-                  <TableHead className="w-[40%]">名稱</TableHead>
-                  <TableHead className="w-[30%]">部門</TableHead>
-                  <TableHead className="w-[30%]">狀態</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayedCustomers.map((customer) => (
-                  <TableRow 
-                    key={customer.id} 
-                    className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''} ${isMobile ? 'flex flex-col p-3 border-b' : ''}`}
-                  >
-                    {isMobile ? (
-                      // Mobile layout
-                      <>
-                        <div className="flex items-center justify-between w-full mb-2">
-                          <Checkbox
-                            checked={selectedCustomerIds.includes(customer.id)}
-                            onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
-                            aria-label={`選取 ${customer.name}`}
-                          />
-                          <div className="flex-1 ml-3" onClick={() => onSelectCustomer(customer)}>
-                            <div className="font-medium text-base">{customer.name}</div>
+            <div className={isMobile ? 'w-full' : ''}>
+              <Table>
+                <TableHeader className={isMobile ? 'hidden' : ''}>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
+                        aria-label="選取全部"
+                      />
+                    </TableHead>
+                    <TableHead className="w-[40%]">名稱</TableHead>
+                    <TableHead className="w-[30%]">部門</TableHead>
+                    <TableHead className="w-[30%]">狀態</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayedCustomers.map((customer) => (
+                    <TableRow 
+                      key={customer.id} 
+                      className={`cursor-pointer hover:bg-gray-50 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''} ${isMobile ? 'flex flex-col p-4 border-b w-full' : ''}`}
+                    >
+                      {isMobile ? (
+                        // Mobile layout - full width
+                        <div className="w-full">
+                          <div className="flex items-center justify-between w-full mb-2">
+                            <div className="flex-1" onClick={() => onSelectCustomer(customer)}>
+                              <div className="font-medium text-base">{customer.name}</div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center w-full" onClick={() => onSelectCustomer(customer)}>
+                            <span className="text-sm text-gray-500">{customer.departmentName}</span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                              {getStatusText(customer.status)}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center w-full" onClick={() => onSelectCustomer(customer)}>
-                          <span className="text-sm text-gray-500">{customer.departmentName}</span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                            {getStatusText(customer.status)}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      // Desktop layout
-                      <>
-                        <TableCell onClick={(e) => e.stopPropagation()}>
-                          <Checkbox
-                            checked={selectedCustomerIds.includes(customer.id)}
-                            onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
-                            aria-label={`選取 ${customer.name}`}
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium" onClick={() => onSelectCustomer(customer)}>
-                          {customer.name}
-                        </TableCell>
-                        <TableCell onClick={() => onSelectCustomer(customer)}>
-                          {customer.departmentName}
-                        </TableCell>
-                        <TableCell onClick={() => onSelectCustomer(customer)}>
-                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
-                            {getStatusText(customer.status)}
-                          </span>
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      ) : (
+                        // Desktop layout
+                        <>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedCustomerIds.includes(customer.id)}
+                              onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
+                              aria-label={`選取 ${customer.name}`}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium" onClick={() => onSelectCustomer(customer)}>
+                            {customer.name}
+                          </TableCell>
+                          <TableCell onClick={() => onSelectCustomer(customer)}>
+                            {customer.departmentName}
+                          </TableCell>
+                          <TableCell onClick={() => onSelectCustomer(customer)}>
+                            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(customer.status)}`}>
+                              {getStatusText(customer.status)}
+                            </span>
+                          </TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             
             {/* Intersection observer target for infinite scroll */}
             {hasMore && (
-              <div ref={observerRef} className="p-4 text-center">
+              <div ref={observerRef} className={`p-4 text-center ${isMobile ? 'w-full' : ''}`}>
                 <div className="flex items-center justify-center space-x-2">
                   <Skeleton className="h-12 w-full" />
                 </div>
@@ -305,24 +304,26 @@ export function CustomerList({
             
             {/* Show total count */}
             {!hasMore && filteredCustomers.length > 20 && (
-              <div className="p-4 text-center text-gray-500 text-sm">
+              <div className={`p-4 text-center text-gray-500 text-sm ${isMobile ? 'w-full' : ''}`}>
                 已顯示全部 {filteredCustomers.length} 位客戶
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-10 text-gray-500">
+          <div className={`text-center py-10 text-gray-500 ${isMobile ? 'w-full' : ''}`}>
             未找到客戶
           </div>
         )}
       </div>
 
-      <BulkDepartmentChangeDialog
-        open={isBulkDialogOpen}
-        onOpenChange={setIsBulkDialogOpen}
-        selectedCount={selectedCustomerIds.length}
-        onConfirm={handleBulkDepartmentChange}
-      />
+      {!isMobile && (
+        <BulkDepartmentChangeDialog
+          open={isBulkDialogOpen}
+          onOpenChange={setIsBulkDialogOpen}
+          selectedCount={selectedCustomerIds.length}
+          onConfirm={handleBulkDepartmentChange}
+        />
+      )}
     </div>
   );
 }
