@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { CustomerList } from "@/components/CustomerList/CustomerList";
@@ -7,8 +6,6 @@ import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
 import { MobileBottomNav } from "@/components/Layout/MobileBottomNav";
 import { MobileHeader } from "@/components/Layout/MobileHeader";
-import { CustomerManagementPage } from "@/components/CustomerManagement/CustomerManagementPage";
-import { ProfilePage } from "@/components/Profile/ProfilePage";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -25,7 +22,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [activeDepartment, setActiveDepartment] = useState("all");
-  const [activeTab, setActiveTab] = useState("customers"); // New state for mobile tabs
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -246,25 +242,37 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     return names[dept] || dept;
   };
 
-  // Mobile tab content renderer
-  const renderMobileTabContent = () => {
-    switch (activeTab) {
-      case 'customers':
-        return (
-          <CustomerManagementPage 
-            customers={customers}
-            onAddCustomer={handleAddCustomer}
-          />
-        );
-      case 'list':
-        return showCustomerDetail ? (
-          <div className="min-h-screen bg-gray-50">
-            <MobileHeader 
-              title={selectedCustomer?.name || '客戶詳情'}
-              showBackButton={true}
-              onBack={handleBackToList}
-            />
-            <div className="pt-16 pb-20">
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20 pt-16">
+        {/* Mobile Header */}
+        <MobileHeader 
+          title={showCustomerDetail ? (selectedCustomer?.name || '客戶詳情') : getDepartmentName(activeDepartment)}
+          showBackButton={showCustomerDetail}
+          onBack={handleBackToList}
+          rightAction={
+            !showCustomerDetail ? (
+              <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
+                <Search className="h-4 w-4" />
+              </Button>
+            ) : undefined
+          }
+        />
+
+        {/* Main Content */}
+        <div className="h-full">
+          {!showCustomerDetail ? (
+            <div className="h-full">
+              <CustomerList 
+                customers={customers} 
+                selectedCustomerId={selectedCustomerId}
+                onSelectCustomer={handleSelectCustomer}
+                onAddCustomer={handleAddCustomer}
+                onBulkUpdateDepartment={handleBulkUpdateDepartment}
+              />
+            </div>
+          ) : (
+            <div className="h-full">
               {selectedCustomer && (
                 <CustomerDetail 
                   customer={selectedCustomer} 
@@ -274,44 +282,14 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
                 />
               )}
             </div>
-          </div>
-        ) : (
-          <div className="min-h-screen bg-gray-50">
-            <MobileHeader 
-              title="客戶列表"
-              rightAction={
-                <Button variant="ghost" size="sm" className="p-1 h-8 w-8">
-                  <Search className="h-4 w-4" />
-                </Button>
-              }
-            />
-            <div className="pt-16 pb-20">
-              <CustomerList 
-                customers={customers} 
-                selectedCustomerId={selectedCustomerId}
-                onSelectCustomer={handleSelectCustomer}
-                onAddCustomer={handleAddCustomer}
-                onBulkUpdateDepartment={handleBulkUpdateDepartment}
-              />
-            </div>
-          </div>
-        );
-      case 'profile':
-        return <ProfilePage />;
-      default:
-        return null;
-    }
-  };
-
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {renderMobileTabContent()}
+          )}
+        </div>
 
         {/* Mobile Bottom Navigation */}
         <MobileBottomNav 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          activeDepartment={activeDepartment}
+          setActiveDepartment={setActiveDepartment}
+          onAddCustomer={handleAddCustomer}
         />
 
         <CustomerEditDialog
