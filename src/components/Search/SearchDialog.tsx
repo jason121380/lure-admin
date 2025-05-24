@@ -39,7 +39,7 @@ export const SearchDialog = ({ open, onOpenChange, onSearch }: SearchDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md mx-4">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>搜尋客戶</DialogTitle>
         </DialogHeader>

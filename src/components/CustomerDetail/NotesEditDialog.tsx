@@ -63,7 +63,7 @@ export function NotesEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-4">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>編輯客戶備註</DialogTitle>
         </DialogHeader>

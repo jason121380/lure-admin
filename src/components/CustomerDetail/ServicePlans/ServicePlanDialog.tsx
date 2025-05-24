@@ -53,7 +53,7 @@ export const ServicePlanDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-4">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>新增服務方案</DialogTitle>
         </DialogHeader>

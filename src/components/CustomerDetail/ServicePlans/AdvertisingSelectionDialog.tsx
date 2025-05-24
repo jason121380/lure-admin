@@ -156,7 +156,7 @@ export const AdvertisingSelectionDialog = ({
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl mx-4">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>選擇廣告投放</DialogTitle>
         </DialogHeader>

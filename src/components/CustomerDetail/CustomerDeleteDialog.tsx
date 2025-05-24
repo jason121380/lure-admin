@@ -49,7 +49,7 @@ export function CustomerDeleteDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent className="mx-4">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>您確定要刪除嗎？</AlertDialogTitle>
           <AlertDialogDescription>
