@@ -50,6 +50,7 @@ export const FilterDialog = ({
         const { data, error } = await supabase
           .from('departments')
           .select('code, name')
+          .neq('code', 'all') // Filter out any "all" departments from database
           .order('sort_order', { ascending: true });
 
         if (error) {
