@@ -5,7 +5,7 @@ import { CustomerDetail } from "@/components/CustomerDetail/CustomerDetail";
 import { Customer } from "@/components/CustomerList/CustomerListItem";
 import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDialog";
 import { MobileHeader } from "@/components/Layout/MobileHeader";
-import { SearchDialog } from "@/components/Search/SearchDialog";
+import { FilterDialog } from "@/components/CustomerList/FilterDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -29,7 +29,11 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarKey, setSidebarKey] = useState(0);
-  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "all",
+    department: "all"
+  });
   
   // Fetch customers on initial load
   useEffect(() => {
@@ -224,11 +228,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setSelectedCustomerId(null);
   };
 
-  const handleSearch = (query: string) => {
-    // For now, we'll just show a toast. In a real implementation,
-    // you might want to filter the customer list or navigate to a search results page
-    toast.success(`搜尋: ${query}`);
-    console.log("搜尋查詢:", query);
+  const handleApplyFilters = (newFilters: { status: string; department: string }) => {
+    setFilters(newFilters);
+    toast.success("已套用篩選條件");
+  };
+
+  const handleOpenFilter = () => {
+    setIsFilterDialogOpen(true);
   };
 
   const getDepartmentName = (dept: string) => {
@@ -251,6 +257,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           onBack={handleBackToList}
           showLogo={!selectedCustomer}
           onAddCustomer={() => handleAddCustomer()}
+          onFilter={!selectedCustomer ? handleOpenFilter : undefined}
         />
 
         {/* Main Content */}
@@ -284,10 +291,11 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           onSave={handleSaveCustomer}
         />
 
-        <SearchDialog
-          open={isSearchDialogOpen}
-          onOpenChange={setIsSearchDialogOpen}
-          onSearch={handleSearch}
+        <FilterDialog
+          open={isFilterDialogOpen}
+          onOpenChange={setIsFilterDialogOpen}
+          onApplyFilters={handleApplyFilters}
+          currentFilters={filters}
         />
       </div>
     );
