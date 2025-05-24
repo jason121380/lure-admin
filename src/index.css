@@ -98,6 +98,21 @@
   .mobile-pwa-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 1rem);
   }
+
+  /* 移除手機版頭部和內容之間的空白 */
+  .mobile-header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+  }
+  
+  .mobile-content-with-header {
+    padding-top: 64px; /* 調整為實際頭部高度 */
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 /* 防止 iOS Safari 縮放 */

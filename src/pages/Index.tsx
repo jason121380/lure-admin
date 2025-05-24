@@ -295,19 +295,21 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     return (
       <div className="min-h-screen bg-gray-50 w-full">
         {/* Mobile Header */}
-        <MobileHeader 
-          title={selectedCustomer ? selectedCustomer.name : ""}
-          showBackButton={!!selectedCustomer}
-          onBack={handleBackToList}
-          showLogo={!selectedCustomer}
-          onAddCustomer={() => handleAddCustomer()}
-          onFilter={!selectedCustomer ? handleOpenFilter : undefined}
-          onSearch={!selectedCustomer ? handleToggleSearch : undefined}
-          onUserProfile={handleOpenUserProfile}
-        />
+        <div className="mobile-header-fixed">
+          <MobileHeader 
+            title={selectedCustomer ? selectedCustomer.name : ""}
+            showBackButton={!!selectedCustomer}
+            onBack={handleBackToList}
+            showLogo={!selectedCustomer}
+            onAddCustomer={() => handleAddCustomer()}
+            onFilter={!selectedCustomer ? handleOpenFilter : undefined}
+            onSearch={!selectedCustomer ? handleToggleSearch : undefined}
+            onUserProfile={handleOpenUserProfile}
+          />
+        </div>
 
         {/* Main Content */}
-        <div className="pt-16 h-screen w-full">
+        <div className="mobile-content-with-header">
           {!selectedCustomer ? (
             <div className="h-full w-full">
               <CustomerList 
