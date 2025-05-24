@@ -1,62 +1,45 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Home, Users, Settings, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { Users, List, User } from "lucide-react";
 
 interface MobileBottomNavProps {
-  activeDepartment: string;
-  setActiveDepartment: (department: string) => void;
-  onAddCustomer: () => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
-export const MobileBottomNav = ({ activeDepartment, setActiveDepartment, onAddCustomer }: MobileBottomNavProps) => {
-  const { signOut } = useAuth();
-
+export const MobileBottomNav = ({ activeTab, setActiveTab }: MobileBottomNavProps) => {
   const navItems = [
-    { id: 'all', label: '全部', icon: Home },
-    { id: 'sales', label: '業務', icon: Users },
-    { id: 'support', label: '客服', icon: Settings },
+    { id: 'management', label: '客戶管理', icon: Users },
+    { id: 'list', label: '客戶列表', icon: List },
+    { id: 'profile', label: '個人中心', icon: User },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50 md:hidden">
-      <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
-          {navItems.map((item) => (
-            <Button
-              key={item.id}
-              variant={activeDepartment === item.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setActiveDepartment(item.id)}
-              className="flex flex-col items-center px-3 py-2 h-auto"
-            >
-              <item.icon className="h-4 w-4 mb-1" />
-              <span className="text-xs">{item.label}</span>
-            </Button>
-          ))}
-        </div>
-        
-        <div className="flex space-x-2">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-1 z-50 md:hidden">
+      <div className="flex items-center justify-around max-w-sm mx-auto">
+        {navItems.map((item) => (
           <Button
-            onClick={onAddCustomer}
-            size="sm"
-            className="flex flex-col items-center px-3 py-2 h-auto bg-blue-600 hover:bg-blue-700"
-          >
-            <Users className="h-4 w-4 mb-1" />
-            <span className="text-xs">新增</span>
-          </Button>
-          
-          <Button
+            key={item.id}
             variant="ghost"
             size="sm"
-            onClick={signOut}
-            className="flex flex-col items-center px-3 py-2 h-auto text-red-600"
+            onClick={() => setActiveTab(item.id)}
+            className={`flex flex-col items-center px-4 py-3 h-auto rounded-lg transition-all ${
+              activeTab === item.id 
+                ? 'bg-blue-50 text-blue-600' 
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
           >
-            <LogOut className="h-4 w-4 mb-1" />
-            <span className="text-xs">登出</span>
+            <item.icon className={`w-5 h-5 mb-1 ${
+              activeTab === item.id ? 'text-blue-600' : 'text-gray-500'
+            }`} />
+            <span className={`text-xs font-medium ${
+              activeTab === item.id ? 'text-blue-600' : 'text-gray-500'
+            }`}>
+              {item.label}
+            </span>
           </Button>
-        </div>
+        ))}
       </div>
     </div>
   );
