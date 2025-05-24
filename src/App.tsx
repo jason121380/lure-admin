@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 // Protected route component
@@ -57,6 +57,35 @@ const AppRoutes = () => {
 const App = () => {
   // Move queryClient creation inside the component
   const [queryClient] = useState(() => new QueryClient());
+  
+  // PWA 安裝和設置
+  useEffect(() => {
+    // 註冊 Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+
+    // 設置 PWA 主題色
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', '#000000');
+    }
+
+    // 處理 iOS Safari 的狀態欄樣式
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
+      document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
+    }
+  }, []);
   
   return (
     <BrowserRouter>

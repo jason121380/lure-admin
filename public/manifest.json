@@ -1,0 +1,28 @@
+
+{
+  "name": "LURE CRM - 客戶管理系統",
+  "short_name": "LURE CRM",
+  "description": "由 LURE 技術支援的客戶管理系統",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/lovable-uploads/f622dbc7-013d-433a-8651-327791e3fa2d.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/lovable-uploads/f622dbc7-013d-433a-8651-327791e3fa2d.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "zh-TW"
+}
