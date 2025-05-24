@@ -161,8 +161,9 @@ export function CustomerList({
           <h2 className="text-xl font-semibold">客戶列表</h2>
           {!isMobile && (
             <Button 
+              variant="ghost" 
               size="sm" 
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="p-1 h-8 w-8"
               onClick={onAddCustomer}
             >
               <Plus className="w-4 h-4" />
