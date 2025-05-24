@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -27,7 +26,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
   const [updateLoading, setUpdateLoading] = useState(false);
   const [currentUserName, setCurrentUserName] = useState("");
 
-  // Update current user name when user changes or dialog opens
+  // Update edited name when user changes or dialog opens
   useEffect(() => {
     if (user && open) {
       const userName = user.user_metadata?.full_name || "";
@@ -148,7 +147,7 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[400px] mx-4">
         <DialogHeader>
           <DialogTitle>個人資料</DialogTitle>
         </DialogHeader>

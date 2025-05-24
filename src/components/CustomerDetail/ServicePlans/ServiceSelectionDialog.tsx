@@ -31,7 +31,7 @@ export const ServiceSelectionDialog = ({ onSelectService }: ServiceSelectionDial
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl mx-4">
         <DialogHeader>
           <DialogTitle>選擇服務項目</DialogTitle>
         </DialogHeader>

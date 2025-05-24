@@ -86,7 +86,7 @@ export const FilterDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] mx-4">
         <DialogHeader>
           <DialogTitle>篩選客戶</DialogTitle>
         </DialogHeader>
