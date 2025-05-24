@@ -35,11 +35,11 @@ export const MobileHeader = ({
             </Button>
           )}
           {showLogo ? (
-            <div className="flex items-center">
+            <div className="flex items-center p-2">
               <img 
                 src="/lovable-uploads/bf4895f7-2032-4f5d-a050-239497c44107.png" 
                 alt="Logo" 
-                className="h-8 w-auto"
+                className="h-6 w-auto"
               />
             </div>
           ) : (
