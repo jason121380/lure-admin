@@ -45,19 +45,15 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     }
   }, [user]);
   
-  // Apply filters whenever customers or filters change
+  // Apply filters whenever customers, filters, or activeDepartment change
   useEffect(() => {
     applyFilters();
-  }, [customers, filters]);
+  }, [customers, filters, activeDepartment]);
   
   const fetchCustomers = async () => {
     try {
+      console.log("Fetching customers for department:", activeDepartment);
       let query = supabase.from('customers').select('*');
-      
-      // Filter by department if not showing all
-      if (activeDepartment !== 'all') {
-        query = query.eq('department', activeDepartment);
-      }
       
       const { data, error } = await query;
       
@@ -103,22 +99,36 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const applyFilters = () => {
     let filtered = [...customers];
 
+    // Apply department filter first (from sidebar)
+    if (activeDepartment !== "all") {
+      filtered = filtered.filter(customer => customer.department === activeDepartment);
+    }
+
     // Apply status filter
     if (filters.status !== "all") {
       filtered = filtered.filter(customer => customer.status === filters.status);
     }
 
-    // Apply department filter
+    // Apply department filter from filter dialog (this should override sidebar if set)
     if (filters.department !== "all") {
       filtered = filtered.filter(customer => customer.department === filters.department);
     }
 
+    console.log("Filtered customers:", filtered.length, "Active department:", activeDepartment);
     setFilteredCustomers(filtered);
   };
 
   // Force sidebar to refresh when customers data changes
   const refreshSidebar = () => {
     setSidebarKey(prev => prev + 1);
+  };
+
+  // Handle department change from sidebar
+  const handleSetActiveDepartment = (department: string) => {
+    console.log("Setting active department to:", department);
+    setActiveDepartment(department);
+    // Reset department filter in filters when sidebar changes
+    setFilters(prev => ({ ...prev, department: "all" }));
   };
   
   const handleSelectCustomer = (customer: Customer) => {
@@ -343,7 +353,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         <Sidebar 
           key={sidebarKey}
           activeDepartment={activeDepartment} 
-          setActiveDepartment={setActiveDepartment} 
+          setActiveDepartment={handleSetActiveDepartment} 
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
