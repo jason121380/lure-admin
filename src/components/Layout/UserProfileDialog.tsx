@@ -8,9 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User, Edit } from "lucide-react";
+import { LogOut, User, Edit, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfileDialogProps {
   open: boolean;
@@ -20,6 +22,9 @@ interface UserProfileDialogProps {
 export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps) => {
   const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -36,8 +41,52 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
   };
 
   const handleEditName = () => {
-    // TODO: Implement edit name functionality
-    toast.info("編輯名稱功能開發中");
+    setEditedName(user?.user_metadata?.full_name || "");
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      toast.error("請輸入有效的名稱");
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      
+      // Update user metadata in Supabase Auth
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { full_name: editedName.trim() }
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      // Also update in profiles table if it exists
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ full_name: editedName.trim() })
+        .eq('id', user?.id);
+
+      // Don't throw error if profiles table doesn't exist or update fails
+      if (profileError) {
+        console.log("Profile table update failed (may not exist):", profileError);
+      }
+
+      toast.success("名稱已更新");
+      setIsEditingName(false);
+    } catch (error) {
+      toast.error("更新名稱時發生錯誤");
+      console.error("Error updating name:", error);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setEditedName("");
   };
 
   if (!user) return null;
@@ -57,33 +106,68 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
                 <User className="h-8 w-8" />
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-1">
-              <h3 className="font-medium text-lg">
-                {user.user_metadata?.full_name || "使用者"}
-              </h3>
+            <div className="space-y-1 flex-1">
+              {isEditingName ? (
+                <div className="space-y-2">
+                  <Input
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    placeholder="輸入姓名"
+                    className="text-lg font-medium"
+                    disabled={updateLoading}
+                  />
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveName}
+                      disabled={updateLoading}
+                      className="flex items-center space-x-1"
+                    >
+                      <Check className="h-3 w-3" />
+                      <span>{updateLoading ? "儲存中..." : "儲存"}</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      disabled={updateLoading}
+                      className="flex items-center space-x-1"
+                    >
+                      <X className="h-3 w-3" />
+                      <span>取消</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <h3 className="font-medium text-lg">
+                  {user.user_metadata?.full_name || "使用者"}
+                </h3>
+              )}
               <p className="text-sm text-gray-500">{user.email}</p>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={handleEditName}
-              className="flex items-center space-x-2"
-            >
-              <Edit className="h-4 w-4" />
-              <span>編輯名稱</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-              disabled={loading}
-              className="flex items-center space-x-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>{loading ? "登出中..." : "登出"}</span>
-            </Button>
-          </div>
+          {!isEditingName && (
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleEditName}
+                className="flex items-center space-x-2"
+              >
+                <Edit className="h-4 w-4" />
+                <span>編輯名稱</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                disabled={loading}
+                className="flex items-center space-x-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>{loading ? "登出中..." : "登出"}</span>
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
