@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -42,6 +44,13 @@ export default function Auth() {
           variant: "destructive",
         });
       } else {
+        // If remember me is checked, save email to localStorage
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', loginEmail);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+        
         toast({
           title: "登入成功",
           description: "歡迎回來！",
@@ -57,6 +66,15 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
+
+  // Load remembered email on component mount
+  React.useEffect(() => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+      setLoginEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,6 +196,20 @@ export default function Auth() {
                         )}
                       </Button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember-me"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label 
+                      htmlFor="remember-me" 
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
+                      記住我
+                    </Label>
                   </div>
                   
                   {/* Hide forgot password link */}
