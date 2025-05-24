@@ -154,7 +154,7 @@ export default function ResetPassword() {
   if (showErrorDialog) {
     return (
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="mx-4">
           <AlertDialogHeader>
             <AlertDialogTitle>重設連結無效</AlertDialogTitle>
             <AlertDialogDescription>

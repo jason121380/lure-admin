@@ -170,7 +170,7 @@ export function CustomerEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh] mx-4">
         <DialogHeader>
           <DialogTitle>{customer ? '編輯客戶' : '新增客戶'}</DialogTitle>
         </DialogHeader>
