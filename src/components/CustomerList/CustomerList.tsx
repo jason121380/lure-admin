@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -185,15 +184,15 @@ export function CustomerList({
 
         {/* Bulk Actions Section */}
         {!isMobile && isSomeSelected && (
-          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <div className="mt-4 p-3 bg-gray-900 border border-gray-700 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-orange-700">
+              <span className="text-sm text-white">
                 已選取 {selectedCustomerIds.length} 位客戶
               </span>
               <Button
                 size="sm"
                 variant="outline"
-                className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                className="text-white border-gray-600 hover:bg-gray-800 bg-transparent"
                 onClick={() => setIsBulkDialogOpen(true)}
               >
                 <Edit2 className="w-3 h-3 mr-1" />
