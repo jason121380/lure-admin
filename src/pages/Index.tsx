@@ -237,9 +237,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       <div className="min-h-screen bg-gray-50 w-full">
         {/* Mobile Header */}
         <MobileHeader 
-          title={selectedCustomer ? selectedCustomer.name : getDepartmentName(activeDepartment)}
+          title={selectedCustomer ? selectedCustomer.name : ""}
           showBackButton={!!selectedCustomer}
           onBack={handleBackToList}
+          showLogo={!selectedCustomer}
           rightAction={
             !selectedCustomer ? (
               <Button variant="ghost" size="sm" className="p-1 h-8 w-8">

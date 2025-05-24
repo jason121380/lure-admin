@@ -8,9 +8,10 @@ interface MobileHeaderProps {
   showBackButton?: boolean;
   onBack?: () => void;
   rightAction?: React.ReactNode;
+  showLogo?: boolean;
 }
 
-export const MobileHeader = ({ title, showBackButton, onBack, rightAction }: MobileHeaderProps) => {
+export const MobileHeader = ({ title, showBackButton, onBack, rightAction, showLogo = false }: MobileHeaderProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-40 md:hidden">
       <div className="flex items-center justify-between">
@@ -25,7 +26,13 @@ export const MobileHeader = ({ title, showBackButton, onBack, rightAction }: Mob
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
-          <h1 className="text-lg font-semibold text-gray-900 truncate">{title}</h1>
+          {showLogo ? (
+            <div className="text-xl font-bold text-indigo-600">
+              LOGO
+            </div>
+          ) : (
+            <h1 className="text-lg font-semibold text-gray-900 truncate">{title}</h1>
+          )}
         </div>
         
         {rightAction && (
