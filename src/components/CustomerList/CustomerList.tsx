@@ -229,25 +229,18 @@ export function CustomerList({
           <>
             <div className={isMobile ? 'w-full' : ''}>
               <Table>
-                <TableHeader>
+                <TableHeader className={isMobile ? 'hidden' : ''}>
                   <TableRow>
-                    {!isMobile && (
-                      <>
-                        <TableHead className="w-[50px]">
-                          <Checkbox
-                            checked={isAllSelected}
-                            onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
-                            aria-label="選取全部"
-                          />
-                        </TableHead>
-                        <TableHead className="w-[40%] font-semibold text-gray-900">名稱</TableHead>
-                        <TableHead className="w-[30%] font-semibold text-gray-900">部門</TableHead>
-                        <TableHead className="w-[30%] font-semibold text-gray-900">狀態</TableHead>
-                      </>
-                    )}
-                    {isMobile && (
-                      <TableHead className="w-full font-semibold text-gray-900">客戶資訊</TableHead>
-                    )}
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
+                        aria-label="選取全部"
+                      />
+                    </TableHead>
+                    <TableHead className="w-[40%]">名稱</TableHead>
+                    <TableHead className="w-[30%]">部門</TableHead>
+                    <TableHead className="w-[30%]">狀態</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
