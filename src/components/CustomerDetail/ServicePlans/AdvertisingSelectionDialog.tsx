@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -153,11 +152,11 @@ export const AdvertisingSelectionDialog = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button 
-          size="sm" 
-          className="flex items-center justify-center w-8 h-8 p-0" 
+          variant="ghost" 
+          className="flex items-center justify-center w-8 h-8 p-0 rounded-full hover:bg-gray-100 transition-colors" 
           disabled={disabled}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 text-gray-600" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
