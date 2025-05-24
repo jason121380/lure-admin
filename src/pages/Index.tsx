@@ -33,7 +33,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [sidebarKey, setSidebarKey] = useState(0);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     department: "all"
@@ -273,10 +272,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setIsFilterDialogOpen(true);
   };
 
-  const handleToggleSearch = () => {
-    setSearchExpanded(!searchExpanded);
-  };
-
   const handleOpenUserProfile = () => {
     setIsUserProfileDialogOpen(true);
   };
@@ -295,21 +290,18 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     return (
       <div className="min-h-screen bg-gray-50 w-full">
         {/* Mobile Header */}
-        <div className="mobile-header-fixed">
-          <MobileHeader 
-            title={selectedCustomer ? selectedCustomer.name : ""}
-            showBackButton={!!selectedCustomer}
-            onBack={handleBackToList}
-            showLogo={!selectedCustomer}
-            onAddCustomer={() => handleAddCustomer()}
-            onFilter={!selectedCustomer ? handleOpenFilter : undefined}
-            onSearch={!selectedCustomer ? handleToggleSearch : undefined}
-            onUserProfile={handleOpenUserProfile}
-          />
-        </div>
+        <MobileHeader 
+          title={selectedCustomer ? selectedCustomer.name : ""}
+          showBackButton={!!selectedCustomer}
+          onBack={handleBackToList}
+          showLogo={!selectedCustomer}
+          onAddCustomer={() => handleAddCustomer()}
+          onFilter={!selectedCustomer ? handleOpenFilter : undefined}
+          onUserProfile={handleOpenUserProfile}
+        />
 
         {/* Main Content */}
-        <div className="mobile-content-with-header">
+        <div className="pt-16 h-screen w-full">
           {!selectedCustomer ? (
             <div className="h-full w-full">
               <CustomerList 
@@ -318,7 +310,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
                 onSelectCustomer={handleSelectCustomer}
                 onAddCustomer={handleAddCustomer}
                 onBulkUpdateDepartment={handleBulkUpdateDepartment}
-                searchExpanded={searchExpanded}
               />
             </div>
           ) : (
@@ -387,7 +378,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
             onSelectCustomer={handleSelectCustomer}
             onAddCustomer={handleAddCustomer}
             onBulkUpdateDepartment={handleBulkUpdateDepartment}
-            searchExpanded={searchExpanded}
           />
         </div>
         

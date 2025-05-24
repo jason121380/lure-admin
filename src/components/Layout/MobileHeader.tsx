@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Plus, Filter, User, Search } from "lucide-react";
+import { ArrowLeft, Plus, Filter, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileHeaderProps {
@@ -14,7 +14,6 @@ interface MobileHeaderProps {
   onAddCustomer?: () => void;
   onFilter?: () => void;
   onUserProfile?: () => void;
-  onSearch?: () => void;
 }
 
 export const MobileHeader = ({ 
@@ -25,14 +24,13 @@ export const MobileHeader = ({
   showLogo = false,
   onAddCustomer,
   onFilter,
-  onUserProfile,
-  onSearch
+  onUserProfile
 }: MobileHeaderProps) => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3 md:hidden h-[60px] flex items-center">
-      <div className="flex items-center justify-between w-full">
+    <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-40 md:hidden">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {showBackButton && onBack && (
             <Button
@@ -63,11 +61,6 @@ export const MobileHeader = ({
           </div>
         ) : (
           <div className="flex items-center space-x-2">
-            {showLogo && onSearch && (
-              <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onSearch}>
-                <Search className="h-4 w-4" />
-              </Button>
-            )}
             {showLogo && onFilter && (
               <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onFilter}>
                 <Filter className="h-4 w-4" />

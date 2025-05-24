@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -23,7 +24,6 @@ type CustomerListProps = {
   onSelectCustomer: (customer: Customer) => void;
   onAddCustomer: () => void;
   onBulkUpdateDepartment?: (customerIds: string[], departmentData: { department: string; departmentName: string }) => Promise<void>;
-  searchExpanded?: boolean;
 };
 
 export function CustomerList({ 
@@ -31,8 +31,7 @@ export function CustomerList({
   selectedCustomerId, 
   onSelectCustomer, 
   onAddCustomer,
-  onBulkUpdateDepartment,
-  searchExpanded = false
+  onBulkUpdateDepartment 
 }: CustomerListProps) {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -157,10 +156,10 @@ export function CustomerList({
   
   return (
     <div className={`h-full flex flex-col ${isMobile ? 'w-full' : ''}`}>
-      <div className={`${isMobile ? 'mobile-customer-list py-4 px-4' : 'p-4 md:p-5'} border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
-        {!isMobile && (
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">客戶列表</h2>
+      <div className={`p-4 md:p-5 border-b sticky top-0 bg-white z-10 ${isMobile ? 'w-full' : ''}`}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">客戶列表</h2>
+          {!isMobile && (
             <Button 
               variant="ghost" 
               size="sm" 
@@ -169,22 +168,20 @@ export function CustomerList({
             >
               <Plus className="w-4 h-4" />
             </Button>
-          </div>
-        )}
+          )}
+        </div>
         
-        {(searchExpanded || !isMobile) && (
-          <div className={isMobile ? '' : 'mb-4'}>
-            <div className="relative">
-              <SearchIcon className={`h-4 w-4 absolute text-gray-400 ${isMobile ? 'left-3 top-3.5' : 'left-2.5 top-2.5'}`} />
-              <Input 
-                placeholder="搜尋客戶名稱..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${isMobile ? 'pl-10 pr-4 py-3 text-base border-gray-200 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 mobile-search-optimized' : 'pl-9'}`}
-              />
-            </div>
+        <div className="mb-4">
+          <div className="relative">
+            <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
+            <Input 
+              placeholder="搜尋客戶名稱..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9"
+            />
           </div>
-        )}
+        </div>
 
         {/* Bulk actions - only show on desktop */}
         {!isMobile && isSomeSelected && (
