@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,8 +27,13 @@ export const ServiceSelectionDialog = ({ onSelectService }: ServiceSelectionDial
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="h-8 w-8 p-0">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
           <Plus className="h-4 w-4" />
+          新增
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
