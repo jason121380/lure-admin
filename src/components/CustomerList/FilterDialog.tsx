@@ -50,7 +50,7 @@ export const FilterDialog = ({
         const { data, error } = await supabase
           .from('departments')
           .select('code, name')
-          .neq('code', 'all') // Filter out any "all" departments from database
+          .neq('code', 'all')
           .order('sort_order', { ascending: true });
 
         if (error) {
@@ -115,7 +115,6 @@ export const FilterDialog = ({
                 <SelectValue placeholder={loading ? "載入中..." : "選擇部門"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">所有部門</SelectItem>
                 {departments.map((dept) => (
                   <SelectItem key={dept.code} value={dept.code}>
                     {dept.name}
