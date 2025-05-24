@@ -61,23 +61,52 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
       return;
     }
 
+    if (!user) {
+      toast.error("找不到用戶資訊");
+      return;
+    }
+
     try {
       setUpdateLoading(true);
       
+      // First check if we have a valid session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("Session error:", sessionError);
+        toast.error("登入會話已過期，請重新登入");
+        await signOut();
+        return;
+      }
+
+      console.log("Current session user:", session.user?.id);
+      console.log("Updating name to:", editedName.trim());
+      
       // Update user metadata in Supabase Auth
-      const { error: authError } = await supabase.auth.updateUser({
+      const { data: authData, error: authError } = await supabase.auth.updateUser({
         data: { full_name: editedName.trim() }
       });
 
       if (authError) {
+        console.error("Auth update error:", authError);
+        
+        // If session is invalid, sign out and ask user to re-login
+        if (authError.message?.includes('session') || authError.message?.includes('Auth')) {
+          toast.error("登入會話已過期，請重新登入");
+          await signOut();
+          return;
+        }
+        
         throw authError;
       }
+
+      console.log("Auth update successful:", authData);
 
       // Also update in profiles table if it exists
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ full_name: editedName.trim() })
-        .eq('id', user?.id);
+        .eq('id', user.id);
 
       // Don't throw error if profiles table doesn't exist or update fails
       if (profileError) {
@@ -95,9 +124,16 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
         setCurrentUserName(editedName.trim());
       }, 100);
       
-    } catch (error) {
-      toast.error("更新名稱時發生錯誤");
+    } catch (error: any) {
       console.error("Error updating name:", error);
+      
+      // Handle specific error cases
+      if (error?.message?.includes('session') || error?.message?.includes('Auth')) {
+        toast.error("登入會話已過期，請重新登入");
+        await signOut();
+      } else {
+        toast.error("更新名稱時發生錯誤");
+      }
     } finally {
       setUpdateLoading(false);
     }
@@ -135,6 +171,13 @@ export const UserProfileDialog = ({ open, onOpenChange }: UserProfileDialogProps
                     className="text-lg font-medium"
                     disabled={updateLoading}
                     autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !updateLoading) {
+                        handleSaveName();
+                      } else if (e.key === 'Escape') {
+                        handleCancelEdit();
+                      }
+                    }}
                   />
                   <div className="flex space-x-2">
                     <Button
