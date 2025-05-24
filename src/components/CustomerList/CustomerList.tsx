@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Customer } from './CustomerListItem';
 import { Button } from '@/components/ui/button';
 import { Plus, SearchIcon, Edit2 } from 'lucide-react';
@@ -34,7 +33,6 @@ export function CustomerList({
   onBulkUpdateDepartment 
 }: CustomerListProps) {
   const isMobile = useIsMobile();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [displayedCount, setDisplayedCount] = useState(20);
   const itemsPerLoad = 20;
@@ -52,12 +50,10 @@ export function CustomerList({
     setLoading(false);
   }, [initialCustomers]);
   
-  // Filter customers based on search and status
+  // Filter customers based on search only
   const filteredCustomers = customers.filter(customer => {
-    const matchesStatus = statusFilter === "all" || customer.status === statusFilter;
     const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesStatus && matchesSearch;
+    return matchesSearch;
   });
   
   // Get the customers to display (limited by displayedCount)
@@ -92,7 +88,7 @@ export function CustomerList({
   // Reset displayed count when filters change
   useEffect(() => {
     setDisplayedCount(20);
-  }, [statusFilter, searchQuery]);
+  }, [searchQuery]);
 
   // Clear selection when customers change
   useEffect(() => {
@@ -173,8 +169,8 @@ export function CustomerList({
           )}
         </div>
         
-        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-row gap-3'} mb-4`}>
-          <div className="flex-1 relative">
+        <div className="mb-4">
+          <div className="relative">
             <SearchIcon className="h-4 w-4 absolute left-2.5 top-2.5 text-gray-400" />
             <Input 
               placeholder="搜尋客戶名稱..." 
@@ -183,18 +179,6 @@ export function CustomerList({
               className="w-full pl-9"
             />
           </div>
-          
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={`${isMobile ? 'w-full' : 'w-40'} shrink-0`}>
-              <SelectValue placeholder="所有狀態" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">所有狀態</SelectItem>
-              <SelectItem value="active">進行中</SelectItem>
-              <SelectItem value="paused">暫停</SelectItem>
-              <SelectItem value="inactive">終止</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Bulk actions - only show on desktop */}
