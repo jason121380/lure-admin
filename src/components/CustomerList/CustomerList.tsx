@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Customer } from './CustomerListItem';
@@ -217,16 +216,18 @@ export function CustomerList({
           <>
             <div className={isMobile ? 'w-full' : ''}>
               <Table>
-                <TableHeader className={isMobile ? 'hidden' : ''}>
+                <TableHeader>
                   <TableRow className="border-slate-200">
-                    <TableHead className="w-[50px]">
-                      <Checkbox
-                        checked={isAllSelected}
-                        onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
-                        aria-label="選取全部"
-                        className="border-slate-300"
-                      />
-                    </TableHead>
+                    {!isMobile && (
+                      <TableHead className="w-[50px]">
+                        <Checkbox
+                          checked={isAllSelected}
+                          onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
+                          aria-label="選取全部"
+                          className="border-slate-300"
+                        />
+                      </TableHead>
+                    )}
                     <TableHead className="w-[30%] text-slate-700">部門</TableHead>
                     <TableHead className="w-[40%] text-slate-700">名稱</TableHead>
                     <TableHead className="w-[30%] text-slate-700">狀態</TableHead>
@@ -239,55 +240,32 @@ export function CustomerList({
                       className={`cursor-pointer hover:bg-slate-50 border-slate-100 ${customer.id === selectedCustomerId ? 'bg-slate-100' : ''}`}
                       onClick={() => onSelectCustomer(customer)}
                     >
-                      {isMobile ? (
-                        // Mobile layout - single horizontal row
-                        <TableCell className="w-full p-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
-                              <Badge 
-                                variant="outline" 
-                                className="text-xs px-2 py-0.5 border-slate-300 text-slate-600 shrink-0"
-                              >
-                                {customer.departmentName}
-                              </Badge>
-                              <div className="font-medium text-sm truncate text-slate-900">{customer.name}</div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
-                                {getStatusText(customer.status)}
-                              </span>
-                            </div>
-                          </div>
+                      {!isMobile && (
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            checked={selectedCustomerIds.includes(customer.id)}
+                            onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
+                            aria-label={`選取 ${customer.name}`}
+                            className="border-slate-300"
+                          />
                         </TableCell>
-                      ) : (
-                        // Desktop layout
-                        <>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
-                            <Checkbox
-                              checked={selectedCustomerIds.includes(customer.id)}
-                              onCheckedChange={(checked: boolean) => handleCheckboxChange(customer.id, checked)}
-                              aria-label={`選取 ${customer.name}`}
-                              className="border-slate-300"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant="outline" 
-                              className="text-xs px-2 py-0.5 border-slate-300 text-slate-600"
-                            >
-                              {customer.departmentName}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium text-slate-900">
-                            {customer.name}
-                          </TableCell>
-                          <TableCell>
-                            <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
-                              {getStatusText(customer.status)}
-                            </span>
-                          </TableCell>
-                        </>
                       )}
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 border-slate-300 text-slate-600"
+                        >
+                          {customer.departmentName}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium text-slate-900">
+                        {customer.name}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(customer.status)}`}>
+                          {getStatusText(customer.status)}
+                        </span>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
