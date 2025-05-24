@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -107,7 +108,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center p-4">
       <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
         {/* Logo and Header */}
         <div className="text-center mb-6">
@@ -122,32 +123,12 @@ export default function Auth() {
           </div>
         </div>
 
-        <Card className="w-full border shadow-sm bg-white">
+        <Card className="w-full border-slate-200 shadow-sm bg-white">
           <Tabs defaultValue="login" className="w-full">
-            {/* Hide tabs for now, only show login */}
-            {/*
-            <TabsList className={`grid w-full grid-cols-2 h-12 p-1 bg-gray-100 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-              <TabsTrigger 
-                value="login" 
-                className="h-10 font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
-              >
-                <LogIn className={`${isMobile ? 'w-3 h-3 mr-1' : 'w-4 h-4 mr-2'}`} />
-                登入
-              </TabsTrigger>
-              <TabsTrigger 
-                value="signup"
-                className="h-10 font-medium text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
-              >
-                <UserPlus className={`${isMobile ? 'w-3 h-3 mr-1' : 'w-4 h-4 mr-2'}`} />
-                註冊
-              </TabsTrigger>
-            </TabsList>
-            */}
-
             <TabsContent value="login" className="mt-0">
               <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>歡迎回來</CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-slate-900`}>歡迎回來</CardTitle>
+                <CardDescription className="text-slate-600">
                   輸入您的登入資訊以存取您的帳戶
                 </CardDescription>
               </CardHeader>
@@ -155,7 +136,7 @@ export default function Auth() {
               <form onSubmit={handleSignIn}>
                 <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-slate-700">
                       電子郵件
                     </Label>
                     <Input 
@@ -164,13 +145,13 @@ export default function Auth() {
                       placeholder="your@email.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
+                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-slate-500`}
                       required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="login-password" className="text-sm font-medium text-slate-700">
                       密碼
                     </Label>
                     <div className="relative">
@@ -179,20 +160,20 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
+                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-500 focus:ring-slate-500`}
                         required
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
+                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-slate-100`}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
+                          <EyeOff className="h-4 w-4 text-slate-400" />
                         ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
+                          <Eye className="h-4 w-4 text-slate-400" />
                         )}
                       </Button>
                     </div>
@@ -206,31 +187,17 @@ export default function Auth() {
                     />
                     <Label 
                       htmlFor="remember-me" 
-                      className="text-sm text-gray-700 cursor-pointer"
+                      className="text-sm text-slate-700 cursor-pointer"
                     >
                       記住我
                     </Label>
                   </div>
-                  
-                  {/* Hide forgot password link */}
-                  {/*
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="px-0 h-auto text-sm text-blue-600 hover:text-blue-700"
-                      onClick={() => setForgotPasswordOpen(true)}
-                    >
-                      忘記密碼？
-                    </Button>
-                  </div>
-                  */}
                 </CardContent>
                 
                 <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
                   <Button 
                     type="submit" 
-                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-blue-600 hover:bg-blue-700 text-white`}
+                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-slate-900 hover:bg-slate-800 text-white`}
                     disabled={isLoading}
                   >
                     {isLoading ? "登入中..." : "登入"}
@@ -238,96 +205,11 @@ export default function Auth() {
                 </CardFooter>
               </form>
             </TabsContent>
-
-            {/* Hide signup tab content */}
-            {/*
-            <TabsContent value="signup" className="mt-0">
-              <CardHeader className={`${isMobile ? 'pb-2 pt-4 px-4' : 'pb-4'}`}>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-900`}>建立帳戶</CardTitle>
-                <CardDescription className="text-gray-600">
-                  輸入您的資訊以建立一個新帳戶
-                </CardDescription>
-              </CardHeader>
-              
-              <form onSubmit={handleSignUp}>
-                <CardContent className={`space-y-4 ${isMobile ? 'px-4' : ''}`}>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">
-                      電子郵件
-                    </Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-full-name" className="text-sm font-medium text-gray-700">
-                      全名
-                    </Label>
-                    <Input
-                      id="signup-full-name"
-                      type="text"
-                      placeholder="您的全名"
-                      value={signupFullName}
-                      onChange={(e) => setSignupFullName(e.target.value)}
-                      className={`${isMobile ? 'h-10' : 'h-11'} bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">
-                      密碼
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        type={showSignupPassword ? "text" : "password"}
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        className={`${isMobile ? 'h-10' : 'h-11'} pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500`}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className={`absolute right-0 top-0 ${isMobile ? 'h-10' : 'h-11'} w-10 hover:bg-gray-100`}
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      >
-                        {showSignupPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-                
-                <CardFooter className={`${isMobile ? 'px-4 pb-4' : ''}`}>
-                  <Button 
-                    type="submit"
-                    className={`w-full ${isMobile ? 'h-10' : 'h-11'} bg-blue-600 hover:bg-blue-700 text-white`}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "註冊中..." : "註冊"}
-                  </Button>
-                </CardFooter>
-              </form>
-            </TabsContent>
-            */}
           </Tabs>
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-500">
+        <div className="text-center mt-6 text-sm text-slate-500">
           <p>© 2025 by Lure</p>
         </div>
       </div>
