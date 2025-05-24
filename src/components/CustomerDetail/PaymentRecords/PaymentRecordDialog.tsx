@@ -150,7 +150,7 @@ export function PaymentRecordDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] mx-4">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{paymentRecord ? "編輯付款記錄" : "新增付款記錄"}</DialogTitle>
           </DialogHeader>
@@ -295,7 +295,7 @@ export function PaymentRecordDialog({
       </Dialog>
       
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-        <AlertDialogContent className="mx-4">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>確認刪除付款記錄</AlertDialogTitle>
             <AlertDialogDescription>
