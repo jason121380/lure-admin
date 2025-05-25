@@ -25,7 +25,7 @@ export function DeleteFileDialog({ open, onOpenChange, onConfirm, fileName }: De
   const [error, setError] = useState("");
 
   const handleConfirm = () => {
-    if (password !== "DELETE") {
+    if (password !== "96962779") {
       setError("請輸入正確的密碼");
       return;
     }
@@ -50,7 +50,7 @@ export function DeleteFileDialog({ open, onOpenChange, onConfirm, fileName }: De
           <AlertDialogDescription>
             您即將刪除檔案：<strong>{fileName}</strong>
             <br />
-            此操作無法復原。請輸入 <strong>DELETE</strong> 以確認刪除。
+            此操作無法復原。請輸入密碼以確認刪除。
           </AlertDialogDescription>
         </AlertDialogHeader>
         
@@ -60,13 +60,13 @@ export function DeleteFileDialog({ open, onOpenChange, onConfirm, fileName }: De
           </Label>
           <Input
             id="delete-password"
-            type="text"
+            type="password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setError("");
             }}
-            placeholder="請輸入 DELETE"
+            placeholder="請輸入密碼"
             className="mt-2"
           />
           {error && (
