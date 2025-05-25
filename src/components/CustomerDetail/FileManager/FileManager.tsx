@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -188,6 +189,18 @@ export function FileManager({ customerId }: FileManagerProps) {
     return <FileIcon className="w-4 h-4" />;
   };
 
+  const getFileType = (mimeType: string) => {
+    if (mimeType.startsWith('image/')) return '圖片';
+    if (mimeType.includes('pdf')) return 'PDF';
+    if (mimeType.includes('text/')) return '文字';
+    if (mimeType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) return 'Word';
+    if (mimeType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) return 'Excel';
+    if (mimeType.includes('application/vnd.openxmlformats-officedocument.presentationml.presentation')) return 'PowerPoint';
+    if (mimeType.includes('application/zip')) return 'ZIP';
+    if (mimeType.includes('application/x-rar')) return 'RAR';
+    return '檔案';
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -261,7 +274,7 @@ export function FileManager({ customerId }: FileManagerProps) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{file.file_name}</p>
                     <p className="text-sm text-gray-500">
-                      {formatFileSize(file.file_size)} • {new Date(file.uploaded_at).toLocaleDateString()}
+                      {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • {new Date(file.uploaded_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
