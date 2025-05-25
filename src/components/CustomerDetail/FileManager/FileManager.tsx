@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -208,29 +207,18 @@ export function FileManager({ customerId }: FileManagerProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>檔案總管</CardTitle>
-          <div className="relative">
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleFileUpload}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={uploading}
-            />
-            <Button 
-              variant="outline" 
-              size={isMobile ? "sm" : "default"}
-              disabled={uploading}
-              className="flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {uploading ? '上傳中...' : '上傳檔案'}
-            </Button>
-          </div>
-        </div>
+        <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>檔案總管</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Hidden file input for drag zone */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileUpload}
+          className="hidden"
+          disabled={uploading}
+        />
+
         {/* Drag and Drop Zone */}
         <div
           ref={dropZoneRef}
