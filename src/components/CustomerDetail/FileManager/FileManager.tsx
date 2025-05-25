@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DeleteFileDialog } from "./DeleteFileDialog";
 
 type CustomerFile = {
   id: string;
@@ -30,6 +30,17 @@ export function FileManager({ customerId }: FileManagerProps) {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    fileId: string;
+    filePath: string;
+    fileName: string;
+  }>({
+    open: false,
+    fileId: "",
+    filePath: "",
+    fileName: ""
+  });
 
   useEffect(() => {
     if (user) {
@@ -155,14 +166,21 @@ export function FileManager({ customerId }: FileManagerProps) {
     }
   };
 
-  const handleFileDelete = async (fileId: string, filePath: string) => {
-    if (!confirm('確定要刪除這個檔案嗎？')) return;
+  const handleFileDelete = async (fileId: string, filePath: string, fileName: string) => {
+    setDeleteDialog({
+      open: true,
+      fileId,
+      filePath,
+      fileName
+    });
+  };
 
+  const confirmDelete = async () => {
     try {
       // Delete from storage
       const { error: storageError } = await supabase.storage
         .from('customer-files')
-        .remove([filePath]);
+        .remove([deleteDialog.filePath]);
 
       if (storageError) throw storageError;
 
@@ -170,7 +188,7 @@ export function FileManager({ customerId }: FileManagerProps) {
       const { error: dbError } = await supabase
         .from('customer_files')
         .delete()
-        .eq('id', fileId);
+        .eq('id', deleteDialog.fileId);
 
       if (dbError) throw dbError;
 
@@ -290,7 +308,7 @@ export function FileManager({ customerId }: FileManagerProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleFileDelete(file.id, file.file_path)}
+                    onClick={() => handleFileDelete(file.id, file.file_path, file.file_name)}
                     className="h-8 w-8 text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -300,6 +318,13 @@ export function FileManager({ customerId }: FileManagerProps) {
             ))}
           </div>
         )}
+
+        <DeleteFileDialog
+          open={deleteDialog.open}
+          onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
+          onConfirm={confirmDelete}
+          fileName={deleteDialog.fileName}
+        />
       </CardContent>
     </Card>
   );
