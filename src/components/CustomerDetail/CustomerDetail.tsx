@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PaymentRecordList } from "./PaymentRecords/PaymentRecordList";
 import { ServicePlanList } from "./ServicePlans/ServicePlanList";
+import { FileManager } from "./FileManager/FileManager";
 import { useState } from "react";
 import { NotesEditDialog } from "./NotesEditDialog";
 import { CustomerDeleteDialog } from "./CustomerDeleteDialog";
@@ -114,10 +115,11 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onU
       </div>
       
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className={`mb-4 grid w-full grid-cols-3 ${isMobile ? 'text-sm' : ''}`}>
+        <TabsList className={`mb-4 grid w-full grid-cols-4 ${isMobile ? 'text-sm' : ''}`}>
           <TabsTrigger value="basic">基本資訊</TabsTrigger>
           <TabsTrigger value="services">服務項目</TabsTrigger>
           <TabsTrigger value="payments">付款記錄</TabsTrigger>
+          <TabsTrigger value="files">檔案總管</TabsTrigger>
         </TabsList>
         
         <TabsContent value="basic" className="p-3 md:p-4 bg-white border rounded-md">
@@ -201,6 +203,10 @@ export function CustomerDetail({ customer, onEditCustomer, onDeleteCustomer, onU
         
         <TabsContent value="payments">
           <PaymentRecordList customerId={customer.id} />
+        </TabsContent>
+        
+        <TabsContent value="files">
+          <FileManager customerId={customer.id} />
         </TabsContent>
       </Tabs>
       
