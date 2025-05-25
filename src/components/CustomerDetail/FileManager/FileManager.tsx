@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,9 +24,12 @@ type FileManagerProps = {
 export function FileManager({ customerId }: FileManagerProps) {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const [files, setFiles] = useState<CustomerFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -52,9 +55,8 @@ export function FileManager({ customerId }: FileManagerProps) {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
+  const uploadFile = async (file: File) => {
+    if (!user) return;
 
     setUploading(true);
     try {
@@ -90,10 +92,43 @@ export function FileManager({ customerId }: FileManagerProps) {
       toast.error('檔案上傳失敗');
     } finally {
       setUploading(false);
-      // Reset input
-      event.target.value = '';
     }
   };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    await uploadFile(file);
+    
+    // Reset input
+    event.target.value = '';
+  };
+
+  const handleDrop = useCallback(async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    if (droppedFiles.length === 0) return;
+
+    // Handle only the first file for now
+    const file = droppedFiles[0];
+    await uploadFile(file);
+  }, [uploadFile]);
+
+  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    // Only set isDragOver to false if we're leaving the drop zone entirely
+    if (!dropZoneRef.current?.contains(event.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  }, []);
 
   const handleFileDownload = async (filePath: string, fileName: string) => {
     try {
@@ -177,6 +212,7 @@ export function FileManager({ customerId }: FileManagerProps) {
           <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>檔案總管</CardTitle>
           <div className="relative">
             <input
+              ref={fileInputRef}
               type="file"
               onChange={handleFileUpload}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -195,11 +231,35 @@ export function FileManager({ customerId }: FileManagerProps) {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Drag and Drop Zone */}
+        <div
+          ref={dropZoneRef}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`
+            border-2 border-dashed rounded-lg p-8 mb-6 text-center transition-colors
+            ${isDragOver 
+              ? 'border-blue-500 bg-blue-50' 
+              : 'border-gray-300 hover:border-gray-400'
+            }
+            ${uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+          `}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragOver ? 'text-blue-500' : 'text-gray-400'}`} />
+          <p className={`text-lg font-medium mb-2 ${isDragOver ? 'text-blue-700' : 'text-gray-700'}`}>
+            {isDragOver ? '放開以上傳檔案' : '拖拽檔案到此處上傳'}
+          </p>
+          <p className="text-sm text-gray-500">
+            或點擊此區域選擇檔案
+          </p>
+        </div>
+
         {files.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <FileIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+          <div className="text-center text-gray-500 py-4">
+            <FileIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
             <p>尚未上傳任何檔案</p>
-            <p className="text-sm mt-2">點擊上方的「上傳檔案」按鈕開始上傳</p>
           </div>
         ) : (
           <div className="space-y-3">
