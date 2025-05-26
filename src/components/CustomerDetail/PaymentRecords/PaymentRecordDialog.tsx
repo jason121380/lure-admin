@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -150,147 +151,150 @@ export function PaymentRecordDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>{paymentRecord ? "編輯付款記錄" : "新增付款記錄"}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">日期</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "yyyy-MM-dd") : <span>選擇日期</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="paymentMethod">支付方式</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="選擇支付方式" />
-                </SelectTrigger>
-                <SelectContent>
-                  {paymentMethods.map(method => (
-                    <SelectItem key={method.id} value={method.id}>{method.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="account">帳戶</Label>
-              <Select value={account} onValueChange={setAccount}>
-                <SelectTrigger>
-                  <SelectValue placeholder="選擇帳戶" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accountOptions.map(option => (
-                    <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="billingCycle">週期</Label>
-              <Select value={billingCycle} onValueChange={setBillingCycle}>
-                <SelectTrigger>
-                  <SelectValue placeholder="選擇週期" />
-                </SelectTrigger>
-                <SelectContent>
-                  {billingCycleOptions.map(option => (
-                    <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="amount">金額</Label>
-              <Input
-                id="amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="taxAmount">稅金</Label>
-              <Input
-                id="taxAmount"
-                type="number"
-                value={taxAmount}
-                onChange={(e) => setTaxAmount(e.target.value)}
-                placeholder="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="totalAmount">總額</Label>
-              <Input
-                id="totalAmount"
-                type="number"
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="0"
-                required
-                readOnly
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isConfirmed"
-                checked={isConfirmed}
-                onCheckedChange={(checked) => setIsConfirmed(checked === true)}
-              />
-              <label
-                htmlFor="isConfirmed"
-                className="text-sm font-medium leading-none cursor-pointer"
-              >
-                確認收款
-              </label>
-            </div>
-            
-            <div className="flex justify-between pt-2">
-              {paymentRecord && onDeletePaymentRecord && (
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  onClick={handleDeleteClick}
-                  className="flex items-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  刪除
-                </Button>
-              )}
-              <div className="ml-auto">
-                <Button type="submit">{paymentRecord ? "更新" : "新增"}</Button>
+          
+          <ScrollArea className="flex-1 px-1">
+            <form onSubmit={handleSubmit} className="space-y-4 pr-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">日期</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "yyyy-MM-dd") : <span>選擇日期</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-            </div>
-          </form>
+              
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">支付方式</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇支付方式" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods.map(method => (
+                      <SelectItem key={method.id} value={method.id}>{method.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="account">帳戶</Label>
+                <Select value={account} onValueChange={setAccount}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇帳戶" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accountOptions.map(option => (
+                      <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="billingCycle">週期</Label>
+                <Select value={billingCycle} onValueChange={setBillingCycle}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇週期" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {billingCycleOptions.map(option => (
+                      <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="amount">金額</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="taxAmount">稅金</Label>
+                <Input
+                  id="taxAmount"
+                  type="number"
+                  value={taxAmount}
+                  onChange={(e) => setTaxAmount(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="totalAmount">總額</Label>
+                <Input
+                  id="totalAmount"
+                  type="number"
+                  value={totalAmount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  placeholder="0"
+                  required
+                  readOnly
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isConfirmed"
+                  checked={isConfirmed}
+                  onCheckedChange={(checked) => setIsConfirmed(checked === true)}
+                />
+                <label
+                  htmlFor="isConfirmed"
+                  className="text-sm font-medium leading-none cursor-pointer"
+                >
+                  確認收款
+                </label>
+              </div>
+              
+              <div className="flex justify-between pt-2 pb-4">
+                {paymentRecord && onDeletePaymentRecord && (
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    onClick={handleDeleteClick}
+                    className="flex items-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    刪除
+                  </Button>
+                )}
+                <div className="ml-auto">
+                  <Button type="submit">{paymentRecord ? "更新" : "新增"}</Button>
+                </div>
+              </div>
+            </form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
       
