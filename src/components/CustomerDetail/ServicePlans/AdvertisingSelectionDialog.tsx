@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -159,79 +161,82 @@ export const AdvertisingSelectionDialog = ({
           <Plus className="h-4 w-4 text-gray-600" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>選擇廣告投放</DialogTitle>
         </DialogHeader>
-        <div className="p-4 space-y-6">
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-3">選擇投放平台</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {advertisingPlatforms.map((platform) => (
-                <Card 
-                  key={platform.id} 
-                  className={`cursor-pointer transition-colors ${
-                    selectedPlatform === platform.id 
-                      ? 'bg-blue-50 border-blue-300' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPlatform(platform.id)}
-                >
-                  <CardContent className="p-3 text-center">
-                    <h4 className="font-medium text-gray-900">{platform.name}</h4>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-          
-          {selectedPlatform && (
+        
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6 pb-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">選擇付款方式</h3>
-              <div className="grid grid-cols-1 gap-3">
-                {paymentMethods.map((method) => (
+              <h3 className="text-sm font-medium text-gray-900 mb-3">選擇投放平台</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {advertisingPlatforms.map((platform) => (
                   <Card 
-                    key={method.id} 
+                    key={platform.id} 
                     className={`cursor-pointer transition-colors ${
-                      selectedPaymentMethod === method.id 
+                      selectedPlatform === platform.id 
                         ? 'bg-blue-50 border-blue-300' 
                         : 'hover:bg-gray-50'
                     }`}
-                    onClick={() => setSelectedPaymentMethod(method.id)}
+                    onClick={() => setSelectedPlatform(platform.id)}
                   >
-                    <CardContent className="p-3">
-                      <h4 className="font-medium text-gray-900">{method.name}</h4>
+                    <CardContent className="p-3 text-center">
+                      <h4 className="font-medium text-gray-900">{platform.name}</h4>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             </div>
-          )}
+            
+            {selectedPlatform && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">選擇付款方式</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {paymentMethods.map((method) => (
+                    <Card 
+                      key={method.id} 
+                      className={`cursor-pointer transition-colors ${
+                        selectedPaymentMethod === method.id 
+                          ? 'bg-blue-50 border-blue-300' 
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => setSelectedPaymentMethod(method.id)}
+                    >
+                      <CardContent className="p-3">
+                        <h4 className="font-medium text-gray-900">{method.name}</h4>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {selectedPaymentMethod && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">填寫相關資訊</h3>
-              {renderConditionalInputs()}
-            </div>
-          )}
+            {selectedPaymentMethod && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">填寫相關資訊</h3>
+                {renderConditionalInputs()}
+              </div>
+            )}
 
-          {selectedPaymentMethod && (
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsOpen(false)}
-              >
-                取消
-              </Button>
-              <Button 
-                onClick={handleAdvertisingSelect}
-                disabled={!isFormValid()}
-              >
-                確認新增
-              </Button>
-            </div>
-          )}
-        </div>
+            {selectedPaymentMethod && (
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  取消
+                </Button>
+                <Button 
+                  onClick={handleAdvertisingSelect}
+                  disabled={!isFormValid()}
+                >
+                  確認新增
+                </Button>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
