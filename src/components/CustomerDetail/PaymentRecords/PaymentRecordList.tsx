@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -286,58 +286,56 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
       
       {paymentRecords.length > 0 ? (
         <div className="p-4 border rounded-md">
-          <ScrollArea className="h-[400px] w-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>日期</TableHead>
-                  <TableHead>支付方式</TableHead>
-                  <TableHead>帳戶</TableHead>
-                  <TableHead>週期</TableHead>
-                  <TableHead className="text-right">金額</TableHead>
-                  <TableHead className="text-right">稅金</TableHead>
-                  <TableHead className="text-right">總額</TableHead>
-                  <TableHead className="text-center">確認收款</TableHead>
-                  <TableHead className="text-center">操作</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>日期</TableHead>
+                <TableHead>支付方式</TableHead>
+                <TableHead>帳戶</TableHead>
+                <TableHead>週期</TableHead>
+                <TableHead className="text-right">金額</TableHead>
+                <TableHead className="text-right">稅金</TableHead>
+                <TableHead className="text-right">總額</TableHead>
+                <TableHead className="text-center">確認收款</TableHead>
+                <TableHead className="text-center">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paymentRecords.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>{record.date}</TableCell>
+                  <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
+                  <TableCell>{getAccountName(record.account)}</TableCell>
+                  <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
+                  <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
+                  <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
+                  <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
+                  <TableCell className="text-center">
+                    {record.isConfirmed ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <Check className="h-3 w-3 mr-1" />已確認
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        未確認
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleEditClick(record)}
+                      className="h-8 w-8"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">編輯</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paymentRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{record.date}</TableCell>
-                    <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
-                    <TableCell>{getAccountName(record.account)}</TableCell>
-                    <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
-                    <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
-                    <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
-                    <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
-                    <TableCell className="text-center">
-                      {record.isConfirmed ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <Check className="h-3 w-3 mr-1" />已確認
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          未確認
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleEditClick(record)}
-                        className="h-8 w-8"
-                      >
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">編輯</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       ) : (
         <div className="p-12 text-center text-gray-500 border rounded-md">
