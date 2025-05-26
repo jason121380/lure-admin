@@ -151,13 +151,13 @@ export function PaymentRecordDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[425px] h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
             <DialogTitle>{paymentRecord ? "編輯付款記錄" : "新增付款記錄"}</DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 px-1">
-            <form onSubmit={handleSubmit} className="space-y-4 pr-4">
+          <ScrollArea className="flex-1 px-6">
+            <form onSubmit={handleSubmit} className="space-y-4 pb-6">
               <div className="space-y-2">
                 <Label htmlFor="date">日期</Label>
                 <Popover>
@@ -277,7 +277,7 @@ export function PaymentRecordDialog({
                 </label>
               </div>
               
-              <div className="flex justify-between pt-2 pb-4">
+              <div className="flex justify-between pt-4">
                 {paymentRecord && onDeletePaymentRecord && (
                   <Button 
                     type="button" 
