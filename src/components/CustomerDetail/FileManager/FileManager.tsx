@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -178,13 +179,19 @@ export function FileManager({ customerId }: FileManagerProps) {
   };
 
   const handleTitleSave = async (fileId: string) => {
+    if (!tempTitle.trim()) {
+      toast.error('標題不能為空');
+      return;
+    }
+
     try {
-      console.log('更新檔案標題:', { fileId, title: tempTitle.trim() });
+      console.log('開始更新檔案標題:', { fileId, title: tempTitle.trim() });
       
       const { error } = await supabase
         .from('customer_files')
         .update({ 
-          title: tempTitle.trim() || null
+          title: tempTitle.trim(),
+          updated_at: new Date().toISOString()
         })
         .eq('id', fileId);
 
@@ -195,23 +202,20 @@ export function FileManager({ customerId }: FileManagerProps) {
 
       console.log('數據庫更新成功');
 
-      // 立即更新本地狀態
+      // 直接更新本地狀態
       setFiles(prevFiles => 
         prevFiles.map(file => 
           file.id === fileId 
-            ? { ...file, title: tempTitle.trim() || null }
+            ? { ...file, title: tempTitle.trim(), updated_at: new Date().toISOString() }
             : file
         )
       );
 
-      toast.success('檔案標題已更新');
+      // 清除編輯狀態
       setEditingTitle(null);
       setTempTitle("");
-
-      // 重新獲取數據以確保同步
-      setTimeout(() => {
-        fetchFiles();
-      }, 500);
+      
+      toast.success('檔案標題已更新');
 
     } catch (error) {
       console.error('Error updating file title:', error);
@@ -373,16 +377,30 @@ export function FileManager({ customerId }: FileManagerProps) {
                           className="h-8 text-sm"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
+                              e.preventDefault();
                               handleTitleSave(file.id);
                             } else if (e.key === 'Escape') {
+                              e.preventDefault();
                               handleTitleCancel();
                             }
                           }}
                           autoFocus
+                          onBlur={() => {
+                            // 延遲執行，讓按鈕點擊事件能夠觸發
+                            setTimeout(() => {
+                              if (editingTitle === file.id) {
+                                handleTitleCancel();
+                              }
+                            }, 150);
+                          }}
                         />
                         <Button
                           size="sm"
-                          onClick={() => handleTitleSave(file.id)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleTitleSave(file.id);
+                          }}
                           className="h-8 px-2"
                         >
                           保存
@@ -390,7 +408,11 @@ export function FileManager({ customerId }: FileManagerProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={handleTitleCancel}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleTitleCancel();
+                          }}
                           className="h-8 px-2"
                         >
                           取消
@@ -404,7 +426,11 @@ export function FileManager({ customerId }: FileManagerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleTitleEdit(file.id, file.title || file.file_name)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleTitleEdit(file.id, file.title || file.file_name);
+                          }}
                           className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Edit2 className="w-3 h-3" />
@@ -418,7 +444,7 @@ export function FileManager({ customerId }: FileManagerProps) {
                       <p>
                         {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • 上傳於 {formatDateTime(file.uploaded_at)}
                       </p>
-                      {file.updated_at && (
+                      {file.updated_at && file.updated_at !== file.uploaded_at && (
                         <p className="text-xs">
                           更新時間：{formatDateTime(file.updated_at)}
                         </p>
