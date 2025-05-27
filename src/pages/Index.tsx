@@ -12,9 +12,8 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type IndexProps = {
@@ -386,27 +385,9 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           setActiveDepartment={handleSetActiveDepartment} 
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          onOpenNotifications={handleOpenNotifications}
+          notificationCount={unreadCount}
         />
-      </div>
-      
-      {/* Desktop header with notification bell */}
-      <div className="fixed top-4 right-4 z-40 hidden md:flex items-center space-x-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="relative p-2 h-10 w-10" 
-          onClick={handleOpenNotifications}
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
       </div>
       
       {/* Desktop menu button */}

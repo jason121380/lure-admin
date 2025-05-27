@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Edit, Trash2, Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -66,6 +65,8 @@ type SidebarProps = {
   setActiveDepartment: (id: string) => void;
   isVisible: boolean;
   toggleSidebar?: () => void;
+  onOpenNotifications: () => void;
+  notificationCount: number;
 };
 
 // Sortable department item component
@@ -169,7 +170,7 @@ const SortableDepartment = ({
   );
 };
 
-export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
+export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar, onOpenNotifications, notificationCount }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
@@ -994,7 +995,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         </div>
       </div>
       
-      {/* User account section */}
+      {/* User account section with notification bell */}
       <div className="p-4 mt-auto border-t border-slate-200">
         <div className="flex items-center justify-between">
           <Popover>
@@ -1040,6 +1041,24 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               </div>
             </PopoverContent>
           </Popover>
+          
+          {/* Notification Bell - positioned to the right of Admin */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="relative p-2 h-10 w-10" 
+            onClick={onOpenNotifications}
+          >
+            <Bell className="h-5 w-5" />
+            {notificationCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </Badge>
+            )}
+          </Button>
         </div>
       </div>
       
