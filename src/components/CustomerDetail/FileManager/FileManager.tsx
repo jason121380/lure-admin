@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -183,8 +182,7 @@ export function FileManager({ customerId }: FileManagerProps) {
       const { error } = await supabase
         .from('customer_files')
         .update({ 
-          title: tempTitle.trim() || null,
-          updated_at: new Date().toISOString()
+          title: tempTitle.trim() || null
         })
         .eq('id', fileId);
 
