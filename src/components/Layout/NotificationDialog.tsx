@@ -115,24 +115,4 @@ export const NotificationDialog = ({
       </DialogContent>
     </Dialog>
   );
-
-  function getTypeColor(type: string) {
-    switch (type) {
-      case 'edit': return 'bg-blue-100 text-blue-800';
-      case 'upload': return 'bg-green-100 text-green-800';
-      case 'delete': return 'bg-red-100 text-red-800';
-      case 'create': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  function getTypeText(type: string) {
-    switch (type) {
-      case 'edit': return '編輯';
-      case 'upload': return '上傳';
-      case 'delete': return '刪除';
-      case 'create': return '新增';
-      default: return '操作';
-    }
-  }
 };
