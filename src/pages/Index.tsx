@@ -378,7 +378,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Desktop Sidebar with notification bell after ADMIN */}
+      {/* Desktop Sidebar */}
       <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block relative`}>
         <Sidebar 
           key={sidebarKey}
@@ -387,26 +387,26 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-        
-        {/* Notification bell positioned after ADMIN in sidebar */}
-        <div className="absolute top-4 right-4 z-40">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="relative p-2 h-10 w-10" 
-            onClick={handleOpenNotifications}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
+      </div>
+      
+      {/* Desktop notification bell - positioned in top right corner */}
+      <div className="fixed top-4 right-4 z-50 hidden md:block">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative p-2 h-10 w-10 bg-white shadow-sm border" 
+          onClick={handleOpenNotifications}
+        >
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </Button>
       </div>
       
       {/* Desktop menu button */}
