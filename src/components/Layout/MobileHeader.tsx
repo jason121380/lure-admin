@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Plus, Filter, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Plus, Filter, User, Bell } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface MobileHeaderProps {
@@ -14,6 +15,8 @@ interface MobileHeaderProps {
   onAddCustomer?: () => void;
   onFilter?: () => void;
   onUserProfile?: () => void;
+  onNotifications?: () => void;
+  notificationCount?: number;
 }
 
 export const MobileHeader = ({ 
@@ -24,7 +27,9 @@ export const MobileHeader = ({
   showLogo = false,
   onAddCustomer,
   onFilter,
-  onUserProfile
+  onUserProfile,
+  onNotifications,
+  notificationCount = 0
 }: MobileHeaderProps) => {
   const { user } = useAuth();
 
@@ -69,6 +74,24 @@ export const MobileHeader = ({
             {showLogo && onAddCustomer && (
               <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={onAddCustomer}>
                 <Plus className="h-4 w-4" />
+              </Button>
+            )}
+            {onNotifications && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="relative p-1 h-8 w-8" 
+                onClick={onNotifications}
+              >
+                <Bell className="h-4 w-4" />
+                {notificationCount > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </Badge>
+                )}
               </Button>
             )}
             {user && (

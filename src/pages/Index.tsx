@@ -7,11 +7,14 @@ import { CustomerEditDialog } from "@/components/CustomerDetail/CustomerEditDial
 import { MobileHeader } from "@/components/Layout/MobileHeader";
 import { FilterDialog } from "@/components/CustomerList/FilterDialog";
 import { UserProfileDialog } from "@/components/Layout/UserProfileDialog";
+import { NotificationDialog } from "@/components/Layout/NotificationDialog";
+import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Menu } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type IndexProps = {
@@ -22,6 +25,8 @@ type IndexProps = {
 const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const { notifications, addNotification, clearAllNotifications, unreadCount } = useNotifications();
+  
   const [activeDepartment, setActiveDepartment] = useState("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -33,6 +38,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const [sidebarKey, setSidebarKey] = useState(0);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isUserProfileDialogOpen, setIsUserProfileDialogOpen] = useState(false);
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: "all",
     department: "all"
@@ -154,10 +160,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     );
     // Force sidebar refresh when customer is updated
     refreshSidebar();
+    // Add notification
+    addNotification('edit', `已更新客戶資料`, updatedCustomer.name);
   };
   
   const handleDeleteCustomer = async (customerId: string) => {
     try {
+      const customerToDelete = customers.find(c => c.id === customerId);
       const { error } = await supabase
         .from('customers')
         .delete()
@@ -173,6 +182,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       fetchCustomers();
       // Force sidebar refresh when customer is deleted
       refreshSidebar();
+      // Add notification
+      addNotification('delete', `已刪除客戶`, customerToDelete?.name);
     } catch (error) {
       toast.error("刪除客戶時發生錯誤");
       console.error("Error deleting customer:", error);
@@ -205,6 +216,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         
         if (error) throw error;
         toast.success("客戶資料已更新");
+        // Add notification
+        addNotification('edit', `已更新客戶資料`, customerData.name);
       } else {
         // Create new customer
         const { data, error } = await supabase
@@ -214,6 +227,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         
         if (error) throw error;
         toast.success("已新增客戶");
+        // Add notification
+        addNotification('create', `已新增客戶`, customerData.name);
         
         if (data && data.length > 0) {
           setSelectedCustomerId(data[0].id);
@@ -252,6 +267,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       fetchCustomers();
       // Force sidebar refresh when bulk department update happens
       refreshSidebar();
+      // Add notification
+      addNotification('edit', `已批量更新 ${customerIds.length} 位客戶的部門`);
     } catch (error) {
       toast.error("批量更新部門失敗");
       console.error("Error bulk updating departments:", error);
@@ -276,6 +293,10 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
     setIsUserProfileDialogOpen(true);
   };
 
+  const handleOpenNotifications = () => {
+    setIsNotificationDialogOpen(true);
+  };
+
   const getDepartmentName = (dept: string) => {
     const names: Record<string, string> = {
       'all': '全部客戶',
@@ -298,6 +319,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           onAddCustomer={() => handleAddCustomer()}
           onFilter={!selectedCustomer ? handleOpenFilter : undefined}
           onUserProfile={handleOpenUserProfile}
+          onNotifications={handleOpenNotifications}
+          notificationCount={unreadCount}
         />
 
         {/* Main Content */}
@@ -342,6 +365,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           open={isUserProfileDialogOpen}
           onOpenChange={setIsUserProfileDialogOpen}
         />
+
+        <NotificationDialog
+          open={isNotificationDialogOpen}
+          onOpenChange={setIsNotificationDialogOpen}
+          notifications={notifications}
+          onClearAll={clearAllNotifications}
+        />
       </div>
     );
   }
@@ -357,6 +387,26 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
+      </div>
+      
+      {/* Desktop header with notification bell */}
+      <div className="fixed top-4 right-4 z-40 hidden md:flex items-center space-x-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative p-2 h-10 w-10" 
+          onClick={handleOpenNotifications}
+        >
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </Button>
       </div>
       
       {/* Desktop menu button */}
@@ -409,6 +459,13 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         open={isAddEditDialogOpen}
         onOpenChange={setIsAddEditDialogOpen}
         onSave={handleSaveCustomer}
+      />
+
+      <NotificationDialog
+        open={isNotificationDialogOpen}
+        onOpenChange={setIsNotificationDialogOpen}
+        notifications={notifications}
+        onClearAll={clearAllNotifications}
       />
     </div>
   );
