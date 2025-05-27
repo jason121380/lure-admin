@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -310,7 +311,7 @@ export function FileManager({ customerId }: FileManagerProps) {
                     <p className="font-medium truncate">{file.file_name}</p>
                     <div className="text-sm text-gray-500 space-y-1">
                       <p>
-                        {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • 上傳於 {new Date(file.uploaded_at).toLocaleDateString()}
+                        {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • 上傳於 {formatDateTime(file.uploaded_at)}
                       </p>
                       {file.updated_at && (
                         <p className="text-xs">
