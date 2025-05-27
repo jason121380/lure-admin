@@ -378,8 +378,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Desktop Sidebar with notification bell */}
-      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block relative`}>
+      {/* Desktop Sidebar */}
+      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <Sidebar 
           key={sidebarKey}
           activeDepartment={activeDepartment} 
@@ -387,26 +387,26 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-        
-        {/* Notification bell positioned in the sidebar next to ADMIN */}
-        <div className="absolute top-20 right-4 z-40">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="relative p-2 h-10 w-10 bg-white shadow-sm border rounded-md" 
-            onClick={handleOpenNotifications}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
+      </div>
+      
+      {/* Desktop header with notification bell */}
+      <div className="fixed top-4 right-4 z-40 hidden md:flex items-center space-x-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative p-2 h-10 w-10" 
+          onClick={handleOpenNotifications}
+        >
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </Button>
       </div>
       
       {/* Desktop menu button */}
