@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
 import { PaymentRecordDialog } from "./PaymentRecordDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // 支付方式列表
 export const paymentMethods = [
@@ -52,11 +51,12 @@ export type PaymentRecord = {
 
 type PaymentRecordListProps = {
   customerId: string;
+  customerName?: string;
 };
 
-export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
+export const PaymentRecordList = ({ customerId, customerName }: PaymentRecordListProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [isPaymentRecordOpen, setIsPaymentRecordOpen] = useState(false);
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,18 +96,14 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
         }
       } catch (error) {
         console.error('Error fetching payment records:', error);
-        toast({
-          title: "獲取付款記錄失敗",
-          description: "請稍後再試",
-          variant: "destructive"
-        });
+        addNotification('create', '獲取付款記錄失敗', customerName);
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchPaymentRecords();
-  }, [customerId, user, toast]);
+  }, [customerId, user, addNotification]);
 
   const handleAddPaymentRecord = async (newPaymentRecord: PaymentRecord) => {
     try {
@@ -148,18 +144,11 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
         setPaymentRecords([formattedRecord, ...paymentRecords]);
         setIsPaymentRecordOpen(false);
         
-        toast({
-          title: "付款記錄已新增",
-          description: `新增了 ${formattedRecord.amount.toLocaleString()} 元的付款記錄`
-        });
+        addNotification('create', `新增付款記錄 ${formattedRecord.amount.toLocaleString()} 元`, customerName);
       }
     } catch (error) {
       console.error('Error adding payment record:', error);
-      toast({
-        title: "新增付款記錄失敗",
-        description: "請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('create', '新增付款記錄失敗', customerName);
     }
   };
 
@@ -189,18 +178,11 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
       setEditingPaymentRecord(null);
       setIsPaymentRecordOpen(false);
       
-      toast({
-        title: "付款記錄已更新",
-        description: `更新了 ${updatedPaymentRecord.amount.toLocaleString()} 元的付款記錄`
-      });
+      addNotification('edit', `更新付款記錄 ${updatedPaymentRecord.amount.toLocaleString()} 元`, customerName);
       
     } catch (error) {
       console.error('Error updating payment record:', error);
-      toast({
-        title: "更新付款記錄失敗",
-        description: "請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('edit', '更新付款記錄失敗', customerName);
     }
   };
 
@@ -219,18 +201,11 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
       setEditingPaymentRecord(null);
       setIsPaymentRecordOpen(false);
       
-      toast({
-        title: "付款記錄已刪除",
-        description: "付款記錄已成功刪除"
-      });
+      addNotification('delete', '刪除付款記錄', customerName);
       
     } catch (error) {
       console.error('Error deleting payment record:', error);
-      toast({
-        title: "刪除付款記錄失敗",
-        description: "請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('delete', '刪除付款記錄失敗', customerName);
     }
   };
 

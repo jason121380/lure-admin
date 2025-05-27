@@ -179,13 +179,12 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       setSelectedCustomerId(null);
       setSelectedCustomer(null);
       fetchCustomers();
-      // Force sidebar refresh when customer is deleted
       refreshSidebar();
-      // Add notification
       addNotification('delete', `已刪除客戶`, customerToDelete?.name);
     } catch (error) {
       toast.error("刪除客戶時發生錯誤");
       console.error("Error deleting customer:", error);
+      addNotification('delete', '刪除客戶失敗', selectedCustomer?.name);
     }
   };
   
@@ -215,7 +214,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         
         if (error) throw error;
         toast.success("客戶資料已更新");
-        // Add notification
         addNotification('edit', `已更新客戶資料`, customerData.name);
       } else {
         // Create new customer
@@ -226,7 +224,6 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         
         if (error) throw error;
         toast.success("已新增客戶");
-        // Add notification
         addNotification('create', `已新增客戶`, customerData.name);
         
         if (data && data.length > 0) {
@@ -236,12 +233,14 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
       }
       
       fetchCustomers();
-      // Force sidebar refresh when customer is saved
       refreshSidebar();
       setIsAddEditDialogOpen(false);
     } catch (error) {
       toast.error(editingCustomer ? "更新客戶資料失敗" : "新增客戶失敗");
       console.error("Error saving customer:", error);
+      addNotification(editingCustomer ? 'edit' : 'create', 
+        editingCustomer ? '更新客戶資料失敗' : '新增客戶失敗', 
+        customerData.name);
     }
   };
 
@@ -264,13 +263,12 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
       toast.success(`已成功更新 ${customerIds.length} 位客戶的部門`);
       fetchCustomers();
-      // Force sidebar refresh when bulk department update happens
       refreshSidebar();
-      // Add notification
       addNotification('edit', `已批量更新 ${customerIds.length} 位客戶的部門`);
     } catch (error) {
       toast.error("批量更新部門失敗");
       console.error("Error bulk updating departments:", error);
+      addNotification('edit', '批量更新部門失敗');
     }
   };
 

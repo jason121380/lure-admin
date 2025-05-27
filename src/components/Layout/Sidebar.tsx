@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, Grip
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   Dialog,
   DialogContent,
@@ -174,6 +174,7 @@ const SortableDepartment = ({
 
 export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar, onOpenNotifications, notificationCount }: SidebarProps) {
   const { user, signOut } = useAuth();
+  const { addNotification } = useNotifications();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
@@ -540,11 +541,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       // Check if this department code already exists for this user in local state
       const existingDept = departmentsList.find(dept => dept.code === newDepartmentCode);
       if (existingDept) {
-        toast({
-          title: "部門已存在",
-          description: `${newDepartmentName} 部門已存在`,
-          variant: "destructive"
-        });
+        addNotification('create', `部門 ${newDepartmentName} 已存在`);
         return;
       }
       
@@ -564,14 +561,8 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           .single();
           
         if (error) {
-          // Handle duplicate key error with the new composite constraint
           if (error.code === '23505' && error.message.includes('departments_user_code_unique')) {
-            toast({
-              title: "部門已存在",
-              description: `您已經有一個名為 ${newDepartmentName} 的部門`,
-              variant: "destructive"
-            });
-            // Refresh the departments list to sync with database
+            addNotification('create', `部門 ${newDepartmentName} 已存在`);
             await fetchDepartments();
             return;
           }
@@ -594,17 +585,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         setNewDepartmentName('');
         setIsAddDepartmentOpen(false);
         
-        toast({
-          title: "部門已新增",
-          description: `${newDepartmentName} 部門已成功新增`,
-        });
+        addNotification('create', `已新增部門 ${newDepartmentName}`);
       } catch (error) {
         console.error("Error adding department:", error);
-        toast({
-          title: "新增部門失敗",
-          description: "無法新增部門，請稍後再試",
-          variant: "destructive"
-        });
+        addNotification('create', `新增部門 ${newDepartmentName} 失敗`);
       }
     }
   };
@@ -658,17 +642,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             setActiveDepartment('all');
           }
           
-          toast({
-            title: "部門已刪除",
-            description: `${departmentToDelete.name} 部門已成功刪除，相關客戶已移至未分類`
-          });
+          addNotification('delete', `已刪除部門 ${departmentToDelete.name}，相關客戶已移至未分類`);
         } catch (error) {
           console.error("Error deleting department:", error);
-          toast({
-            title: "刪除部門失敗",
-            description: "無法刪除部門，請稍後再試",
-            variant: "destructive"
-          });
+          addNotification('delete', `刪除部門 ${departmentToDelete.name} 失敗`);
         }
       }
       setIsDeleteDialogOpen(false);
@@ -709,17 +686,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         setEditDepartmentName('');
         setDepartmentToEdit(null);
 
-        toast({
-          title: "部門名稱已更新",
-          description: `部門名稱已成功更新為「${editDepartmentName.trim()}」`,
-        });
+        addNotification('edit', `已更新部門名稱為「${editDepartmentName.trim()}」`);
       } catch (error) {
         console.error("Error updating department:", error);
-        toast({
-          title: "更新部門失敗",
-          description: "無法更新部門名稱，請稍後再試",
-          variant: "destructive"
-        });
+        addNotification('edit', `更新部門名稱失敗`);
       }
     }
   };
@@ -741,17 +711,10 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       setUserFullName(fullName);
       setIsUserProfileOpen(false);
-      toast({
-        title: "個人資料已更新",
-        description: "您的姓名已成功更新"
-      });
+      addNotification('edit', '個人資料已更新');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast({
-        title: "更新失敗",
-        description: "無法更新您的個人資料，請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('edit', '更新個人資料失敗');
     }
   };
 
@@ -765,21 +728,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       if (error) throw error;
 
-      // 關閉彈窗
       setIsPasswordDialogOpen(false);
-      
-      // 顯示成功通知
-      toast({
-        title: "密碼重設郵件已發送",
-        description: "請檢查您的電子郵件以完成密碼重設。如果沒收到郵件，請檢查垃圾郵件資料夾。",
-      });
+      addNotification('edit', '密碼重設郵件已發送，請檢查您的電子郵件');
     } catch (error) {
       console.error('Error resetting password:', error);
-      toast({
-        title: "重設密碼失敗",
-        description: "無法發送重設密碼郵件，請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('edit', '重設密碼失敗');
     }
   };
 
@@ -875,11 +828,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       }
     } catch (error) {
       console.error("Error updating department order:", error);
-      toast({
-        title: "更新失敗",
-        description: "無法更新部門順序，請稍後再試",
-        variant: "destructive"
-      });
+      addNotification('edit', '更新失敗');
       // Revert to original order by refetching
       await fetchDepartments();
     }
