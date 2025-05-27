@@ -378,8 +378,8 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      {/* Desktop Sidebar */}
-      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+      {/* Desktop Sidebar with notification bell after ADMIN */}
+      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block relative`}>
         <Sidebar 
           key={sidebarKey}
           activeDepartment={activeDepartment} 
@@ -387,26 +387,26 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           isVisible={true}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-      </div>
-      
-      {/* Desktop header with notification bell */}
-      <div className="fixed top-4 right-4 z-40 hidden md:flex items-center space-x-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="relative p-2 h-10 w-10" 
-          onClick={handleOpenNotifications}
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
+        
+        {/* Notification bell positioned after ADMIN in sidebar */}
+        <div className="absolute top-4 right-4 z-40">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="relative p-2 h-10 w-10" 
+            onClick={handleOpenNotifications}
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
       </div>
       
       {/* Desktop menu button */}
