@@ -297,7 +297,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-medium">付款記錄</h3>
         <Button 
           variant="ghost" 
@@ -313,65 +313,84 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
       </div>
       
       {paymentRecords.length > 0 ? (
-        <div className="p-4 border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日期</TableHead>
-                <TableHead>支付方式</TableHead>
-                <TableHead>帳戶</TableHead>
-                <TableHead>週期</TableHead>
-                <TableHead className="text-right">金額</TableHead>
-                <TableHead className="text-right">稅金</TableHead>
-                <TableHead className="text-right">總額</TableHead>
-                <TableHead className="text-center">確認收款</TableHead>
-                <TableHead>更新時間</TableHead>
-                <TableHead className="text-center">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentRecords.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell>{record.date}</TableCell>
-                  <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
-                  <TableCell>{getAccountName(record.account)}</TableCell>
-                  <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
-                  <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-center">
-                    {record.isConfirmed ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <Check className="h-3 w-3 mr-1" />已確認
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        未確認
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {record.updatedAt ? formatDateTime(record.updatedAt) : '-'}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleEditClick(record)}
-                      className="h-8 w-8"
-                    >
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">編輯</span>
-                    </Button>
-                  </TableCell>
+        <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="px-6 py-4 font-semibold">日期</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold">支付方式</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold">帳戶</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold">週期</TableHead>
+                  <TableHead className="px-6 py-4 text-right font-semibold">金額</TableHead>
+                  <TableHead className="px-6 py-4 text-right font-semibold">稅金</TableHead>
+                  <TableHead className="px-6 py-4 text-right font-semibold">總額</TableHead>
+                  <TableHead className="px-6 py-4 text-center font-semibold">確認收款</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold min-w-[140px]">更新時間</TableHead>
+                  <TableHead className="px-6 py-4 text-center font-semibold w-20">操作</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paymentRecords.map((record) => (
+                  <TableRow key={record.id} className="hover:bg-gray-50/50">
+                    <TableCell className="px-6 py-5 font-medium">{record.date}</TableCell>
+                    <TableCell className="px-6 py-5">{getPaymentMethodName(record.paymentMethod)}</TableCell>
+                    <TableCell className="px-6 py-5">{getAccountName(record.account)}</TableCell>
+                    <TableCell className="px-6 py-5">{getBillingCycleName(record.billingCycle)}</TableCell>
+                    <TableCell className="px-6 py-5 text-right font-medium">
+                      <span className="text-blue-600">{record.amount.toLocaleString()}</span>
+                      <span className="text-gray-500 ml-1">元</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5 text-right">
+                      <span className="text-orange-600">{record.taxAmount.toLocaleString()}</span>
+                      <span className="text-gray-500 ml-1">元</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5 text-right font-semibold">
+                      <span className="text-green-600">{record.totalAmount.toLocaleString()}</span>
+                      <span className="text-gray-500 ml-1">元</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5 text-center">
+                      {record.isConfirmed ? (
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                          <Check className="h-4 w-4 mr-1.5" />已確認
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                          未確認
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-6 py-5 text-sm text-gray-600 min-w-[140px]">
+                      <div className="leading-5">
+                        {record.updatedAt ? formatDateTime(record.updatedAt) : '-'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-5 text-center">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEditClick(record)}
+                        className="h-9 w-9 hover:bg-gray-100"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">編輯</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       ) : (
-        <div className="p-12 text-center text-gray-500 border rounded-md">
-          付款記錄將顯示於此
+        <div className="p-16 text-center text-gray-500 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+          <div className="text-gray-400 mb-2">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="text-lg font-medium text-gray-600 mb-1">尚無付款記錄</p>
+          <p className="text-sm text-gray-500">點擊右上角的 + 按鈕新增第一筆付款記錄</p>
         </div>
       )}
 
