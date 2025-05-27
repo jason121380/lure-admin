@@ -1,9 +1,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
+import { Upload, Download, Trash2, File, FileText, Image, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -18,7 +17,6 @@ type CustomerFile = {
   mime_type: string;
   uploaded_at: string;
   updated_at?: string;
-  title?: string;
 };
 
 type FileManagerProps = {
@@ -34,8 +32,6 @@ export function FileManager({ customerId }: FileManagerProps) {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [editingTitle, setEditingTitle] = useState<string | null>(null);
-  const [tempTitle, setTempTitle] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     fileId: string;
@@ -97,8 +93,7 @@ export function FileManager({ customerId }: FileManagerProps) {
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
-          mime_type: file.type,
-          title: file.name // Default title to file name
+          mime_type: file.type
         });
 
       if (dbError) throw dbError;
@@ -171,61 +166,6 @@ export function FileManager({ customerId }: FileManagerProps) {
       console.error('Error downloading file:', error);
       toast.error('檔案下載失敗');
     }
-  };
-
-  const handleTitleEdit = (fileId: string, currentTitle: string) => {
-    setEditingTitle(fileId);
-    setTempTitle(currentTitle || "");
-  };
-
-  const handleTitleSave = async (fileId: string) => {
-    if (!tempTitle.trim()) {
-      toast.error('標題不能為空');
-      return;
-    }
-
-    try {
-      console.log('開始更新檔案標題:', { fileId, title: tempTitle.trim() });
-      
-      const { error } = await supabase
-        .from('customer_files')
-        .update({ 
-          title: tempTitle.trim(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', fileId);
-
-      if (error) {
-        console.error('數據庫更新錯誤:', error);
-        throw error;
-      }
-
-      console.log('數據庫更新成功');
-
-      // 直接更新本地狀態
-      setFiles(prevFiles => 
-        prevFiles.map(file => 
-          file.id === fileId 
-            ? { ...file, title: tempTitle.trim(), updated_at: new Date().toISOString() }
-            : file
-        )
-      );
-
-      // 清除編輯狀態
-      setEditingTitle(null);
-      setTempTitle("");
-      
-      toast.success('檔案標題已更新');
-
-    } catch (error) {
-      console.error('Error updating file title:', error);
-      toast.error('更新檔案標題失敗: ' + (error as any)?.message);
-    }
-  };
-
-  const handleTitleCancel = () => {
-    setEditingTitle(null);
-    setTempTitle("");
   };
 
   const handleFileDelete = async (fileId: string, filePath: string, fileName: string) => {
@@ -363,88 +303,17 @@ export function FileManager({ customerId }: FileManagerProps) {
             {files.map((file) => (
               <div 
                 key={file.id} 
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 group"
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {getFileIcon(file.mime_type)}
                   <div className="flex-1 min-w-0">
-                    {editingTitle === file.id ? (
-                      <div className="flex items-center gap-2 mb-1">
-                        <Input
-                          value={tempTitle}
-                          onChange={(e) => setTempTitle(e.target.value)}
-                          placeholder="輸入檔案標題"
-                          className="h-8 text-sm"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleTitleSave(file.id);
-                            } else if (e.key === 'Escape') {
-                              e.preventDefault();
-                              handleTitleCancel();
-                            }
-                          }}
-                          autoFocus
-                          onBlur={() => {
-                            // 延遲執行，讓按鈕點擊事件能夠觸發
-                            setTimeout(() => {
-                              if (editingTitle === file.id) {
-                                handleTitleCancel();
-                              }
-                            }, 150);
-                          }}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleTitleSave(file.id);
-                          }}
-                          className="h-8 px-2"
-                        >
-                          保存
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleTitleCancel();
-                          }}
-                          className="h-8 px-2"
-                        >
-                          取消
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium truncate">
-                          {file.title || file.file_name}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleTitleEdit(file.id, file.title || file.file_name);
-                          }}
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
-                    {file.title && file.title !== file.file_name && (
-                      <p className="text-xs text-gray-400 mb-1">檔案名稱：{file.file_name}</p>
-                    )}
+                    <p className="font-medium truncate">{file.file_name}</p>
                     <div className="text-sm text-gray-500 space-y-1">
                       <p>
                         {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • 上傳於 {formatDateTime(file.uploaded_at)}
                       </p>
-                      {file.updated_at && file.updated_at !== file.uploaded_at && (
+                      {file.updated_at && (
                         <p className="text-xs">
                           更新時間：{formatDateTime(file.updated_at)}
                         </p>
