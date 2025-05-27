@@ -28,20 +28,21 @@ interface Notification {
   message: string;
   timestamp: Date;
   customerName?: string;
+  isRead: boolean;
 }
 
 interface NotificationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   notifications: Notification[];
-  onClearAll: () => void;
+  onMarkAllAsRead: () => void;
 }
 
 export const NotificationDialog = ({ 
   open, 
   onOpenChange, 
   notifications, 
-  onClearAll 
+  onMarkAllAsRead 
 }: NotificationDialogProps) => {
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -63,18 +64,20 @@ export const NotificationDialog = ({
     }
   };
 
+  const unreadNotifications = notifications.filter(n => !n.isRead);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>通知</DialogTitle>
-            {notifications.length > 0 && (
+            {unreadNotifications.length > 0 && (
               <button
-                onClick={onClearAll}
+                onClick={onMarkAllAsRead}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
-                清除全部
+                全部設為已讀
               </button>
             )}
           </div>
@@ -90,7 +93,9 @@ export const NotificationDialog = ({
               {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className="p-3 bg-gray-50 rounded-lg border"
+                  className={`p-3 rounded-lg border ${
+                    notification.isRead ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
@@ -105,6 +110,9 @@ export const NotificationDialog = ({
                           <span className="text-xs text-gray-600">
                             {notification.customerName}
                           </span>
+                        )}
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         )}
                       </div>
                       <p className="text-sm text-gray-900">
