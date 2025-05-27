@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,6 +47,7 @@ export type PaymentRecord = {
   totalAmount: number;
   isConfirmed: boolean;
   billingCycle: string;
+  updatedAt?: string;
 };
 
 type PaymentRecordListProps = {
@@ -89,7 +89,8 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
             taxAmount: Number(record.tax_amount || 0),
             totalAmount: Number(record.total_amount),
             isConfirmed: record.is_confirmed,
-            billingCycle: record.billing_cycle
+            billingCycle: record.billing_cycle,
+            updatedAt: record.updated_at
           }));
           
           setPaymentRecords(formattedRecords);
@@ -142,7 +143,8 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
           taxAmount: Number(data.tax_amount || 0),
           totalAmount: Number(data.total_amount),
           isConfirmed: data.is_confirmed,
-          billingCycle: data.billing_cycle
+          billingCycle: data.billing_cycle,
+          updatedAt: data.updated_at
         };
         
         setPaymentRecords([formattedRecord, ...paymentRecords]);
@@ -165,7 +167,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
 
   const handleUpdatePaymentRecord = async (updatedPaymentRecord: PaymentRecord) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('payment_records')
         .update({
           date: updatedPaymentRecord.date,
@@ -177,14 +179,23 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
           is_confirmed: updatedPaymentRecord.isConfirmed,
           billing_cycle: updatedPaymentRecord.billingCycle,
         })
-        .eq('id', updatedPaymentRecord.id);
+        .eq('id', updatedPaymentRecord.id)
+        .select('*')
+        .single();
       
       if (error) throw error;
       
-      // Update local state
-      setPaymentRecords(paymentRecords.map(record => 
-        record.id === updatedPaymentRecord.id ? updatedPaymentRecord : record
-      ));
+      // Update local state with updated_at from database
+      if (data) {
+        const formattedRecord: PaymentRecord = {
+          ...updatedPaymentRecord,
+          updatedAt: data.updated_at
+        };
+        
+        setPaymentRecords(paymentRecords.map(record => 
+          record.id === updatedPaymentRecord.id ? formattedRecord : record
+        ));
+      }
       
       setEditingPaymentRecord(null);
       setIsPaymentRecordOpen(false);
@@ -258,6 +269,23 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     setIsPaymentRecordOpen(true);
   };
 
+  // 格式化日期時間
+  const formatDateTime = (dateTimeString: string) => {
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-8 text-center">
@@ -297,6 +325,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                 <TableHead className="text-right">稅金</TableHead>
                 <TableHead className="text-right">總額</TableHead>
                 <TableHead className="text-center">確認收款</TableHead>
+                <TableHead>更新時間</TableHead>
                 <TableHead className="text-center">操作</TableHead>
               </TableRow>
             </TableHeader>
@@ -320,6 +349,9 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                         未確認
                       </span>
                     )}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {record.updatedAt ? formatDateTime(record.updatedAt) : '-'}
                   </TableCell>
                   <TableCell className="text-center">
                     <Button 
