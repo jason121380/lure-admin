@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -180,6 +179,8 @@ export function FileManager({ customerId }: FileManagerProps) {
 
   const handleTitleSave = async (fileId: string) => {
     try {
+      console.log('更新檔案標題:', { fileId, title: tempTitle.trim() });
+      
       const { error } = await supabase
         .from('customer_files')
         .update({ 
@@ -187,7 +188,12 @@ export function FileManager({ customerId }: FileManagerProps) {
         })
         .eq('id', fileId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('數據庫更新錯誤:', error);
+        throw error;
+      }
+
+      console.log('數據庫更新成功');
 
       // 立即更新本地狀態
       setFiles(prevFiles => 
@@ -201,9 +207,15 @@ export function FileManager({ customerId }: FileManagerProps) {
       toast.success('檔案標題已更新');
       setEditingTitle(null);
       setTempTitle("");
+
+      // 重新獲取數據以確保同步
+      setTimeout(() => {
+        fetchFiles();
+      }, 500);
+
     } catch (error) {
       console.error('Error updating file title:', error);
-      toast.error('更新檔案標題失敗');
+      toast.error('更新檔案標題失敗: ' + (error as any)?.message);
     }
   };
 
