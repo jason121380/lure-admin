@@ -24,7 +24,7 @@ type IndexProps = {
 const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const { notifications, addNotification, clearAllNotifications, unreadCount } = useNotifications();
+  const { notifications, addNotification, markAllAsRead, unreadCount } = useNotifications();
   
   const [activeDepartment, setActiveDepartment] = useState("all");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -367,7 +367,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
           open={isNotificationDialogOpen}
           onOpenChange={setIsNotificationDialogOpen}
           notifications={notifications}
-          onClearAll={clearAllNotifications}
+          onMarkAllAsRead={markAllAsRead}
         />
       </div>
     );
@@ -444,7 +444,7 @@ const Index = ({ sidebarVisible, setSidebarVisible }: IndexProps) => {
         open={isNotificationDialogOpen}
         onOpenChange={setIsNotificationDialogOpen}
         notifications={notifications}
-        onClearAll={clearAllNotifications}
+        onMarkAllAsRead={markAllAsRead}
       />
     </div>
   );
