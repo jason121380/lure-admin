@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -339,7 +340,7 @@ export function FileManager({ customerId }: FileManagerProps) {
             {files.map((file) => (
               <div 
                 key={file.id} 
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 group"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {getFileIcon(file.mime_type)}
