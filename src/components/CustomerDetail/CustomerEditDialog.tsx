@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNotifications } from '@/hooks/useNotifications';
 
 type DepartmentType = {
   id: string;
@@ -56,7 +55,6 @@ export function CustomerEditDialog({
   const [taxId, setTaxId] = useState('');
   const [departmentsList, setDepartmentsList] = useState<DepartmentType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { addNotification } = useNotifications();
 
   // Fetch departments from the database
   useEffect(() => {
@@ -148,7 +146,7 @@ export function CustomerEditDialog({
     const finalDepartment = department || 'uncategorized';
     const finalDepartmentName = departmentName || '未分類';
     
-    const customerData = {
+    onSave({
       name,
       department: finalDepartment,
       departmentName: finalDepartmentName,
@@ -158,16 +156,7 @@ export function CustomerEditDialog({
       address,
       contact,
       taxId,
-    };
-
-    // Add notification for the action
-    if (customer) {
-      addNotification('edit', '已更新客戶資訊', name);
-    } else {
-      addNotification('create', '已新增客戶', name);
-    }
-    
-    onSave(customerData);
+    });
   };
 
   const handleDepartmentChange = (value: string) => {

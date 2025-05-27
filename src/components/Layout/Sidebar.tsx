@@ -1,11 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Edit, Trash2, Bell } from 'lucide-react';
+import { Plus, X, LogOut, User, Mail, Key, Menu, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { useNotifications } from "@/hooks/useNotifications";
 import {
   Dialog,
   DialogContent,
@@ -67,8 +66,6 @@ type SidebarProps = {
   setActiveDepartment: (id: string) => void;
   isVisible: boolean;
   toggleSidebar?: () => void;
-  onOpenNotifications: () => void;
-  notificationCount: number;
 };
 
 // Sortable department item component
@@ -172,9 +169,8 @@ const SortableDepartment = ({
   );
 };
 
-export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar, onOpenNotifications, notificationCount }: SidebarProps) {
+export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, toggleSidebar }: SidebarProps) {
   const { user, signOut } = useAuth();
-  const { addNotification } = useNotifications();
   const { toast } = useToast();
   const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState('');
@@ -541,7 +537,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       // Check if this department code already exists for this user in local state
       const existingDept = departmentsList.find(dept => dept.code === newDepartmentCode);
       if (existingDept) {
-        addNotification('create', `部門 ${newDepartmentName} 已存在`);
+        toast({
+          title: "部門已存在",
+          description: `${newDepartmentName} 部門已存在`,
+          variant: "destructive"
+        });
         return;
       }
       
@@ -561,8 +561,14 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
           .single();
           
         if (error) {
+          // Handle duplicate key error with the new composite constraint
           if (error.code === '23505' && error.message.includes('departments_user_code_unique')) {
-            addNotification('create', `部門 ${newDepartmentName} 已存在`);
+            toast({
+              title: "部門已存在",
+              description: `您已經有一個名為 ${newDepartmentName} 的部門`,
+              variant: "destructive"
+            });
+            // Refresh the departments list to sync with database
             await fetchDepartments();
             return;
           }
@@ -585,10 +591,17 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         setNewDepartmentName('');
         setIsAddDepartmentOpen(false);
         
-        addNotification('create', `已新增部門 ${newDepartmentName}`);
+        toast({
+          title: "部門已新增",
+          description: `${newDepartmentName} 部門已成功新增`,
+        });
       } catch (error) {
         console.error("Error adding department:", error);
-        addNotification('create', `新增部門 ${newDepartmentName} 失敗`);
+        toast({
+          title: "新增部門失敗",
+          description: "無法新增部門，請稍後再試",
+          variant: "destructive"
+        });
       }
     }
   };
@@ -642,10 +655,17 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
             setActiveDepartment('all');
           }
           
-          addNotification('delete', `已刪除部門 ${departmentToDelete.name}，相關客戶已移至未分類`);
+          toast({
+            title: "部門已刪除",
+            description: `${departmentToDelete.name} 部門已成功刪除，相關客戶已移至未分類`
+          });
         } catch (error) {
           console.error("Error deleting department:", error);
-          addNotification('delete', `刪除部門 ${departmentToDelete.name} 失敗`);
+          toast({
+            title: "刪除部門失敗",
+            description: "無法刪除部門，請稍後再試",
+            variant: "destructive"
+          });
         }
       }
       setIsDeleteDialogOpen(false);
@@ -686,10 +706,17 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         setEditDepartmentName('');
         setDepartmentToEdit(null);
 
-        addNotification('edit', `已更新部門名稱為「${editDepartmentName.trim()}」`);
+        toast({
+          title: "部門名稱已更新",
+          description: `部門名稱已成功更新為「${editDepartmentName.trim()}」`,
+        });
       } catch (error) {
         console.error("Error updating department:", error);
-        addNotification('edit', `更新部門名稱失敗`);
+        toast({
+          title: "更新部門失敗",
+          description: "無法更新部門名稱，請稍後再試",
+          variant: "destructive"
+        });
       }
     }
   };
@@ -711,10 +738,17 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       setUserFullName(fullName);
       setIsUserProfileOpen(false);
-      addNotification('edit', '個人資料已更新');
+      toast({
+        title: "個人資料已更新",
+        description: "您的姓名已成功更新"
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
-      addNotification('edit', '更新個人資料失敗');
+      toast({
+        title: "更新失敗",
+        description: "無法更新您的個人資料，請稍後再試",
+        variant: "destructive"
+      });
     }
   };
 
@@ -728,11 +762,21 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
 
       if (error) throw error;
 
+      // 關閉彈窗
       setIsPasswordDialogOpen(false);
-      addNotification('edit', '密碼重設郵件已發送，請檢查您的電子郵件');
+      
+      // 顯示成功通知
+      toast({
+        title: "密碼重設郵件已發送",
+        description: "請檢查您的電子郵件以完成密碼重設。如果沒收到郵件，請檢查垃圾郵件資料夾。",
+      });
     } catch (error) {
       console.error('Error resetting password:', error);
-      addNotification('edit', '重設密碼失敗');
+      toast({
+        title: "重設密碼失敗",
+        description: "無法發送重設密碼郵件，請稍後再試",
+        variant: "destructive"
+      });
     }
   };
 
@@ -828,7 +872,11 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
       }
     } catch (error) {
       console.error("Error updating department order:", error);
-      addNotification('edit', '更新失敗');
+      toast({
+        title: "更新失敗",
+        description: "無法更新部門順序，請稍後再試",
+        variant: "destructive"
+      });
       // Revert to original order by refetching
       await fetchDepartments();
     }
@@ -946,7 +994,7 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
         </div>
       </div>
       
-      {/* User account section with notification bell */}
+      {/* User account section */}
       <div className="p-4 mt-auto border-t border-slate-200">
         <div className="flex items-center justify-between">
           <Popover>
@@ -992,24 +1040,6 @@ export function Sidebar({ activeDepartment, setActiveDepartment, isVisible, togg
               </div>
             </PopoverContent>
           </Popover>
-          
-          {/* Notification Bell - positioned to the right of Admin */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="relative p-2 h-10 w-10" 
-            onClick={onOpenNotifications}
-          >
-            <Bell className="h-5 w-5" />
-            {notificationCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {notificationCount > 99 ? '99+' : notificationCount}
-              </Badge>
-            )}
-          </Button>
         </div>
       </div>
       

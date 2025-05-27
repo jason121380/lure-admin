@@ -16,7 +16,6 @@ import { AdvertisingSelectionDialog } from "./AdvertisingSelectionDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useNotifications } from "@/hooks/useNotifications";
 
 export type ServicePlanItem = {
   id: string;
@@ -60,12 +59,10 @@ export const paymentMethods = [
 
 type ServicePlanListProps = {
   customerId?: string;
-  customerName?: string;
 };
 
-export const ServicePlanList = ({ customerId, customerName }: ServicePlanListProps) => {
+export const ServicePlanList = ({ customerId }: ServicePlanListProps) => {
   const { user } = useAuth();
-  const { addNotification } = useNotifications();
   const [servicePlans, setServicePlans] = useState<ServicePlanItem[]>([]);
   const [advertisingPlans, setAdvertisingPlans] = useState<AdvertisingPlanItem[]>([]);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
@@ -172,12 +169,10 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
         
         setServicePlans(prev => [...prev, newServicePlan]);
         toast.success("成功新增服務項目");
-        addNotification('create', `已新增服務項目：${serviceItem.name}`, customerName);
       }
     } catch (error) {
       console.error("Error adding service plan:", error);
       toast.error("新增服務項目失敗");
-      addNotification('create', '新增服務項目失敗', customerName);
     }
   };
 
@@ -223,12 +218,10 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
         // 替換任何現有廣告計劃
         setAdvertisingPlans([newAdvertisingPlan]);
         toast.success("成功新增廣告投放");
-        addNotification('create', `已新增廣告投放：${platformItem.name}`, customerName);
       }
     } catch (error) {
       console.error("Error adding advertising plan:", error);
       toast.error("新增廣告投放失敗");
-      addNotification('create', '新增廣告投放失敗', customerName);
     }
   };
 
@@ -255,11 +248,9 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
           )
         );
         toast.success("價格已更新");
-        addNotification('edit', '已更新服務項目價格', customerName);
       } catch (error) {
         console.error("Error updating price:", error);
         toast.error("更新價格失敗");
-        addNotification('edit', '更新服務項目價格失敗', customerName);
       }
     }
     setEditingPriceId(null);
@@ -294,11 +285,9 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
         )
       );
       toast.success("描述已更新");
-      addNotification('edit', '已更新服務項目描述', customerName);
     } catch (error) {
       console.error("Error updating description:", error);
       toast.error("更新描述失敗");
-      addNotification('edit', '更新服務項目描述失敗', customerName);
     }
     setEditingDescriptionId(null);
     setEditingDescription("");
@@ -316,11 +305,9 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
       
       setServicePlans(prev => prev.filter(plan => plan.id !== id));
       toast.success("服務項目已刪除");
-      addNotification('delete', '已刪除服務項目', customerName);
     } catch (error) {
       console.error("Error removing service plan:", error);
       toast.error("刪除服務項目失敗");
-      addNotification('delete', '刪除服務項目失敗', customerName);
     }
   };
 
@@ -336,11 +323,9 @@ export const ServicePlanList = ({ customerId, customerName }: ServicePlanListPro
       
       setAdvertisingPlans([]);
       toast.success("廣告投放已刪除");
-      addNotification('delete', '已刪除廣告投放', customerName);
     } catch (error) {
       console.error("Error removing advertising plan:", error);
       toast.error("刪除廣告投放失敗");
-      addNotification('delete', '刪除廣告投放失敗', customerName);
     }
   };
   

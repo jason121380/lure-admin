@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNotifications } from '@/hooks/useNotifications';
 
 type NotesEditDialogProps = {
   customerId: string;
@@ -19,7 +18,6 @@ type NotesEditDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (notes: string) => void;
-  customerName?: string;
 };
 
 export function NotesEditDialog({
@@ -28,11 +26,9 @@ export function NotesEditDialog({
   open,
   onOpenChange,
   onSave,
-  customerName,
 }: NotesEditDialogProps) {
   const [currentNotes, setCurrentNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const { addNotification } = useNotifications();
 
   useEffect(() => {
     if (open) {
@@ -55,12 +51,10 @@ export function NotesEditDialog({
       }
       
       toast.success('備註已成功更新');
-      addNotification('edit', '已更新客戶備註', customerName);
       onSave(currentNotes);
       onOpenChange(false);
     } catch (error) {
       toast.error('更新備註時發生錯誤');
-      addNotification('edit', '更新客戶備註失敗', customerName);
       console.error('Error updating notes:', error);
     } finally {
       setIsSaving(false);

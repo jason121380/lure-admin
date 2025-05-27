@@ -19,10 +19,9 @@ type CustomerFile = {
 
 type FileManagerProps = {
   customerId: string;
-  customerName?: string;
 };
 
-export function FileManager({ customerId, customerName }: FileManagerProps) {
+export function FileManager({ customerId }: FileManagerProps) {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);

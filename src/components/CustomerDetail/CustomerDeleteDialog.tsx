@@ -12,20 +12,19 @@ import {
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Customer } from "@/components/CustomerList/CustomerListItem";
 
 type CustomerDeleteDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  customer: Customer;
+  customerName: string;
 };
 
 export function CustomerDeleteDialog({
   open,
   onOpenChange,
   onConfirm,
-  customer,
+  customerName,
 }: CustomerDeleteDialogProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -54,7 +53,7 @@ export function CustomerDeleteDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>您確定要刪除嗎？</AlertDialogTitle>
           <AlertDialogDescription>
-            這將永久刪除 <strong>{customer.name}</strong> 以及所有相關的資料。
+            這將永久刪除 <strong>{customerName}</strong> 以及所有相關的資料。
             此操作無法撤銷。
           </AlertDialogDescription>
         </AlertDialogHeader>
