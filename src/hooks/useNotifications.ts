@@ -7,7 +7,6 @@ interface Notification {
   message: string;
   timestamp: Date;
   customerName?: string;
-  isRead: boolean;
 }
 
 export const useNotifications = () => {
@@ -24,25 +23,21 @@ export const useNotifications = () => {
       message,
       timestamp: new Date(),
       customerName,
-      isRead: false,
     };
 
     setNotifications(prev => [newNotification, ...prev]);
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications(prev => prev.map(notification => ({
-      ...notification,
-      isRead: true
-    })));
+  const clearAllNotifications = useCallback(() => {
+    setNotifications([]);
   }, []);
 
-  const unreadCount = notifications.filter(notification => !notification.isRead).length;
+  const unreadCount = notifications.length;
 
   return {
     notifications,
     addNotification,
-    markAllAsRead,
+    clearAllNotifications,
     unreadCount,
   };
 };
