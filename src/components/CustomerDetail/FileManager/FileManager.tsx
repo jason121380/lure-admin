@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Upload, Download, Trash2, File, FileText, Image, FileIcon, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -188,10 +189,18 @@ export function FileManager({ customerId }: FileManagerProps) {
 
       if (error) throw error;
 
+      // 立即更新本地狀態
+      setFiles(prevFiles => 
+        prevFiles.map(file => 
+          file.id === fileId 
+            ? { ...file, title: tempTitle.trim() || null }
+            : file
+        )
+      );
+
       toast.success('檔案標題已更新');
       setEditingTitle(null);
       setTempTitle("");
-      fetchFiles();
     } catch (error) {
       console.error('Error updating file title:', error);
       toast.error('更新檔案標題失敗');
