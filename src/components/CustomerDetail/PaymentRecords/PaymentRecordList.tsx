@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Check, Pencil } from "lucide-react";
+import { Plus, Check, Pencil, Columns2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -61,6 +61,7 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingPaymentRecord, setEditingPaymentRecord] = useState<PaymentRecord | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('cards');
 
   // 獲取付款記錄
   useEffect(() => {
@@ -299,61 +300,49 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">付款記錄</h3>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => {
-            setEditingPaymentRecord(null);
-            setIsPaymentRecordOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">新增付款記錄</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
+            title={viewMode === 'table' ? '切換到卡片視圖' : '切換到表格視圖'}
+          >
+            <Columns2 className="h-4 w-4" />
+            <span className="sr-only">切換視圖</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => {
+              setEditingPaymentRecord(null);
+              setIsPaymentRecordOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">新增付款記錄</span>
+          </Button>
+        </div>
       </div>
       
       {paymentRecords.length > 0 ? (
-        <div className="p-4 border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日期</TableHead>
-                <TableHead>支付方式</TableHead>
-                <TableHead>帳戶</TableHead>
-                <TableHead>週期</TableHead>
-                <TableHead className="text-right">金額</TableHead>
-                <TableHead className="text-right">稅金</TableHead>
-                <TableHead className="text-right">總額</TableHead>
-                <TableHead className="text-center">確認收款</TableHead>
-                <TableHead>更新時間</TableHead>
-                <TableHead className="text-center">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <>
+          {viewMode === 'cards' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {paymentRecords.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell>{record.date}</TableCell>
-                  <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
-                  <TableCell>{getAccountName(record.account)}</TableCell>
-                  <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
-                  <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
-                  <TableCell className="text-center">
-                    {record.isConfirmed ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <Check className="h-3 w-3 mr-1" />已確認
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        未確認
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {record.updatedAt ? formatDateTime(record.updatedAt) : '-'}
-                  </TableCell>
-                  <TableCell className="text-center">
+                <div key={record.id} className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-lg">{record.date}</h4>
+                      {record.isConfirmed ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <Check className="h-3 w-3 mr-1" />已確認
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          未確認
+                        </span>
+                      )}
+                    </div>
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -363,12 +352,110 @@ export const PaymentRecordList = ({ customerId }: PaymentRecordListProps) => {
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">編輯</span>
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">支付方式:</span>
+                      <span className="text-sm font-medium">{getPaymentMethodName(record.paymentMethod)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">帳戶:</span>
+                      <span className="text-sm">{getAccountName(record.account)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">週期:</span>
+                      <span className="text-sm">{getBillingCycleName(record.billingCycle)}</span>
+                    </div>
+                    
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">金額:</span>
+                        <span className="text-sm font-medium">{record.amount.toLocaleString()} 元</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">稅金:</span>
+                        <span className="text-sm">{record.taxAmount.toLocaleString()} 元</span>
+                      </div>
+                      
+                      <div className="flex justify-between font-medium">
+                        <span className="text-sm">總額:</span>
+                        <span className="text-sm text-blue-600">{record.totalAmount.toLocaleString()} 元</span>
+                      </div>
+                    </div>
+                    
+                    {record.updatedAt && (
+                      <div className="flex justify-between pt-1 border-t">
+                        <span className="text-xs text-gray-500">更新時間:</span>
+                        <span className="text-xs text-gray-500">{formatDateTime(record.updatedAt)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+          ) : (
+            <div className="p-4 border rounded-md overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>日期</TableHead>
+                    <TableHead>支付方式</TableHead>
+                    <TableHead>帳戶</TableHead>
+                    <TableHead>週期</TableHead>
+                    <TableHead className="text-right">金額</TableHead>
+                    <TableHead className="text-right">稅金</TableHead>
+                    <TableHead className="text-right">總額</TableHead>
+                    <TableHead className="text-center">確認收款</TableHead>
+                    <TableHead>更新時間</TableHead>
+                    <TableHead className="text-center">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paymentRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>{record.date}</TableCell>
+                      <TableCell>{getPaymentMethodName(record.paymentMethod)}</TableCell>
+                      <TableCell>{getAccountName(record.account)}</TableCell>
+                      <TableCell>{getBillingCycleName(record.billingCycle)}</TableCell>
+                      <TableCell className="text-right">{record.amount.toLocaleString()} 元</TableCell>
+                      <TableCell className="text-right">{record.taxAmount.toLocaleString()} 元</TableCell>
+                      <TableCell className="text-right">{record.totalAmount.toLocaleString()} 元</TableCell>
+                      <TableCell className="text-center">
+                        {record.isConfirmed ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <Check className="h-3 w-3 mr-1" />已確認
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            未確認
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">
+                        {record.updatedAt ? formatDateTime(record.updatedAt) : '-'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleEditClick(record)}
+                          className="h-8 w-8"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">編輯</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </>
       ) : (
         <div className="p-12 text-center text-gray-500 border rounded-md">
           付款記錄將顯示於此
