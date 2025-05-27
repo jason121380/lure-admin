@@ -15,6 +15,7 @@ type CustomerFile = {
   file_size: number;
   mime_type: string;
   uploaded_at: string;
+  updated_at?: string;
 };
 
 type FileManagerProps = {
@@ -227,6 +228,22 @@ export function FileManager({ customerId }: FileManagerProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const formatDateTime = (dateTimeString: string) => {
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    } catch (error) {
+      return dateTimeString;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -291,9 +308,16 @@ export function FileManager({ customerId }: FileManagerProps) {
                   {getFileIcon(file.mime_type)}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{file.file_name}</p>
-                    <p className="text-sm text-gray-500">
-                      {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • {new Date(file.uploaded_at).toLocaleDateString()}
-                    </p>
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <p>
+                        {getFileType(file.mime_type)} • {formatFileSize(file.file_size)} • 上傳於 {new Date(file.uploaded_at).toLocaleDateString()}
+                      </p>
+                      {file.updated_at && (
+                        <p className="text-xs">
+                          更新時間：{formatDateTime(file.updated_at)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
